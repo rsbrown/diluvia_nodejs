@@ -6,6 +6,7 @@ var World = module.exports = function() {
     this._accounts = [];
 };
 
+
 var defaultZone = new Zone(64, 64),
     defaultTile = new Tile({
         image: Defs.Images.baseTile
@@ -31,5 +32,13 @@ World.prototype = {
     
     removeAccount: function(account) {
         
-    }
+    },
+    
+    tick: function() {
+        return this._ticks + 1;
+    },
+    
+    getTicks: function() {
+        return this._ticks;
+    },
 };

@@ -1,10 +1,10 @@
 var START_HITPOINTS = 100;
-var UID_COUNTER     = 0;
+var uidCounter      = 0;
 
 var Account = module.exports = function(options) {
     options             = options || {};
     
-    this._uid           = UID_COUNTER++;
+    this._uid           = uidCounter++;
     
     this._username      = options.username;
     this._password      = options.password;
@@ -53,6 +53,22 @@ Account.prototype = {
     
     getClient: function() {
         return this._client;
+    },
+    
+    onStart: function(command) {
+        this._currentZone.startCommand(this, command);
+    },
+    
+    onEnd: function(command) {
+        this._currentZone.stopCommand(this, command);
+    },
+    
+    getUid: function() {
+        return this._uid;
+    },
+    
+    shouldUpdateZone: function(lastUpdated) {
+        return this._currentZone.hasUpdatedSince(lastUpdated);
     }
 };
 

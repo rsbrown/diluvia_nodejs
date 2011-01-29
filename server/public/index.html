@@ -1,6 +1,9 @@
 <html>
   <head>
     <script src="/socket.io/socket.io.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/js/libs/jquery/jquery-1.4.4.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/js/canvasWriter.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/js/libs/underscore/underscore-min.js" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" charset="utf-8">
       var socket = new io.Socket("localhost", { "port": 3000 });
       
@@ -11,7 +14,7 @@
       });
       
       socket.on("message", function(msg) {
-        console.log(msg);
+        parseMessage(msg);
       });
       
       socket.on("disconnect", function() {
@@ -21,6 +24,6 @@
   </head>
   
   <body>
-    
+    <canvas id="viewport" width="4096" height="4096"></canvas> 
   </body>
 </html>

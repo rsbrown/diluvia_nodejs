@@ -22,6 +22,7 @@ socket.on("connection", function(conn) {
     world.addAccount(account);
     
     conn.on("message", function(msg) {
+        console.log(msg);
         client.onMessage(msg);
     });
     
