@@ -1,6 +1,7 @@
 var Defs = require("defs");
 
-var ActorTile = module.exports = function() {
+var ActorTile = module.exports = function(account) {
+    this.account = account;
 };
 
 ActorTile.prototype = {
