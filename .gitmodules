@@ -1,0 +1,6 @@
+[submodule "assets/js/libs/backbone"]
+	path = assets/js/libs/backbone
+	url = https://github.com/documentcloud/backbone.git
+[submodule "assets/js/libs/underscore"]
+	path = assets/js/libs/underscore
+	url = https://github.com/documentcloud/underscore.git
