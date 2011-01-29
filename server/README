@@ -1,0 +1,14 @@
+This is the server application.
+
+You'll need NPM modules:
+
+  * express
+  * socket.io
+  
+Run it with:
+
+  $ node app.js
+  
+It will show up on port 3000:
+
+  http://localhost:3000/
