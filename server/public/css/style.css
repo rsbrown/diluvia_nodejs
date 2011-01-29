@@ -1,0 +1,44 @@
+/* resets */
+body {
+	margin: 0;
+	padding: 0;
+}
+h1, h2, h3, h4, h5, h6, p, ul, ol {
+	margin: 0 0 12px 0;
+	font-weight: normal;
+}
+li {
+	margin-bottom: 6px;
+}
+a img {
+	border: 0;
+}
+a {
+	outline: none;
+}
+
+/* styles */
+body {
+	font: 13px "Lucida Grande", Verdana, sans-serif;
+	background: #000;
+}
+header {
+	background: #333;
+	height: 60px;
+}
+#logo {
+	font-size: 27px;
+	line-height: 60px;
+	color: #eee;
+	position: absolute;
+	top: 0;
+	left: 30px;
+}
+#welcome {
+	position: absolute;
+	top: 0;
+	right: 30px;
+	line-height: 60px;
+	color: #999;
+	font-style: italic;
+}

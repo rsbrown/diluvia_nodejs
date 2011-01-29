@@ -1,13 +1,33 @@
+var Defs = require("defs");
+
 var Client = module.exports = function(conn, account) {
-    this._conn      = conn;
-    this._account   = account;
+    var self = this;
+    
+    this._conn          = conn;
+    this._account       = account;
+    this._interval      = setInterval(function() { self._onInterval(); }, Defs.CLIENT_INTERVAL);
+    this._lastUpdate    = 0;
     
     account.setClient(this);
 };
 
 Client.prototype = {
+    _onInterval: function() {
+        if (this._account.shouldUpdateZone(this._lastUpdate)) {
+            this.sendZoneState(this._account.getCurrentZone());
+            this._lastUpdate = new Date().getTime();
+        }
+    },
+    
     onMessage: function(msg) {
-        
+        if (msg) {
+            if (msg.type == "CommandStart") {
+                this._account.onStart(msg.command);
+            }
+            else if (msg.type == "CommandEnd") {
+                this._account.onEnd(msg.command);
+            }
+        }
     },
     
     onDisconnect: function() {
@@ -37,7 +57,7 @@ Client.prototype = {
             var layer   = layers[layerIdx],
                 data    = {};
             
-            for (var tileIdx = 0, tileLen = layer.length; tileIdx < tileLen; tileIdx++) {                
+            for (var tileIdx in layer) {
                 data[tileIdx] = layer[tileIdx];
             }
             
