@@ -69,19 +69,19 @@ var enablePaint = function() {
 var paint = function() {
     if (paint_ok && zonedata && zonestate) {
         //draw terrain
-        for (var i = 0; i < 4096; i++) {
+        //var m = 20;
+        var m = 4096;
+        for (var i = 0; i < m; i++) {
             var tile = zonedata[zonestate[0][i]];
-            //var row = 0;//    i / 64;
-            //var col = 0; //i % 64;
-            var row = i / 64;
+            var row = parseInt(i / 64, 10);
             var col = i % 64;
             var dest_coords = rowColToPixels(row, col);
             
-            console.log(row);
-            console.log(col);
+            //console.log(row);
+            //console.log(col);
             
             drawImage(context, images[tile.img], tile.coords, dest_coords );
-           break;
+           //break;
         }
     } else {
         //console.log {zonedata: zonedata, zonestate: zonestate}
@@ -96,5 +96,10 @@ var rowColToPixels = function(row, col) {
 };
 
 var drawImage = function(canvas, img, img_coords, dest_coords) {
-    canvas.drawImage(img, img_coords[0], img_coords[1], TILE_DIMS[0], TILE_DIMS[1], dest_coords[0], dest_coords[1], TILE_DIMS[0], TILE_DIMS[1]); 
+    try {
+        canvas.drawImage(img, img_coords[0], img_coords[1], TILE_DIMS[0], TILE_DIMS[1], dest_coords[0], dest_coords[1], TILE_DIMS[0], TILE_DIMS[1]); 
+    }
+    catch(e) {
+        console.log(e);
+    }
 };
