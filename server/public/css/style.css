@@ -17,13 +17,14 @@ a {
 	outline: none;
 }
 
-/* styles */
+/* main styles */
 body {
-	font: 13px "Lucida Grande", Verdana, sans-serif;
+	font: 15px "Lucida Grande", Verdana, sans-serif;
 	background: #000;
 }
 header {
-	background: #333;
+	background: #202020;
+	border-bottom: 1px solid #303030;
 	height: 60px;
 }
 #logo {
@@ -41,4 +42,35 @@ header {
 	line-height: 60px;
 	color: #999;
 	font-style: italic;
+}
+#content {
+	padding: 30px 30px 48px;
+	color: #d0d0d0;
+}
+#content h2 {
+	color: #fff;
+	font-size: 18px;
+}
+
+/* list of islands */
+#islands {
+	width: 240px;
+}
+#islands .island {
+	text-decoration: none;
+	color: #e0e0e0;
+	display: block;
+	padding: 10px;
+}
+#islands .island:hover {
+	background: #363636;
+	outline: 1px solid #464646;
+	
+}
+#islands .island .name {
+	font-weight: bold;
+}
+#islands .island .info {
+	color: #6f6f6f;
+	font-size: 13px;
 }
