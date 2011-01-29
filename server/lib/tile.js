@@ -1,6 +1,8 @@
 var TILE_SIZE = [64, 64];
 
 var Tile = module.exports = function(options) {
+    options             = options || {};
+    
     this._image         = options.image         || "empty.png";
     this._label         = options.label         || null;
     this._title         = options.title         || "Tile";

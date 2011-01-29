@@ -18,14 +18,27 @@ var Zone = module.exports = function(width, height) {
 
 Zone.prototype = {
     getSpawnPointIndex: function() {
-        var layer = this._layers[OBJECT_LAYER];
+        var layer = this._layers[OBJECT_LAYER],
+            spawnTiles = [];
         
-        for (var i = 0, len = layer.length; i < len; i++) {
-            var tile = layer[i];
+        
+        for (var i = 0, len = this._tiles.length; i < len; i++) {
+            var tile = this._tiles[i];
             
             if (tile.spawnPoint) {
-                return i;
+                spawnTiles.push(i);
             }
+        }
+        
+        if (spawnTileIdx) {            
+            for (var i = 0, len = layer.length; i < len; i++) {            
+                if (spawnTiles.indexOf(layer[i]) != -1) {
+                    return i;
+                }
+            }
+        }
+        else {
+            return 0;
         }
     },
     
