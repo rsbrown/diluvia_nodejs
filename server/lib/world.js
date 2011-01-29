@@ -1,4 +1,5 @@
-var Zone    = require("zone"),
+var Defs    = require("defs"),
+    Zone    = require("zone"),
     Tile    = require("tile");
 
 var World = module.exports = function() {
@@ -7,14 +8,18 @@ var World = module.exports = function() {
 
 var defaultZone = new Zone(64, 64),
     defaultTile = new Tile({
-        image: "sprites.png:0,0"
-    });
-
+        image: Defs.Images.baseTile
+    }),
+    spawnTile   = new Tile();
+    
 var defaultTileIdx = defaultZone.addTile(defaultTile);
+var spawnTileIdx   = defaultZone.addTile(spawnTile);
 
 for (var i = 0; i < (64 * 64); i++) {
     defaultZone.setLayerTile(0, i, defaultTileIdx);
 }
+
+defaultZone.setLayerTile(1, 0, spawnTileIdx);
 
 World.prototype = {
     addAccount: function(account) {
