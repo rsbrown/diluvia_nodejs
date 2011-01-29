@@ -9,13 +9,15 @@ var LAYER_COUNT     = 3,
 var Zone = module.exports = function(width, height) {
     var self = this;
     
-    this._layers        = [];
-    this._tiles         = [];
-    this._dimensions    = [width, height];
-    this._cmdInterval   = setInterval(function() { self._onCommandInterval(); }, Defs.COMMAND_INTERVAL);
-    this._active        = [];
-    this._updatedAt     = new Date().getTime();
-    this._accountTile   = {};
+    this._layers            = [];
+    this._tiles             = [];
+    this._dimensions        = [width, height];
+    this._cmdInterval       = setInterval(function() { self._onCommandInterval(); }, Defs.COMMAND_INTERVAL);
+    this._active            = [];
+    this._shouldBeInactive  = [];
+    this._updatedAt         = new Date().getTime();
+    this._accountTile       = {};
+    this._zoneTick          = 0;
     
     // initialize layers
     for (var i = 0; i < LAYER_COUNT; i++) {
@@ -50,31 +52,6 @@ Zone.prototype = {
     
     getAccountLayerTileIndex: function(account) {
         return this._accountTile[account.getUid()];
-        
-        // var tileIdx;
-        //       
-        //       for (var i = 0, len = this._tiles.length; i < len; i++) {
-        //           var tile = this._tiles[i];
-        //           
-        //           if (tile.account == account) {
-        //               tileIdx = i;
-        //           }
-        //       }
-        //       
-        //       console.log(tileIdx);
-        //       
-        //       if (tileIdx) {
-        //           var actorLayer = this._layers[ACTOR_LAYER];
-        //           console.log(actorLayer);
-        //           
-        //           for (var key in actorLayer) {
-        //               var val = actorLayer[key];
-        //               
-        //               if (val == tileIdx) {
-        //                   return key;
-        //               }
-        //           }
-        //       }
     },
     
     addAccount: function(account) {
@@ -104,6 +81,7 @@ Zone.prototype = {
         }
 
         this._updatedAt = new Date().getTime();
+        this._zoneTick++;
 
         return layer;
     },
@@ -130,31 +108,37 @@ Zone.prototype = {
         return this._tiles[idx];
     },
     
-    startCommand: function(account, command) {
-        console.log("Adding " + account.getUid() + " with " + command);
-        
-        this._active.push([account, command]);
-    },
-    
-    stopCommand: function(account, command) {
-        var idx;
+    getActiveCommandIdx: function(account, command) {
+        var idx = -1;
         
         for (var i = 0, len = this._active.length; i < len; i++) {
-            var obj         = this._active[i],
-                _account    = obj[0],
-                _command    = obj[1];
-                        
-            if (account == _account && command == _command) {
+            var obj = this._active[i];
+                     
+            if (obj[0] == account && obj[1] == command) {
                 idx = i;
             }
         }
-                
-        if (idx != -1) {
-            this._active.splice(idx, 1);
-        }        
+        
+        return idx;
+    },
+    
+    startCommand: function(account, command) {        
+        if (this.getActiveCommandIdx(account, command) == -1) {
+            this._active.push([account, command]);
+        }
+    },
+    
+    stopCommand: function(account, command) {
+        // we queue up the stop so at least one command gets executed
+        if (this.getActiveCommandIdx(account, command) != -1) {
+            this._shouldBeInactive.push([account, command]);
+        }
     },
     
     _onCommandInterval: function() {
+        var idx;
+        
+        // actually execute commands for active ones
         for (var i = 0, len = this._active.length; i < len; i++) {
             var obj     = this._active[i],
                 account = obj[0],
@@ -162,6 +146,18 @@ Zone.prototype = {
             
             this.executeCommand(account, command);
         }
+        
+        // process the stopCommand queue
+        for (var i = 0, len = this._shouldBeInactive.length; i < len; i++) {            
+            var item    = this._shouldBeInactive[i],
+                idx     = this.getActiveCommandIdx(item[0], item[1]);
+                        
+            if (idx != -1) {
+                this._active.splice(idx, 1);
+            }
+        }
+        
+        this._shouldBeInactive = [];
     },
     
     executeCommand: function(account, command) {
@@ -182,8 +178,8 @@ Zone.prototype = {
             
                 // it's within the zone
                 for (var i = 0; i < LAYER_COUNT; i++) {
-                    var tileIdx = this._layers[i][potentialIdx],
-                        tile    = this.getTile(tileIdx);
+                    var otherTileIdx = this._layers[i][potentialIdx],
+                        tile         = this.getTile(otherTileIdx);
                 
                     if (tile) {
                         if (!tile.moveInto(account)) {
@@ -199,6 +195,8 @@ Zone.prototype = {
                     this.setLayerTile(ACTOR_LAYER, potentialIdx, tileIdx);
                     
                     this._accountTile[account.getUid()] = potentialIdx;
+                    
+                    console.log("MOVE " + account.getUid() + ": " + layerTileIdx + " => " + potentialIdx + " (" + tileIdx + ")");
                 }
             }
             else {
