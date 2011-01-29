@@ -47,7 +47,7 @@ Zone.prototype = {
             tileIdx = this.addTile(tile),
             cli     = account.getClient();
         
-        this.setLayerTile(ACTOR_LAYER, spawn, tileIdx);
+        this.setLayerTile(ACTOR_LAYER, tileIdx, spawn);
         
         cli.sendZoneData(this);
         cli.sendZoneState(this);
