@@ -1,0 +1,64 @@
+<html>
+  <head>
+    <script src="/socket.io/socket.io.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" charset="utf-8">
+      var socket = new io.Socket("localhost", { "port": 3000 });
+      
+      socket.connect();
+      
+      socket.on("connect", function() {
+        
+      });
+      
+      socket.on("message", function(msg) {
+        console.log(msg);
+      });
+      
+      socket.on("disconnect", function() {
+        
+      });
+  
+      var KEYCODE_COMMANDS = {
+          38: "n",
+          40: "s",
+          39: "e",
+          37: "w"
+      };
+      
+      var keysDown = {};
+  
+      function sendToServer(msg) {
+          socket.send(msg);
+      }
+  
+      window.addEventListener("keydown", function(ev) {
+          var kc = ev.keyCode;
+          
+          if (!keysDown[kc]) {
+                var cmd = KEYCODE_COMMANDS[kc];
+          
+                if (cmd) {
+                    keysDown[kc] = true;
+                    sendToServer({ "type": "CommandStart", "command": cmd });
+                }
+          }
+      }, true);
+      
+      window.addEventListener("keyup", function(ev) {
+          var kc  = ev.keyCode;
+          
+          delete keysDown[kc];
+          
+          var cmd = KEYCODE_COMMANDS[kc];
+                  
+          if (cmd) {
+              sendToServer({ "type": "CommandEnd", "command": cmd });
+          }
+      }, true);
+    </script>
+  </head>
+  
+  <body>
+    
+  </body>
+</html>
