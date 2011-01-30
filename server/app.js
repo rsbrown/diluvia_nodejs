@@ -13,7 +13,8 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 app.use(express.bodyDecoder());
 app.use(express.cookieDecoder());
-app.use(express.session());
+app.use(express.session({key: '69c39bb0-2c14-11e0-91fa-0800200c9a66',
+                         secret: 'mooninites7b67c080'}));
 
 app.listen(3000);
 
