@@ -9,11 +9,24 @@ var express = require("express"),
 var app = express.createServer();
 
 app.use(express.staticProvider(__dirname + "/public"));
+app.set('views', __dirname + '/views');
+app.set('view engine', 'ejs');
+app.use(express.bodyDecoder());
+app.use(express.cookieDecoder());
+app.use(express.session());
 
 app.listen(3000);
 
 var socket  = io.listen(app),
     world   = new World();
+
+app.get('/', function(req, res){
+  res.render('index');
+});
+
+app.get('/play', function(req, res){
+  res.render('world');
+});
 
 socket.on("connection", function(conn) {
     var account = new Account(),
