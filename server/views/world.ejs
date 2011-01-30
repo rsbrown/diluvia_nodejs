@@ -1,6 +1,6 @@
 <script type="text/javascript" charset="utf-8">
     $(document).ready(function() {
-        new DiluviaController("localhost", { port: 3000 });
+        new DiluviaController("<%=SOCKET_IO_HOSTNAME%>", <%=SOCKET_IO_OPTIONS%>);
     });
 </script>
 

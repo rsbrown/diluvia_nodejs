@@ -8,7 +8,7 @@ set :user,         'deploy'
 set :use_sudo,     false
 set :deploy_subdir, "web"
 
-# after "deploy:update_code","deploy:symlink_configs"
+after "deploy:update_code","deploy:symlink_configs"
 after "deploy:update", "deploy:cleanup"
 # after "deploy:start", "delayed_job:start"
 # after "deploy:stop", "delayed_job:stop"
@@ -36,8 +36,7 @@ namespace(:deploy) do
     rails_env = fetch(:rails_env, "development")
     run <<-CMD
       cd #{release_path} &&
-      ln -nfs #{shared_path}/config/database.yml #{release_path}/config/database.yml &&
-      ln -nfs #{shared_path}/config/robots.txt #{release_path}/public/robots.txt
+      ln -nfs #{shared_path}/config/env.js #{release_path}/server/lib/env.js
     CMD
   end
 
