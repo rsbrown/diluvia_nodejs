@@ -24,6 +24,8 @@ var Keyboard = function(controller) {
         ev.preventDefault();
     });
     
+    /*
+    
     $(window).keyup(function(ev) {
         var kc  = ev.keyCode;
     
@@ -37,6 +39,7 @@ var Keyboard = function(controller) {
     
         ev.preventDefault();
     });
+    */
     
     // $(window).keydown(function(ev) {
     //     var kc  = ev.keyCode;
