@@ -16,11 +16,13 @@ var zonedata;
 var images = {};
 var zonestate;
 var paint_ok = true;
+var images_loaded = {};
 
 
 var parseMessage = function(msg) {
     if (msg) {
 //    blockPaint();
+    //var baseUrl = window.location.protocol + '//' + window.location.host;
     if (msg.type == "ZoneData") {
         zonedata = msg.attrs;
         _.each(_.keys(msg.attrs), function(i) {
@@ -29,34 +31,52 @@ var parseMessage = function(msg) {
             zonedata[i].img = img;
             var rowcol = imgParts[1].split(',');
             zonedata[i].coords = rowColToPixels(parseInt(rowcol[0], 10), parseInt(rowcol[1], 10) );
-            
-            
-            setImage(img);
-             
+                  
+            //images[img] = baseUrl + '/images/' + img;
+            images[img] = 'images/' + img;
+            images_loaded[ images[img] ] = false;
         });
+        
+        
+        _.each(_.keys(images), function(i) {
+            var src = images[i];
+            images[i] = new Image();
+
+            images[i].addEventListener('load', function() {
+                images_loaded[this.src] = true;
+            }, false);
+            
+            images[i].src = src;
+        });
+        
+        
+      
     } else if (msg.type == "ZoneState")  {
         parseZoneState(msg.attrs);
-        paint();
+        //setTimeout(checkPaint, 50);
+        setTimeout(paint, 2000);
     }
 //    enablePaint();
     }
-
 };
 
-
-
-var setImage = function(img) {
-  if (!images[img]) {
-      images[img] = new Image();
-      images[img].src = 'images/' + img;
-  }  
-  
-  return images[img];
+var checkPaint = function() {
+    var canPaint = true;
+    _.each(_.keys(images_loaded), function(i) {
+        if (canPaint && !images_loaded[i]) {
+            canPaint = false;
+        }
+    });
+    if (canPaint) {
+        paint();
+    } else {
+        //setTimeout(checkPaint, 50);  
+        paint();
+    } 
 };
 
 var parseZoneState = function(state) {
    zonestate = state;
-   
 };
 
 var blockPaint = function() {
@@ -65,6 +85,7 @@ var blockPaint = function() {
 var enablePaint = function() {
     paint_ok = true;
 }
+
 
 var paint = function() {
     if (paint_ok && zonedata && zonestate) {
@@ -83,11 +104,9 @@ var paint = function() {
             drawImage(context, images[tile.img], tile.coords, dest_coords );
            //break;
         }
-    } else {
-        //console.log {zonedata: zonedata, zonestate: zonestate}
-        console.log(zonedata);
-        console.log("have zonestate with length: " + zonestate.length);
+
     }
+    
 };
 
 
