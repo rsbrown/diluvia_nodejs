@@ -4,35 +4,34 @@ var Sound = function() {
     
     this.addAudio("bgmusic1", "/media/music/dungeon_music.wav")
     this.addAudio("bump", "/media/sounds/bump.mp3")
-    // this.loopAudio("bgmusic1");
+    this.loopAudio("bgmusic1");
 };
 
 Sound.prototype = {
     addAudio: function(key, src) {
-        var audio = new Audio(src);
-        this._audios[key] = audio;
+        // var audio = new Audio(src);
+        // this._audios[key] = audio;
+        this._audios[key] = src;
     },
     
     playAudio: function(key) {
-        this._audios[key].play();
+        // this._audios[key].play();
+        var src = this._audios[key];
+        var audio = new Audio(src).play();
     },
     
     loopAudio: function(key) {
         if (!(key in this._loops)) {
-            var audio = this._audios[key];
-            
-            this._loops[key] = true;
-            
+            var audio = new Audio(this._audios[key]);
+            this._loops[key] = audio;
             audio.loop = true;
             audio.play();
         }
     },
     
     cancelLoops: function() {
-        this.playAudio("bump");
         for (key in this._loops) {
-            var loop    = this._loops[key],
-                audio   = this._audios[key];
+            var audio    = this._loops[key];
             
             audio.loop = false;
             audio.pause();

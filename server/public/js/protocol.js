@@ -31,13 +31,7 @@ Protocol.prototype = {
     _parseMessage: function(msg) {
         var self = this;
         
-        if (msg) {
-<<<<<<< HEAD
-            //console.log(msg.type);
-=======
-            console.log(msg);
->>>>>>> de06dadc7530ca13f2c01b28e5400fa7e5930311
-            
+        if (msg) {            
             if (msg.type == "ZoneData") {
                 var zoneData = this._zoneData = msg.attrs;
                 
