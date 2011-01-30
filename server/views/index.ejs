@@ -1,12 +1,17 @@
 <div style="float:right;margin-right:5px">
-  <% if (global["username"]) { %>
-    <a href="/account/<%= global["username"] %>"><%= global["username"] %></a>
+  <% if (username) { %>
+    <a href="/account/<%= username %>"><%= username %></a>
   <% } else { %>
   <a href="/auth/twitter" style="border:0px">
     <img style="border:0px" src="http://apiwiki.twitter.com/f/1242697715/Sign-in-with-Twitter-darker.png"/>
   </a>
   <% } %>
 </div>
+<% if(flash && flash.error) { %>
+<div style="float: right;">
+    <%= flash.error %>
+</div>
+<% } %>
 
 <div id="content">
   <div id="islands">

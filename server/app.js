@@ -19,7 +19,7 @@ var Defs        = require("defs"),
 
 var r = redis.createClient();
 r.stream.on( 'connect', function() {
-  r.get( 'default', function( err, data ) {
+  r.get( 'island:<username>', function( err, data ) {
 
     var defaultZone = new Zone(64, 64);
     var defaultTile = new Tile({image: Defs.Images.baseTile}),
@@ -34,7 +34,7 @@ r.stream.on( 'connect', function() {
 
       defaultZone.setLayerTile(1, 64, spawnTileIdx);
       
-      r.set( 'default', JSON.stringify(defaultZone), function() {
+      r.set( 'island:<username>', JSON.stringify(defaultZone), function() {
         console.log("CREATED NEW MAP");
       });
     } else {
@@ -77,26 +77,41 @@ app.listen(3000);
 var socket      = io.listen(app),
     world       = new World();
     
-var redirectBackOrRoot = function(res) {
-    if (global["store_location"]) {
-        res.redirect(global["store_location"]);
+var redirectBackOrRoot = function(req, res) {
+    if (req.session["store_location"]) {
+        res.redirect(req.session["store_location"]);
     } else {
         res.redirect("/");
     }
 };
 
+var preParseRequest = function(req, res) {
+    if (req.query["un"]) {
+        req.session["username"] = req.query["un"];
+    }
+    if (!req.session.flash) {
+        req.session.flash = {};
+    }
+    if (!req.session.flash.error) {req.session.flash.error = false;}
+    if (!req.session.flash.warning) {req.session.flash.warning = false;}
+    if (!req.session.flash.info) {req.session.flash.info = false;}
+}
+
 app.get('/', function(req, res){
-    global["isAuthenticated"] = false; 
-    global["store_location"] = '/';
-    res.render('index');
+    preParseRequest(req, res);
+    //req.session["isAuthenticated"] = false; 
+    req.session["store_location"] = '/';
+    res.render('index', {locals: {username: req.session["username"], flash: req.session.flash}});
 });
 
 app.get('/play', function(req, res){
-  global["store_location"] = '/play';
-  res.render('world');
+  preParseRequest(req, res);
+  req.session["store_location"] = '/play';
+  res.render('world', {locals: {flash: req.session.flash}});
 });
 
 app.get ('/auth/twitter', function(req, res, params) {
+    preParseRequest(req, res);
     console.log(req);
     if (!req.session.auth) { req.session.auth = {}; }
     req.authenticate(['twitter'], function(error, authenticated) { 
@@ -111,24 +126,28 @@ app.get ('/auth/twitter', function(req, res, params) {
                 "HMAC-SHA1");
             oa.getProtectedResource("http://twitter.com/statuses/user_timeline.xml", "GET",
                 req.getAuthDetails()["twitter_oauth_token"], req.getAuthDetails()["twitter_oauth_token_secret"],  function (error, data) {
-                    global["username"] = req.getAuthDetails().user.username;
+                    req.session["username"] = req.getAuthDetails().user.username;
                     
-                    redirectBackOrRoot(res);
+                    redirectBackOrRoot(req, res);
                     //res.writeHead(200, {'Content-Type': 'text/html'});
                     //res.end("<html><h1>Hello! Twitter authenticated user ("+req.getAuthDetails().user.username+")</h1>"+data+ "</html>");
                 }
             );
         }
         else {
-            res.writeHead(200, {'Content-Type': 'text/html'})
-            res.end("<html><h1>Twitter authentication failed :( </h1></html>")
+            req.session.flash.error = "Twitter authentication failed";
+            res.render('index', {locals: {flash: req.session.flash, username: null}});
+            //redirectBackOrRoot(req, res);
+            //res.writeHead(200, {'Content-Type': 'text/html'})
+            //res.end("<html><h1>Twitter authentication failed :( </h1></html>")
         }
     });
 });
 
 app.get('/edit', function(req, res){
-  global["store_location"] = '/edit';
-  res.render('editor');
+  preParseRequest(req, res);
+  req.session["store_location"] = '/edit';
+  res.render('editor', {locals: {flash: req.session.flash}});
 });
 
 socket.on("connection", function(conn) {
