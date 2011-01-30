@@ -1,20 +1,9 @@
 <script type="text/javascript" charset="utf-8">
-    document.body.style = "height: 100%; width: 100%;";
-    document.style      = "height: 100%; width: 100%";
-    
-    $(document).ready(function() {
-        new DiluviaController("<%=SOCKET_IO_HOSTNAME%>", <%=SOCKET_IO_OPTIONS%>);
-        
-        $('#viewport_container').css({
-            'width': $(window).width() + "px",
-            'height': $(window).height() - $('header').outerHeight() + "px"
-        });
-    });
-    
-
+  $(document).ready(function() {
+      
+      
+  });
 </script>
-
-
 <div id="dungeon_editor">
   <div id="tile_drawer closed">
     
@@ -22,7 +11,5 @@
       <div id="drawer_button"></div>
     </div>
   </div>
-  <div id="viewport_container">
-      <canvas id="viewport" height="4096" width="4096"></canvas>
-  </div>
+  <%- partial('world') %>
 </div>

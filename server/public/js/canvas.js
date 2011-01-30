@@ -9,7 +9,6 @@ var Canvas = function(controller, element) {
     
     this._sizedZone     = false;
     this._vpIdx         = 0;
-    this._lastZoneState = {};
     
     this._element.style.position = "absolute";
 };
@@ -21,8 +20,6 @@ Canvas.prototype = {
             layerCount  = zoneDims[2],
             tileWidth   = Diluvia.TILE_DIMS[0],
             tileHeight  = Diluvia.TILE_DIMS[1];
-        
-        this._lastZoneState = zoneState;
         
         if (!this._sizedZone) {
             this._element.setAttribute("width",     zoneDims[0] * tileWidth);
@@ -55,15 +52,7 @@ Canvas.prototype = {
             }
         }
         
-        this.updateViewportPosition();
-    },
-    
-    updateViewportPosition: function() {
-        var zoneDims        = this._lastZoneState.dimensions,
-            playerIdx       = this._lastZoneState.playerIdx,
-            tileWidth       = Diluvia.TILE_DIMS[0],
-            tileHeight      = Diluvia.TILE_DIMS[1],
-            vpCX            = this._viewport.width() / 2,
+        var vpCX            = this._viewport.width() / 2,
             vpCY            = this._viewport.height() / 2,
             actorCanvasX    = ((playerIdx % zoneDims[0]) * tileWidth) + (tileWidth / 2),
             actorCanvasY    = (Math.floor(playerIdx / zoneDims[1]) * tileHeight) + (tileHeight / 2),
@@ -74,5 +63,8 @@ Canvas.prototype = {
             "left": canvasLeft + "px",
             "top":  canvasTop  + "px"
         });
+    },
+    
+    updateViewportPosition: function() {
     }
 }

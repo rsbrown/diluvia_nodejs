@@ -54,6 +54,10 @@ Account.prototype = {
     },
     
     setClient: function(client) {
+        if (client == null) {
+            this._currentZone.removeAccount(this);
+        }
+        
         this._client = client;
     },
     

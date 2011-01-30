@@ -6,7 +6,6 @@ var Protocol = function(controller, server, options) {
     this._socket        = new io.Socket(server, options);
     
     this._zoneData      = {};
-    this._zoneState     = {};
 
     this._socket.connect();
 
@@ -33,7 +32,7 @@ Protocol.prototype = {
         var self = this;
         
         if (msg) {
-            //console.log(msg);
+            console.log(msg);
             
             if (msg.type == "ZoneData") {
                 var zoneData = this._zoneData = msg.attrs;
@@ -52,8 +51,7 @@ Protocol.prototype = {
                 this._controller.updatedZoneData(zoneData);
             }
             else if (msg.type == "ZoneState")  {
-                this._zoneState = msg.attrs;
-                this._controller.updatedZoneState(this._zoneState);
+                this._controller.updatedZoneState(msg.attrs);
             }
         }
     },

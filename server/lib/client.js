@@ -5,20 +5,12 @@ var Client = module.exports = function(conn, account) {
     
     this._conn          = conn;
     this._account       = account;
-    this._interval      = setInterval(function() { self._onInterval(); }, Defs.CLIENT_INTERVAL);
     this._lastUpdate    = 0;
     
     account.setClient(this);
 };
 
 Client.prototype = {
-    _onInterval: function() {
-        if (this._account.shouldUpdateZone(this._lastUpdate)) {
-            this.sendZoneState(this._account.getCurrentZone());
-            this._lastUpdate = new Date().getTime();
-        }
-    },
-    
     onMessage: function(msg) {
         if (msg) {
             if (msg.type == "CommandStart") {
@@ -37,7 +29,8 @@ Client.prototype = {
     },
     
     onDisconnect: function() {
-        
+        this._account.setClient(null);
+        clearInterval(this._interval);
     },
     
     sendZoneData: function(zone) {

@@ -64,18 +64,29 @@ Zone.prototype = {
             layerIdx    = this.getSpawnPointIndex(),
             tileIdx     = this.addTile(tile),
             cli         = account.getClient();
-        
-        console.log(layerIdx);
-        
+                
         this._accountTile[account.getUid()] = layerIdx;
         this._accounts.push(account);
         
         this.setLayerTile(ACTOR_LAYER, layerIdx, tileIdx);
-        
-        cli.sendZoneData(this);
-        cli.sendZoneState(this);
-        
+                // 
+                // cli.sendZoneData(this);
+                // cli.sendZoneState(this);
+                // 
+        this._resendAll();
+                
         return tile;
+    },
+    
+    removeAccount: function(account) {
+        var layerIdx = this._accountTile[account.getUid()];
+        
+        delete this._accountTile[account.getUid()];
+        this._accounts.splice(this._accounts.indexOf(account), 1);
+        
+        this.setLayerTile(ACTOR_LAYER, layerIdx, null);
+        
+        this._resendAll();
     },
     
     setLayerTile: function(layer, layerIdx, tileIdx) {
@@ -294,5 +305,15 @@ Zone.prototype = {
     
     hasUpdatedSince: function(date) {
         return (this._updatedAt > date);
+    },
+    
+    _resendAll: function() {
+        for (var i = 0, len = this._accounts.length; i < len; i++) {
+            var account = this._accounts[i],
+                client  = account.getClient();
+            
+            client.sendZoneData(this);
+            client.sendZoneState(this);
+        }
     }
 };
