@@ -17,6 +17,46 @@ var express     = require("express"),
     Tile        = require("tile"),
     SpawnTile   = require("spawn_tile");
 
+
+var r = redis.createClient();
+var username = null;
+
+var setZoneState = function() {
+    if (username) {
+        r.stream.on( 'connect', function() {
+          r.get( 'island:' + username, function( err, data ) {
+
+            var defaultZone = new Zone(64, 64);
+            var defaultTile = new Tile({image: Defs.Images.baseTile}),
+            spawnTile       = new SpawnTile();
+            var defaultTileIdx = defaultZone.addTile(defaultTile);
+            var spawnTileIdx   = defaultZone.addTile(spawnTile);
+    
+            if (!data) {
+              for (var i = 0; i < (64 * 64); i++) {
+                  defaultZone.setLayerTile(0, i, defaultTileIdx);
+              }
+
+              defaultZone.setLayerTile(1, 64, spawnTileIdx);
+      
+              r.set( 'island:' + username, JSON.stringify(defaultZone), function() {
+                console.log("CREATED NEW MAP");
+              });
+            } else {
+              var obj = JSON.parse( data.toString() );
+              defaultZone.setLayers(obj["_layers"]);
+              console.log("MAP IS ALREADY THERE");
+            }
+            world.setDefaultZone(defaultZone);
+          });
+        });
+    }
+    else {
+        console.log("COULDN'T SET STATE WITHOUT USER");
+    }
+};
+    
+
 try {
     var keys = require('./auth_keys');
     for(var key in keys) {
@@ -57,7 +97,7 @@ var redirectBackOrRoot = function(res) {
 
 var preParseRequest = function(req, res) {
     if (req.query["un"]) {
-        req.session["username"] = req.query["un"];
+        username = req.session["username"] = req.query["un"];
     }
     if (!req.session.flash) {
         req.session.flash = {};
@@ -71,6 +111,7 @@ app.get('/', function(req, res){
     preParseRequest(req, res);
     //req.session["isAuthenticated"] = false; 
     req.session["store_location"] = '/';
+    setZoneState();
     res.render('index', {locals: {username: req.session["username"], flash: req.session.flash}});
 });
 
@@ -96,7 +137,7 @@ app.get ('/auth/twitter', function(req, res, params) {
                 "HMAC-SHA1");
             oa.getProtectedResource("http://twitter.com/statuses/user_timeline.xml", "GET",
                 req.getAuthDetails()["twitter_oauth_token"], req.getAuthDetails()["twitter_oauth_token_secret"],  function (error, data) {
-                    req.session["username"] = req.getAuthDetails().user.username;
+                    username = req.session["username"] = req.getAuthDetails().user.username;
                     
                     redirectBackOrRoot(req, res);
                     //res.writeHead(200, {'Content-Type': 'text/html'});
