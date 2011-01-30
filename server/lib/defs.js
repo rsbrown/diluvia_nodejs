@@ -1,5 +1,5 @@
 var Defs = module.exports = {
-    COMMAND_INTERVAL:  250,
+    COMMAND_INTERVAL:  100,
     CLIENT_INTERVAL:   100,
     
     Images: {
