@@ -4,9 +4,9 @@ var SpawnTile = module.exports = function() {
     this.spawnTile = true;
 };
 
-ActorTile.prototype = {
-    movesInto: function(actor) {
-        return false;
+SpawnTile.prototype = {
+    moveInto: function(actor) {
+        return true;
     },
     
     getImage:       function() { return Defs.Images.spawnTile; },

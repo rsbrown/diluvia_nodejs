@@ -11,7 +11,7 @@ var Zone = module.exports = function(width, height) {
     
     this._layers            = [];
     this._tiles             = [];
-    this._dimensions        = [width, height];
+    this._dimensions        = [width, height, LAYER_COUNT];
     this._cmdInterval       = setInterval(function() { self._onCommandInterval(); }, Defs.COMMAND_INTERVAL);
     this._active            = [];
     this._shouldBeInactive  = [];
@@ -31,27 +31,26 @@ Zone.prototype = {
     },
     
     getSpawnPointIndex: function() {
-        var layer = this._layers[OBJECT_LAYER],
-            spawnTiles = [];
+        var layer       = this._layers[OBJECT_LAYER],
+            spawnTiles  = [];
         
         for (var i = 0, len = this._tiles.length; i < len; i++) {
             var tile = this._tiles[i];
             
-            if (tile.spawnPoint) {
+            if (tile.spawnTile) {
                 spawnTiles.push(i);
             }
         }
         
         if (spawnTiles.length > 0) {            
-            for (var i = 0, len = layer.length; i < len; i++) {            
-                if (spawnTiles.indexOf(layer[i]) != -1) {
-                    return i;
+            for (var key in layer) {
+                if (spawnTiles.indexOf(layer[key]) != -1) {
+                    return key;
                 }
             }
         }
-        else {
-            return 0;
-        }
+
+        return 0;
     },
     
     getAccountLayerTileIndex: function(account) {
@@ -63,6 +62,8 @@ Zone.prototype = {
             layerIdx    = this.getSpawnPointIndex(),
             tileIdx     = this.addTile(tile),
             cli         = account.getClient();
+        
+        console.log(layerIdx);
         
         this._accountTile[account.getUid()] = layerIdx;
         

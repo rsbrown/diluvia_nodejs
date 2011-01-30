@@ -1,19 +1,7 @@
 <script type="text/javascript" charset="utf-8">
-  var socket = new io.Socket("localhost", { "port": 3000 });
-  
-  socket.connect();
-  
-  socket.on("connect", function() {
-    
-  });
-  
-  socket.on("message", function(msg) {
-    parseMessage(msg);
-  });
-  
-  socket.on("disconnect", function() {
-    
-  });
+    $(document).ready(function() {
+        new DiluviaController("localhost", { port: 3000 });
+    });
 </script>
 
 <canvas id="viewport" width="4096" height="4096"></canvas>

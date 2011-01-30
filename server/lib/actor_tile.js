@@ -5,7 +5,7 @@ var ActorTile = module.exports = function(account) {
 };
 
 ActorTile.prototype = {
-    movesInto: function(actor) {
+    moveInto: function(actor) {
         return false;
     },
     
