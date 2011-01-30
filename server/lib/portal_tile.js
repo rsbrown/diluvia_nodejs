@@ -11,7 +11,7 @@ var PortalTile = module.exports = function(options) {
 PortalTile.prototype = {
     moveInto: function(actor) {
         actor.teleport(this._destZone, this._destCoords);
-        return false;
+        return "silent";
     },
     
     getImage:       function() { return this._image; },
