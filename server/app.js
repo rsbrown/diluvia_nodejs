@@ -55,10 +55,10 @@ app.get('/play', function(req, res){
 });
 
 app.get ('/auth/twitter', function(req, res, params) {
-    console.log(req);
+    //console.log(req);
     if (!req.session.auth) { req.session.auth = {}; }
     req.authenticate(['twitter'], function(error, authenticated) { 
-        console.log("authenticated: " + authenticated);
+        //console.log("authenticated: " + authenticated);
         if( authenticated ) {
             var oa= new OAuth("http://twitter.com/oauth/request_token",
                 "http://twitter.com/oauth/access_token",
@@ -79,6 +79,10 @@ app.get ('/auth/twitter', function(req, res, params) {
             res.end("<html><h1>Twitter authentication failed :( </h1></html>")
         }
     });
+});
+
+app.get('/edit', function(req, res){
+  res.render('editor');
 });
 
 socket.on("connection", function(conn) {

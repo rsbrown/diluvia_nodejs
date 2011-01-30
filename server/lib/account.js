@@ -16,6 +16,8 @@ var Account = module.exports = function(options) {
     this._currentZone   = null;
     
     this._hitpoints     = START_HITPOINTS;
+    
+    this._queue         = [];
 };
 
 Account.prototype = {
@@ -59,6 +61,10 @@ Account.prototype = {
         return this._client;
     },
     
+    onCommand: function(command) {
+        this._currentZone.runCommand(this, command);
+    },
+    
     onStart: function(command) {
         this._currentZone.startCommand(this, command);
     },
@@ -73,7 +79,19 @@ Account.prototype = {
     
     shouldUpdateZone: function(lastUpdated) {
         return this._currentZone.hasUpdatedSince(lastUpdated);
-    }
+    },
+    
+    sendMessage: function(msg) {
+        this._queue.push(msg);
+    },
+    
+    flushSendQueue: function() {
+        for (var i = 0, len = this._queue.length; i < len; i++) {
+            this._client.send(this._queue[i]);
+        }
+        
+        this._queue = [];
+    },
 };
 
 

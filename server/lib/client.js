@@ -27,6 +27,9 @@ Client.prototype = {
             else if (msg.type == "CommandEnd") {
                 this._account.onEnd(msg.command);
             }
+            else if (msg.type == "Command") {
+                this._account.onCommand(msg.command);
+            }
         }
     },
     
@@ -49,19 +52,21 @@ Client.prototype = {
         this.sendMessage("ZoneData", tileData);
     },
     
-    sendZoneState: function(zone) {
-        var layers      = zone.getLayers(),
-            layerState  = {};
+    sendZoneState: function(zone, layerState) {
+        if (!layerState) {
+            var layers      = zone.getLayers(),
+                layerState  = {};
 
-        for (var layerIdx = 0, layerLen = layers.length; layerIdx < layerLen; layerIdx++) {
-            var layer   = layers[layerIdx],
-                data    = {};
+            for (var layerIdx = 0, layerLen = layers.length; layerIdx < layerLen; layerIdx++) {
+                var layer   = layers[layerIdx],
+                    data    = {};
             
-            for (var tileIdx in layer) {
-                data[tileIdx] = layer[tileIdx];
+                for (var tileIdx in layer) {
+                    data[tileIdx] = layer[tileIdx];
+                }
+            
+                layerState[layerIdx] = data;
             }
-            
-            layerState[layerIdx] = data;
         }
         
         this.sendMessage("ZoneState", {

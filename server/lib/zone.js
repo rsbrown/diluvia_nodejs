@@ -18,6 +18,8 @@ var Zone = module.exports = function(width, height) {
     this._updatedAt         = new Date().getTime();
     this._accountTile       = {};
     this._zoneTick          = 0;
+    this._accounts          = [];
+    this._updatedTiles      = [];
     
     // initialize layers
     for (var i = 0; i < LAYER_COUNT; i++) {
@@ -66,6 +68,7 @@ Zone.prototype = {
         console.log(layerIdx);
         
         this._accountTile[account.getUid()] = layerIdx;
+        this._accounts.push(account);
         
         this.setLayerTile(ACTOR_LAYER, layerIdx, tileIdx);
         
@@ -85,8 +88,8 @@ Zone.prototype = {
             layer[layerIdx] = tileIdx;
         }
 
-        this._updatedAt = new Date().getTime();
-        this._zoneTick++;
+        //this._updatedAt = new Date().getTime();
+        //this._zoneTick++;
 
         return layer;
     },
@@ -162,7 +165,16 @@ Zone.prototype = {
             }
         }
         
-        this._shouldBeInactive = [];
+        this._resendTiles(this._updatedTiles);
+        
+        this._updatedTiles      = [];
+        this._shouldBeInactive  = [];
+    },
+    
+    runCommand: function(account, command) {
+        this.executeCommand(account, command);
+        this._resendTiles(this._updatedTiles);
+        this._updatedTiles = [];
     },
     
     executeCommand: function(account, command) {
@@ -201,11 +213,36 @@ Zone.prototype = {
                     
                     this._accountTile[account.getUid()] = potentialIdx;
                     
+                    this._updatedTiles.push(layerTileIdx);
+                    this._updatedTiles.push(potentialIdx);
+                    
                     console.log("MOVE " + account.getUid() + ": " + layerTileIdx + " => " + potentialIdx + " (" + tileIdx + ")");
                 }
             }
             else {
                 console.log("User tried to move out of map");
+            }
+        }
+    },
+    
+    _resendTiles: function(updatedTiles) {
+        if (updatedTiles.length > 0) {
+            var layerState = {};
+
+            for (var li = 0; li < this._dimensions[2]; li++) {
+                var data = {};
+                
+                for (var i = 0, len = updatedTiles.length; i < len; i++) {
+                    var updatedTile = updatedTiles[i];
+                    data[updatedTile] = this.getLayerTile(li, updatedTile);
+                }
+                                
+                layerState[li] = data;
+            }
+            
+            for (var i = 0, len = this._accounts.length; i < len; i++) {
+                var account = this._accounts[i];
+                account.getClient().sendZoneState(this, layerState);
             }
         }
     },

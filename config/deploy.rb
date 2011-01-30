@@ -28,6 +28,7 @@ task :production do
 
   ssh_options[:keys] = [File.join(ENV["HOME"], ".ssh", "aws_rsa")]
   ssh_options[:port] = 38112
+  default_environment["PATH"] = "$PATH:$HOME/local/bin/:$HOME/bin"
   role :app, "ec2-184-72-224-221.compute-1.amazonaws.com"
 end
 
@@ -42,13 +43,20 @@ namespace(:deploy) do
 
   desc "Restarting node.js with restart.txt"
   task :restart, :roles => :app, :except => { :no_release => true } do
-    run "echo \'TODO: RESTART\'"
+    run <<-CMD
+      cd /var/js/diluvia/current/server &&
+      ~/local/bin/forever stop app.js && 
+      ~/local/bin/forever start app.js
+    CMD
   end
 
   [:start, :stop].each do |t|
-    desc "#{t} task is a no-op with node.js"
+    desc "#{t} the node.js server"
     task t, :roles => :app do
-      run "echo \'TODO: START/STOP\'"
+      run <<-CMD
+        cd /var/js/diluvia/current/server &&
+        ~/local/bin/forever #{t} app.js
+      CMD
     end
   end
 
