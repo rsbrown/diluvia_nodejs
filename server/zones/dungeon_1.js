@@ -27,6 +27,8 @@
         "G":    "DUNGEON_DOOR_L",
         "H":    "DUNGEON_OPEN_L",
         
+        "L":    "LAVA",
+        
         
         "Y":    { "class": "PortalTile", "options": { "zone": "zones:2", "image": "sprites.png:4,0", "dropAt": [ 2, 2 ] } },
         "Z":    { "class": "PortalTile", "options": { "zone": "zones:3", "image": "sprites.png:4,0", "dropAt": [ 2, 2 ] } },
@@ -83,10 +85,10 @@
                     "7                            3",
                     "7                            3",
                     "7                            3",
-                    "7                            3",
-                    "7                            3",
-                    "7                            3",
-                    "7                            3",
+                    "7   LLLLLLLLL                3",
+                    "7   LLLLLLLLL                3",
+                    "7   LLLLLLLLL                3",
+                    "7   LLLLLLLLL                3",
                     "7                            3",
                     "655555555555555 55555555555554",
                     "000000000000007 30000000000000",
