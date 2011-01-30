@@ -242,10 +242,13 @@ Zone.prototype = {
               this._updatedTiles.push(potentialIdx);
               
               console.log("MOVE " + account.getUid() + ": " + layerTileIdx + " => " + potentialIdx + " (" + tileIdx + ")");
+          } else {
+              account.getClient().sendMoveFailed();
           }
       }
       else {
           console.log("User tried to move out of map");
+          account.getClient().sendMoveFailed();
       }
       
     },
