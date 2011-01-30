@@ -55,7 +55,7 @@ var setImage = function(img) {
 };
 
 var parseZoneState = function(state) {
-   zonestate = state;
+   zonestate = state.layers;
    
 };
 
