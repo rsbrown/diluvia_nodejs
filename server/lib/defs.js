@@ -10,7 +10,7 @@ var Defs = module.exports = {
     CLIENT_INTERVAL:        100,
         
     Tiles: {
-        PLAYER:             new ActorTile({ image: "sprites.png:5,4" }),
+        PLAYER:             new ActorTile({ image: "dude.png:0,0" }),
         PLAYER_N:           new ActorTile({ image: "dude.png:0,0" }),
         PLAYER_S:           new ActorTile({ image: "dude.png:2,0" }),
         PLAYER_E:           new ActorTile({ image: "dude.png:1,0" }),
