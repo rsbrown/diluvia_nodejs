@@ -65,6 +65,10 @@ DiluviaController.prototype = {
         }
     },
     
+    move: function(cmd) {
+        this._protocol.send({ "type": "Move", "command": cmd });
+    },
+    
     commandStart: function(cmd) {
         this._protocol.send({ "type": "CommandStart", "command": cmd });
     },

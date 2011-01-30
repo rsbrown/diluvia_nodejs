@@ -11,14 +11,15 @@ var Keyboard = function(controller) {
     $(window).keydown(function(ev) {
         var kc = ev.keyCode;
     
-        if (!keysDown[kc]) {
+        // if (!keysDown[kc]) {
               var cmd = KEYCODE_COMMANDS[kc];
     
               if (cmd) {
                   keysDown[kc] = true;
-                  controller.commandStart(cmd);
+                  // controller.commandStart(cmd);
+                  controller.move(cmd);
               }
-        }
+        // }
     
         ev.preventDefault();
     });

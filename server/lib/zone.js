@@ -178,51 +178,61 @@ Zone.prototype = {
     },
     
     executeCommand: function(account, command) {
-        var layerTileIdx    = this.getAccountLayerTileIndex(account),
-            tileIdx         = this.getLayerTile(ACTOR_LAYER, layerTileIdx),
-            tile            = this.getTile(tileIdx),
-            dir;
+        var dir;
         
         if (command == "n" || command == "s" || command == "e" || command == "w") {
             dir = command;
         }
         
         if (dir) {
-            var potentialIdx = this.indexForDirectionalMove(layerTileIdx, dir);
-        
-            if (potentialIdx != -1) {
-                var canMove = true;
-            
-                // it's within the zone
-                for (var i = 0; i < LAYER_COUNT; i++) {
-                    var otherTileIdx = this._layers[i][potentialIdx],
-                        tile         = this.getTile(otherTileIdx);
-                
-                    if (tile) {
-                        if (!tile.moveInto(account)) {
-                            // FAIL MOVEMENT
-                            canMove = false;
-                            break;
-                        }
-                    }
-                }
-            
-                if (canMove) {
-                    this.setLayerTile(ACTOR_LAYER, layerTileIdx, null);
-                    this.setLayerTile(ACTOR_LAYER, potentialIdx, tileIdx);
-                    
-                    this._accountTile[account.getUid()] = potentialIdx;
-                    
-                    this._updatedTiles.push(layerTileIdx);
-                    this._updatedTiles.push(potentialIdx);
-                    
-                    console.log("MOVE " + account.getUid() + ": " + layerTileIdx + " => " + potentialIdx + " (" + tileIdx + ")");
-                }
-            }
-            else {
-                console.log("User tried to move out of map");
-            }
+          this.move(account, dir);
         }
+    },
+    
+    moveClient: function() {
+      this._resendTiles(this._updatedTiles);
+    },
+    
+    move: function(account, dir) {
+      var layerTileIdx    = this.getAccountLayerTileIndex(account),
+          tileIdx         = this.getLayerTile(ACTOR_LAYER, layerTileIdx),
+          tile            = this.getTile(tileIdx);
+
+      var potentialIdx = this.indexForDirectionalMove(layerTileIdx, dir);
+  
+      if (potentialIdx != -1) {
+          var canMove = true;
+      
+          // it's within the zone
+          for (var i = 0; i < LAYER_COUNT; i++) {
+              var otherTileIdx = this._layers[i][potentialIdx],
+                  tile         = this.getTile(otherTileIdx);
+          
+              if (tile) {
+                  if (!tile.moveInto(account)) {
+                      // FAIL MOVEMENT
+                      canMove = false;
+                      break;
+                  }
+              }
+          }
+      
+          if (canMove) {
+              this.setLayerTile(ACTOR_LAYER, layerTileIdx, null);
+              this.setLayerTile(ACTOR_LAYER, potentialIdx, tileIdx);
+              
+              this._accountTile[account.getUid()] = potentialIdx;
+              
+              this._updatedTiles.push(layerTileIdx);
+              this._updatedTiles.push(potentialIdx);
+              
+              console.log("MOVE " + account.getUid() + ": " + layerTileIdx + " => " + potentialIdx + " (" + tileIdx + ")");
+          }
+      }
+      else {
+          console.log("User tried to move out of map");
+      }
+      
     },
     
     _resendTiles: function(updatedTiles) {
