@@ -70,6 +70,7 @@ Account.prototype = {
         this._world.addAccount(this);
         
         this.getClient().sendPlaySound("scream");
+        
         oldZone.playSound("scream");
     },
     
