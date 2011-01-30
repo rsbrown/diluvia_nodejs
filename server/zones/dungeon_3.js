@@ -17,6 +17,8 @@
         "6":    "DUNGEON_WALL_BL",
         "7":    "DUNGEON_WALL_L",
         "8":    "DUNGEON_WALL_TL",
+        
+        "X":    "SNAIL",
 
         "F":    { "class": "PortalTile", "options": { "zone": "zones:1", "image": "sprites.png:5,1", "dropAt": [ 19, 16 ] } }
     },
@@ -37,7 +39,7 @@
     "objectMap": [  
                     "8111112",
                     "7     3",
-                    "7     3",
+                    "7  X  3",
                     "7     3",
                     "7     3",
                     "7     3",

@@ -88,9 +88,9 @@
     "objectMap": [  
                     "811111111111111111111111111112",
                     "7                            3",   
-                    "7 LLLLLLLLLLLLLL*55555@   NQ 3",   
-                    "7 LLLLLLLLLLLLLL3000007   OR 3",   
-                    "7 LLLLLLLLLLLLLL3000007   PS 3",   
+                    "7 LLLLLLLLLLLLL *55555@   NQ 3",   
+                    "7 LLLLLLLLLLLLL 3000007   OR 3",   
+                    "7 LLLLLLLLLLLLL 3000007   PS 3",   
                     "7               3000007      3",   
                     "65555555555555@ 30000065555554",   
                     "000000000000007 30000000000000",
