@@ -2,6 +2,7 @@ require.paths.unshift("./lib");
 
 var express = require("express"),
     io      = require("socket.io"),
+    redis   = require("redis-client"),
     Env     = require("env"),
     Client  = require("client"),
     World   = require("world"),

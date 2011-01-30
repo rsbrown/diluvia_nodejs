@@ -4,12 +4,16 @@
     
     $(document).ready(function() {
         new DiluviaController("<%=SOCKET_IO_HOSTNAME%>", <%=SOCKET_IO_OPTIONS%>);
+        
+        $('#viewport_container').css({
+            'width': $(window).width() + "px",
+            'height': $(window).height() - $('header').outerHeight() + "px"
+        });
     });
     
-    // $('#viewport').attr('height', ($(window).height() - $('header').outerHeight())).attr('width',$(window).width());
 
-   // css({'width': ($(window).width() + "px"), 'height': ($(window).height() - $('header').outerHeight())});
 </script>
+
 
 <div id="dungeon_editor">
   <div id="tile_drawer closed">
@@ -18,7 +22,7 @@
       <div id="drawer_button"></div>
     </div>
   </div>
-  <div id="viewport_container" style="width: 100%; height: 100%; position: absolute; bottom: 0">
+  <div id="viewport_container">
       <canvas id="viewport" height="4096" width="4096"></canvas>
   </div>
 </div>

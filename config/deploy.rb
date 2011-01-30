@@ -1,7 +1,7 @@
 set :keep_releases, 3
 set :application,  'diluvia'
 set :scm,          "git"
-set :git_enable_submodules, 1
+# set :git_enable_submodules, 1
 set :repository,   'git@rsbrown.unfuddle.com:rsbrown/diluvia.git'
 set :deploy_via,   :export
 set :user,         'deploy'
