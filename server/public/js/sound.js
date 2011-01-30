@@ -2,7 +2,7 @@ var Sound = function() {
     this._audios    = {};
     this._loops     = {};
     
-    this.addAudio("bump", "/media/sounds/bump.mp3");
+    this.addAudio("bump", "/media/sounds/bump.mp3")
 };
 
 Sound.prototype = {
@@ -26,7 +26,7 @@ Sound.prototype = {
             
             this._loops[key] = audio;
             
-            //audio.loop = "loop"
+            audio.loop = "loop"
             audio.play();
         }
     },
