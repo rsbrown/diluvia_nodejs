@@ -3,7 +3,7 @@ var Defs = require("defs");
 var PortalTile = module.exports = function(options) {
     options             = options        || {};
     this._image         = options.image  || (Defs.Tiles ? Defs.Tiles.PORTAL.getImage() : "empty.png:0,0");
-    this._destZone      = options.zone   || 0; 
+    this._destZone      = options.zone   || 0;
 };
 
 PortalTile.prototype = {

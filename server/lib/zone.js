@@ -37,7 +37,7 @@ Zone.prototype = {
         return this._dimensions;
     },
     
-    getSpawnPointIndex: function() {
+    getDefaultSpawnPointIndex: function() {
         var layer       = this._layers[OBJECT_LAYER],
             spawnTiles  = [];
         
@@ -65,7 +65,7 @@ Zone.prototype = {
     },
     
     addAccount: function(account) {
-        var layerIdx    = this.getSpawnPointIndex(),
+        var layerIdx    = this.getDefaultSpawnPointIndex(),
             tileIdx     = "PLAYER",
             cli         = account.getClient();
                 
