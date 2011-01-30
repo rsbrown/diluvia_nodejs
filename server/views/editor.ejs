@@ -2,7 +2,7 @@
     $(document).ready(function() {
         new DiluviaController("localhost", { port: 3000 });
   
-        $('#viewport').attr('height',$(window).height() - $('header').outerHeight()).attr('width',$(window).width());
+        $('#viewport').attr('height',$(window).height() -  $('header').outerHeight()).attr('width',$(window).width());
         
         //css({'width': ($(window).width() + "px"), 'height': ($(window).height() - $('header').outerHeight())})
     });

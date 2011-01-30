@@ -75,7 +75,6 @@ header {
 	font-size: 13px;
 }
 
-<<<<<<< HEAD
 /* editor */
 #main {
 	position: relative;
@@ -106,7 +105,7 @@ header {
 	margin-top: -12px;
 	background: url(../img/drawer-open_arrow.png) no-repeat;
 }
-=======
+
 canvas {
     
 }
@@ -114,4 +113,3 @@ canvas {
 #viewport_container {
     overflow:   hidden;
 }
->>>>>>> 58966136d759235538ad503b582b6745499db46e
