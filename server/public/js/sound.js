@@ -2,7 +2,8 @@ var Sound = function() {
     this._audios    = {};
     this._loops     = {};
     
-    this.addAudio("bgmusic1", "/media/music/dungeon_music.wav")
+    this.addAudio("bgmusic1", "/media/music/beat_music.wav")
+    this.addAudio("bgmusic2", "/media/music/dungeon_music.wav")
     this.addAudio("bump", "/media/sounds/bump.mp3")
     this.loopAudio("bgmusic1");
 };
