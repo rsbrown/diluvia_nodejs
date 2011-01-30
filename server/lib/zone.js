@@ -237,13 +237,13 @@ Zone.prototype = {
                     tile         = this.getTile(otherTileIdx);
 
                 if (tile) {
-                    var moveRet = tile.moveInto(account);
+                    var moveRet = tile.canMoveInto(account);
                     
                     if (moveRet == "silent") {
                         noisy = false;
                     }
                     
-                    if (!moveRet || moveRet == "silent") {
+                    if (!moveRet && moveRet != "silent") {
                         // FAIL MOVEMENT
                         canMove = false;
                         break;
@@ -261,8 +261,16 @@ Zone.prototype = {
                 this._updatedTiles.push(potentialIdx);
 
                 console.log("MOVE " + account.getUid() + ": " + layerTileIdx + " => " + potentialIdx + " (" + tileIdx + ")");
+
+                for (var i = 0; i < LAYER_COUNT; i++) {
+                    var otherTileIdx = this._layers[i][potentialIdx],
+                        tile         = this.getTile(otherTileIdx);
+                    
+                    if (tile) {
+                        tile.moveInto(account);
+                    }
+                }
             } else {
-                console.log("User tried to move out of map");
                 if (noisy) account.getClient().sendMoveFailed();
             }
             
@@ -285,7 +293,6 @@ Zone.prototype = {
                     data[updatedTile] = this.getLayerTile(li, updatedTile);
                 }
                 
-                console.log("RESEND: " + li + " = " + JSON.stringify(data));
                 layerState[li] = data;
             }
             
@@ -359,5 +366,14 @@ Zone.prototype = {
     
     setMusic: function(music) {
         this._music = music;
+    },
+    
+    playSound: function(sound) {
+        for (var i = 0, len = this._accounts.length; i < len; i++) {
+            var account = this._accounts[i],
+                client  = account.getClient();
+            
+            client.sendPlaySound(sound);
+        }
     }
 };

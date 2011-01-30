@@ -7,6 +7,9 @@ var ActorTile = module.exports = function(options) {
 
 ActorTile.prototype = {
     moveInto: function(actor) {
+    },
+    
+    canMoveInto: function(actor) {
         return false;
     },
     

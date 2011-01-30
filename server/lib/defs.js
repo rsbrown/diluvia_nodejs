@@ -2,7 +2,8 @@ var Tile            = require("tile"),
     WallTile        = require("wall_tile"),
     ActorTile       = require("actor_tile"),
     SpawnTile       = require("spawn_tile"),
-    PortalTile      = require("portal_tile");
+    PortalTile      = require("portal_tile"),
+    PainTile        = require("pain_tile");
 
 var Defs = module.exports = {
     COMMAND_INTERVAL:       250,

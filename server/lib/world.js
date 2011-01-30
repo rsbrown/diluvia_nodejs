@@ -47,7 +47,7 @@ World.prototype = {
     },
     
     removeAccount: function(account) {
-        var zone = this.account.getCurrentZone();
+        var zone = account.getCurrentZone();
         zone.removeAccount(account);
         this._accounts.splice(this._accounts.indexOf(account), 1);
     },

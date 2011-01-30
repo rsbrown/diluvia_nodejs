@@ -63,9 +63,14 @@ Account.prototype = {
     },
     
     die: function() {
+        var oldZone = this.getCurrentZone();
+        
         this._hitpoints = 100;
-        world.removeAccount(this);
-        world.addAccount(this);
+        this._world.removeAccount(this);
+        this._world.addAccount(this);
+        
+        this.getClient().sendPlaySound("scream");
+        oldZone.playSound("scream");
     },
     
     setClient: function(client) {

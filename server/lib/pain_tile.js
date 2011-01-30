@@ -6,9 +6,12 @@ var PainTile = module.exports = function(options) {
 };
 
 PainTile.prototype = {
+    canMoveInto: function(actor) {
+        return true;
+    },
+    
     moveInto: function(actor) {
         actor.takeDamage(25);
-        return true;
     },
     
     getImage:       function() { return this._image; },

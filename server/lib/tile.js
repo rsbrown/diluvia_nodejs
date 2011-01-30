@@ -11,6 +11,9 @@ var Tile = module.exports = function(options) {
 
 Tile.prototype = {
     moveInto: function(actor) {
+    },
+    
+    canMoveInto: function(actor) {
         return true;
     },
     

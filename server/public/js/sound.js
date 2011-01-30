@@ -2,7 +2,8 @@ var Sound = function() {
     this._audios    = {};
     this._loops     = {};
     
-    this.addAudio("bump", "/media/sounds/bump.mp3")
+    this.addAudio("bump",   "/media/sounds/bump.mp3");
+    this.addAudio("scream", "/media/sounds/scream1.wav");
 };
 
 Sound.prototype = {

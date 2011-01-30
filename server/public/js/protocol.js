@@ -62,6 +62,10 @@ Protocol.prototype = {
                 console.log("playing sound");
                 self._controller.getSound().playAudio("bump");
             }
+            else if (msg.type == "PlaySound") {
+                var sound = self._controller.getSound();
+                sound.playAudio(msg.attrs);
+            }
         }
     },
     

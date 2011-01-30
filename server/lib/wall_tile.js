@@ -7,6 +7,9 @@ var WallTile = module.exports = function(options) {
 
 WallTile.prototype = {
     moveInto: function(actor) {
+    },
+    
+    canMoveInto: function(actor) {
         return false;
     },
     
