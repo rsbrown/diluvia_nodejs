@@ -216,8 +216,9 @@ Zone.prototype = {
         var layerTileIdx    = this.getAccountLayerTileIndex(account),
             tileIdx         = this.getLayerTile(ACTOR_LAYER, layerTileIdx),
             tile            = this.getTile(tileIdx),
-            dirTileIdx      = ACTOR_DIRECTIONAL_KEYS[dir];
-
+            dirTileIdx      = ACTOR_DIRECTIONAL_KEYS[dir],
+            noisy           = true;
+            
         var potentialIdx = this.indexForDirectionalMove(layerTileIdx, dir);
 
         // change the tile for the player to the directional
@@ -229,13 +230,20 @@ Zone.prototype = {
         
         if (potentialIdx != -1) {
             var canMove = true;
+            
             // it's within the zone
             for (var i = 0; i < LAYER_COUNT; i++) {
                 var otherTileIdx = this._layers[i][potentialIdx],
                     tile         = this.getTile(otherTileIdx);
 
                 if (tile) {
-                    if (!tile.moveInto(account)) {
+                    var moveRet = tile.moveInto(account);
+                    
+                    if (moveRet == "silent") {
+                        noisy = false;
+                    }
+                    
+                    if (!moveRet || moveRet == "silent") {
                         // FAIL MOVEMENT
                         canMove = false;
                         break;
@@ -255,13 +263,13 @@ Zone.prototype = {
                 console.log("MOVE " + account.getUid() + ": " + layerTileIdx + " => " + potentialIdx + " (" + tileIdx + ")");
             } else {
                 console.log("User tried to move out of map");
-                account.getClient().sendMoveFailed();
+                if (noisy) account.getClient().sendMoveFailed();
             }
             
         }
         else {
             console.log("User tried to move out of map");
-            account.getClient().sendMoveFailed();
+            if (noisy) account.getClient().sendMoveFailed();
         }
     },
     
