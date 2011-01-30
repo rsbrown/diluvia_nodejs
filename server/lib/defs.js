@@ -12,8 +12,28 @@ var Defs = module.exports = {
         PLAYER:             new ActorTile({ image: "sprites.png:5,4" }),
         SPAWN:              new SpawnTile({ image: "sprites.png:2,8" }),
         ROCK:               new WallTile({ image: "sprites.png:3,4" }),
-        BASE_GRASS:         new Tile({ image: "sprites.png:3,7" }),
+        BASE_GRASS:         new Tile({ image: "sprites.png:2,7" }),
         BASE_STONE:         new Tile({ image: "sprites.png:4,7" }),
+		SPAWN_STONE:        new SpawnTile({ image: "sprites.png:4,7" }),
+		SPAWN_GRASS:        new SpawnTile({ image: "sprites.png:2,7" }),
+
+		TREE_1: 			new WallTile({ image: "sprites.png:3,2" }),
+		TREE_2: 			new WallTile({ image: "sprites.png:4,2" }),
+		TREE_3: 			new WallTile({ image: "sprites.png:3,3" }),
+		TREE_4: 			new WallTile({ image: "sprites.png:4,3" }),
+
+		DUNGEON_TOWER_1_1:  new WallTile({ image: "sprites.png:0,2" }),
+		DUNGEON_TOWER_1_2:  new WallTile({ image: "sprites.png:1,2" }),
+		DUNGEON_TOWER_1_3:  new WallTile({ image: "sprites.png:2,2" }),
+		DUNGEON_TOWER_2_1:  new WallTile({ image: "sprites.png:0,3" }),	
+		DUNGEON_TOWER_2_2:  new WallTile({ image: "sprites.png:1,3" }),
+		DUNGEON_TOWER_2_3:  new WallTile({ image: "sprites.png:2,3" }),
+		DUNGEON_TOWER_3_1:  new WallTile({ image: "sprites.png:0,4" }),
+		DUNGEON_TOWER_3_2:  new WallTile({ image: "sprites.png:1,4" }),
+		DUNGEON_TOWER_3_3:  new WallTile({ image: "sprites.png:2,4" }),
+        DUNGEON_TOWER_4_1:  new WallTile({ image: "sprites.png:0,5" }),
+        DUNGEON_TOWER_4_3:  new WallTile({ image: "sprites.png:2,5" }),
+
         DUNGEON_WALL_T:     new WallTile({ image: "sprites.png:2,0" }),
         DUNGEON_WALL_TR:    new WallTile({ image: "sprites.png:1,0" }),
         DUNGEON_WALL_R:     new WallTile({ image: "sprites.png:3,1" }),
@@ -22,6 +42,19 @@ var Defs = module.exports = {
         DUNGEON_WALL_BL:    new WallTile({ image: "sprites.png:0,1" }),
         DUNGEON_WALL_L:     new WallTile({ image: "sprites.png:3,0" }),
         DUNGEON_WALL_TL:    new WallTile({ image: "sprites.png:0,0" }),
-        PORTAL:             new PortalTile({ image: "sprites.png:2,8" })
+		DUNGEON_DOOR_T:     new WallTile({ image: "sprites.png:5,0" }),
+		DUNGEON_OPEN_T:     new WallTile({ image: "sprites.png:4,0" }),
+		DUNGEON_DOOR_R:     new WallTile({ image: "sprites.png:4,1" }),
+		DUNGEON_OPEN_R:     new WallTile({ image: "sprites.png:5,1" }),
+		DUNGEON_DOOR_B:     new WallTile({ image: "sprites.png:6,1" }),
+		DUNGEON_OPEN_B:     new WallTile({ image: "sprites.png:6,0" }),
+		DUNGEON_DOOR_L:     new WallTile({ image: "sprites.png:7,0" }),
+		DUNGEON_OPEN_L:     new WallTile({ image: "sprites.png:7,1" }),
+		
+		
+		DUNGEON_CEILING:    new WallTile({ image: "sprites.png:0,10" }),
+
+        PORTAL:             new PortalTile({ image: "sprites.png:2,8" }),
+		WATER:              new WallTile({ image: "sprites.png:0,7" })
     }
 };
