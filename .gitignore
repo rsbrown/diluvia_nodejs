@@ -1,2 +1,4 @@
 mkmf.log
-erver/lib/env.js
+server/lib/env.js
+.DS_Store
+**/.DS_Store

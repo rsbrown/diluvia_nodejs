@@ -61,6 +61,10 @@ Account.prototype = {
         return this._client;
     },
     
+    onCommand: function(command) {
+        this._currentZone.runCommand(this, command);
+    },
+    
     onStart: function(command) {
         this._currentZone.startCommand(this, command);
     },

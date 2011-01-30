@@ -70,6 +70,10 @@ DiluviaController.prototype = {
     },
     
     commandEnd: function(cmd) {
-        this._protocol.send({ "type": "CommandEnd", "command": cmd })
+        this._protocol.send({ "type": "CommandEnd", "command": cmd });
+    },
+    
+    command: function(cmd) {
+        this._protocol.send({ "type": "Command", "command": cmd });
     }
 };

@@ -171,6 +171,12 @@ Zone.prototype = {
         this._shouldBeInactive  = [];
     },
     
+    runCommand: function(account, command) {
+        this.executeCommand(account, command);
+        this._resendTiles(this._updatedTiles);
+        this._updatedTiles = [];
+    },
+    
     executeCommand: function(account, command) {
         var layerTileIdx    = this.getAccountLayerTileIndex(account),
             tileIdx         = this.getLayerTile(ACTOR_LAYER, layerTileIdx),
