@@ -92,19 +92,38 @@ header {
 }
 #tile_drawer.closed {
 	background: none;
-	width: 11px;
+	width: 13px;
 }
 #drawer_button_box {
 	width: 11px;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+#tile_drawer.closed #drawer_button_box {
+	padding: 0 2px 0 0;
+}
+#tile_drawer.open #drawer_button_box {
+	background: #000;
+	padding-left: 0 0 0 2px;
+}
+#tile_drawer.open #drawer_button {
+	background: url(../img/drawer-close_arrow.png) no-repeat;
 }
 #drawer_button {
 	width: 11px;
 	height: 24px;
 	position: absolute;
-	top: 50px;
+	top: 50%;
 	margin-top: -12px;
 	background: url(../img/drawer-open_arrow.png) no-repeat;
+	display: block;
 }
+#drawer_button:hover {
+	background-position: 0 -24px !important;
+}
+
 
 canvas {
     
