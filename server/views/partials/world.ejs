@@ -1,0 +1,30 @@
+<script type="text/javascript" charset="utf-8">
+    document.body.style = "height: 100%; width: 100%;";
+    document.style      = "height: 100%; width: 100%";
+    
+    function size_element(element) {
+      element.css({
+          'width': $(window).width() + "px",
+          'height': $(window).height() - $('header').outerHeight() + "px"
+      });
+    }
+    
+    $(document).ready(function() {
+        new DiluviaController("<%=SOCKET_IO_HOSTNAME%>", <%=SOCKET_IO_OPTIONS%>);
+        
+        size_element($('#viewport_container'));
+        size_element($('#main'));
+        
+        $(window).resize(function() {
+          size_element($('#viewport_container'));
+          size_element($('#main'));
+        });
+    
+    });
+    
+
+</script>
+
+<div id="viewport_container">
+    <canvas id="viewport" height="4096" width="4096"></canvas>
+</div>
