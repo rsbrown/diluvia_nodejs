@@ -4,6 +4,7 @@ var Defs        = require("defs"),
     SpawnTile   = require("spawn_tile"),
     PortalTile  = require("portal_tile"),
     WallTile    = require("wall_tile"),
+    PainTile    = require("pain_tile"),
     fs          = require("fs");
 
 var World = module.exports = function() {
