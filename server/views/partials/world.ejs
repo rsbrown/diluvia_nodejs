@@ -14,14 +14,14 @@
 
 <script type="text/javascript" charset="utf-8">
     var backgroundMusicFiles = [
-                       'myladycareysdompe', 
-                       'go_from_my_window', 
-                       'seiomaccorgo', 
-                       'witches', 
-                       'jewel', 
-                       'larossignol', 
-                       'browning', 
-                       'leyenda'
+                       'dungeon_music.wav', 
+                       'go_from_my_window.mp3', 
+                       'seiomaccorgo.mp3', 
+                       'witches.mp3', 
+                       'jewel.mp3', 
+                       'larossignol.mp3', 
+                       'browning.mp3', 
+                       'leyenda.mp3'
                      ];
     //var musicIdx = Math.floor(Math.random()*backgroundMusicFiles.length);
     var musicIdx = 0;
@@ -64,7 +64,7 @@
             swfPath: "/media",
             ready: function () {
               var idx = this.element.attr("id").replace("bg-music-", "");
-              this.element.jPlayer("setFile", "/media/music/" + backgroundMusicFiles[idx] + ".mp3");
+              this.element.jPlayer("setFile", "/media/music/" + backgroundMusicFiles[idx]);
             }
           });
 
