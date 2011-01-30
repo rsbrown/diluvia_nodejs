@@ -2,13 +2,22 @@
     document.body.style = "height: 100%; width: 100%;";
     document.style      = "height: 100%; width: 100%";
     
+    function size_viewport() {
+      $('#viewport_container').css({
+          'width': $(window).width() + "px",
+          'height': $(window).height() - $('header').outerHeight() + "px"
+      });
+    }
+    
     $(document).ready(function() {
         new DiluviaController("<%=SOCKET_IO_HOSTNAME%>", <%=SOCKET_IO_OPTIONS%>);
         
-        $('#viewport_container').css({
-            'width': $(window).width() + "px",
-            'height': $(window).height() - $('header').outerHeight() + "px"
+        size_viewport();
+        
+        $(window).resize(function() {
+          size_viewport();
         });
+    
     });
     
 
