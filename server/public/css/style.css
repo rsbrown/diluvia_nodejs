@@ -74,3 +74,34 @@ header {
 	color: #6f6f6f;
 	font-size: 13px;
 }
+
+/* editor */
+#main {
+	position: relative;
+}
+#dungeon_editor {
+}
+#tile_drawer {
+	width: 200px;
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	background: url(../img/greybg.png);
+	z-index: 10;
+}
+#tile_drawer.closed {
+	background: none;
+	width: 11px;
+}
+#drawer_button_box {
+	width: 11px;
+}
+#drawer_button {
+	width: 11px;
+	height: 24px;
+	position: absolute;
+	top: 50px;
+	margin-top: -12px;
+	background: url(../img/drawer-open_arrow.png) no-repeat;
+}

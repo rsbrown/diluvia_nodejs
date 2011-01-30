@@ -29,6 +29,10 @@ app.get('/play', function(req, res){
   res.render('world');
 });
 
+app.get('/edit', function(req, res){
+  res.render('editor');
+});
+
 socket.on("connection", function(conn) {
     var account = new Account(),
         client  = new Client(conn, account);

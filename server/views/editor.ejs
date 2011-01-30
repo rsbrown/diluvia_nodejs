@@ -1,0 +1,19 @@
+<script type="text/javascript" charset="utf-8">
+    $(document).ready(function() {
+        new DiluviaController("localhost", { port: 3000 });
+  
+        $('#viewport').attr('height',$(window).height() - $('header').outerHeight()).attr('width',$(window).width());
+        
+        //css({'width': ($(window).width() + "px"), 'height': ($(window).height() - $('header').outerHeight())})
+    });
+</script>
+
+<div id="dungeon_editor">
+  <div id="tile_drawer closed">
+    
+    <div id="drawer_button_box">
+      <div id="drawer_button"></div>
+    </div>
+  </div>
+  <canvas id="viewport"></canvas>
+</div>
