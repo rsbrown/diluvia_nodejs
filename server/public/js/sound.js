@@ -1,6 +1,10 @@
 var Sound = function() {
     this._audios    = {};
     this._loops     = {};
+    
+    this.addAudio("bgmusic1", "/media/music/dungeon_music.wav")
+    this.addAudio("bump", "/media/sounds/bump.mp3")
+    // this.loopAudio("bgmusic1");
 };
 
 Sound.prototype = {
@@ -25,6 +29,7 @@ Sound.prototype = {
     },
     
     cancelLoops: function() {
+        this.playAudio("bump");
         for (key in this._loops) {
             var loop    = this._loops[key],
                 audio   = this._audios[key];

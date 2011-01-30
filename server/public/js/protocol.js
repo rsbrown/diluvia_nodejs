@@ -32,7 +32,7 @@ Protocol.prototype = {
         var self = this;
         
         if (msg) {
-            console.log(msg.type);
+            //console.log(msg.type);
             
             if (msg.type == "ZoneData") {
                 var zoneData = this._zoneData = msg.attrs;
@@ -55,7 +55,7 @@ Protocol.prototype = {
             }
             else if (msg.type == "MoveFailed") {
                 console.log("playing sound");
-                $("#bump-sound").jPlayer("stop").jPlayer("play");
+                self._controller.getSound().playAudio("bump");
             }
         }
     },
