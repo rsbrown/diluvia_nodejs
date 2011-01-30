@@ -34,7 +34,7 @@ Canvas.prototype = {
                 var layerTileIdx    = layer[key],
                     tile            = zoneData[layerTileIdx],
                     col             = Math.floor(key / zoneDims[0]),
-                    row             = key % zoneDims[1],
+                    row             = key % zoneDims[0],
                     destPixelCoords = Diluvia.rowColToPixels(row, col),
                     image           = this;
 
@@ -55,7 +55,7 @@ Canvas.prototype = {
         var vpCX            = this._viewport.width() / 2,
             vpCY            = this._viewport.height() / 2,
             actorCanvasX    = ((playerIdx % zoneDims[0]) * tileWidth) + (tileWidth / 2),
-            actorCanvasY    = (Math.floor(playerIdx / zoneDims[1]) * tileHeight) + (tileHeight / 2),
+            actorCanvasY    = (Math.floor(playerIdx / zoneDims[0]) * tileHeight) + (tileHeight / 2),
             canvasLeft      = vpCX - actorCanvasX,
             canvasTop       = vpCY - actorCanvasY;
 

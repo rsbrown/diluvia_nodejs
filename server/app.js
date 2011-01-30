@@ -17,6 +17,51 @@ var express     = require("express"),
     Tile        = require("tile"),
     SpawnTile   = require("spawn_tile");
 
+
+var r = redis.createClient();
+var username = null;
+var userData = {};
+
+r.stream.on( 'connect', function() {
+  var zoneKey = username ? "island:" + username : "default";
+  r.get( zoneKey, function( err, data ) {
+
+    var defaultZone = new Zone(64, 64);
+    var defaultTile = new Tile({image: Defs.Tiles.BASE_GRASS}),
+    spawnTile       = new SpawnTile();
+    var defaultTileIdx = defaultZone.addTile(defaultTile);
+    var spawnTileIdx   = defaultZone.addTile(spawnTile);
+
+    if (!data) {
+      for (var i = 0; i < (64 * 64); i++) {
+          defaultZone.setLayerTile(0, i, defaultTileIdx);
+      }
+
+      defaultZone.setLayerTile(1, 64, spawnTileIdx);
+
+      r.set( zoneKey, JSON.stringify(defaultZone), function() {
+        console.log("CREATED NEW MAP");
+      });
+    } else {
+      var obj = JSON.parse( data.toString() );
+      defaultZone.setLayers(obj["_layers"]);
+      console.log("MAP IS ALREADY THERE");
+    }
+    var world = new World();
+    world.setDefaultZone(defaultZone);
+  });
+});
+
+var setZoneState = function() {
+    if (username) {
+        
+    }
+    else {
+        console.log("COULDN'T SET STATE WITHOUT USER");
+    }
+};
+    
+
 try {
     var keys = require('./auth_keys');
     for(var key in keys) {
@@ -56,9 +101,7 @@ var redirectBackOrRoot = function(req, res) {
 };
 
 var preParseRequest = function(req, res) {
-    if (req.query["un"]) {
-        req.session["username"] = req.query["un"];
-    }
+    setUser(req, res);
     if (!req.session.flash) {
         req.session.flash = {};
     }
@@ -67,17 +110,54 @@ var preParseRequest = function(req, res) {
     if (!req.session.flash.info) {req.session.flash.info = false;}
 }
 
+var setUser = function(req, res, user) {
+    if (user) {
+        username = req.session["username"] = user;
+    }
+    else if (req.query) {
+        username = req.session["username"] = req.query["un"];
+    }
+    else {
+        username = req.session["username"] = null;
+    }
+    if (username) {
+        var uKey = "users:" + username;
+        r.get(uKey, function(err, data) {
+           if (!data) {
+               r.set(uKey, "{}");
+           } 
+           else {
+               userData = data;
+           }
+        });
+    }
+};
+
 app.get('/', function(req, res){
     preParseRequest(req, res);
     //req.session["isAuthenticated"] = false; 
     req.session["store_location"] = '/';
-    res.render('index', {locals: {username: req.session["username"], flash: req.session.flash}});
+    setZoneState();
+    res.render('index', {locals: {username: username, flash: req.session.flash}});
 });
 
 app.get('/play', function(req, res){
   preParseRequest(req, res);
   req.session["store_location"] = '/play';
   res.render('world', {locals: {flash: req.session.flash}});
+});
+
+app.get('/setSession/:user', function(req, res) {
+   setUser(req, res, req.params.user);
+   preParseRequest(req, res);
+   res.render('index', {locals: {username: username, flash: req.session.flash}});
+});
+
+app.get('/play/:user', function(req, res) {
+    setUser(req, res, req.params.user);
+    preParseRequest(req, res);
+    req.session["store_location"] = '/play';
+    res.render('world', {locals: {flash: req.session.flash}});
 });
 
 app.get ('/auth/twitter', function(req, res, params) {
@@ -96,20 +176,15 @@ app.get ('/auth/twitter', function(req, res, params) {
                 "HMAC-SHA1");
             oa.getProtectedResource("http://twitter.com/statuses/user_timeline.xml", "GET",
                 req.getAuthDetails()["twitter_oauth_token"], req.getAuthDetails()["twitter_oauth_token_secret"],  function (error, data) {
-                    req.session["username"] = req.getAuthDetails().user.username;
-                    
+                    username = req.session["username"] = req.getAuthDetails().user.username;
+                    setUser(req, res, req.getAuthDetails().user.username);
                     redirectBackOrRoot(req, res);
-                    //res.writeHead(200, {'Content-Type': 'text/html'});
-                    //res.end("<html><h1>Hello! Twitter authenticated user ("+req.getAuthDetails().user.username+")</h1>"+data+ "</html>");
                 }
             );
         }
         else {
             req.session.flash.error = "Twitter authentication failed";
             res.render('index', {locals: {flash: req.session.flash, username: null}});
-            //redirectBackOrRoot(req, res);
-            //res.writeHead(200, {'Content-Type': 'text/html'})
-            //res.end("<html><h1>Twitter authentication failed :( </h1></html>")
         }
     });
 });
