@@ -58,7 +58,7 @@ var Defs = module.exports = {
 		DUNGEON_OPEN_L:     new WallTile({ image: "sprites.png:7,1" }),
 		
 		
-		DUNGEON_CEILING:    new WallTile({ image: "sprites.png:0,10" }),
+		DUNGEON_CEILING:    new WallTile({ image: "sprites.png:0,9" }),
 
         PORTAL:             new PortalTile({ image: "sprites.png:2,8" }),
 		WATER:              new WallTile({ image: "sprites.png:0,7" })
