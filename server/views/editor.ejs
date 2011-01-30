@@ -1,20 +1,31 @@
 <script type="text/javascript" charset="utf-8">
   $(document).ready(function() {
       function resize_editor() {
-          
+          $("#dungeon_editor").height('100%');
+          $("#tile_drawer").height('100%');
+          $("#drawer_button_box").height('100%');
       }
     
+      resize_editor();
       $(window).resize(function() {
-        $("#dungeon_editor").height('100%');
-      }
+        resize_editor();
+      });
+      
+      $('#drawer_button').click(function() {
+          if ($('#tile_drawer').hasClass('closed')) {
+              $('#tile_drawer').removeClass('closed').addClass('open');
+          } else {
+              $('#tile_drawer').removeClass('open').addClass('closed');
+          }
+      });
       
   });
 </script>
 <div id="dungeon_editor">
-  <div id="tile_drawer closed">
+  <div id="tile_drawer" class="closed">
     
     <div id="drawer_button_box">
-      <div id="drawer_button"></div>
+      <a id="drawer_button"></a>
     </div>
   </div>
   <%- partial('world') %>
