@@ -25,9 +25,7 @@ Sound.prototype = {
         if (!(key in this._loops)) {
             var audio = new Audio(this._audios[key]);
             
-            this._loops[key] = audio;
-            
-            audio.loop = "loop"
+            this._loops[key] = audio;            
             audio.play();
         }
     },
@@ -35,9 +33,8 @@ Sound.prototype = {
     cancelLoops: function() {
         for (key in this._loops) {
             var audio = this._loops[key];
-            
-            audio.pause();
-            audio.currentTime = 0;      
+            audio.play();
+            audio.pause(); 
         }
         
         this._loops = {};
