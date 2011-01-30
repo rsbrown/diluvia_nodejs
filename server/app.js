@@ -1,4 +1,5 @@
 require.paths.unshift("./lib");
+require.paths.unshift("./ext");
 
 var express = require("express"),
     io      = require("socket.io"),
