@@ -65,7 +65,7 @@ Zone.prototype = {
     },
     
     addAccount: function(account, coords) {
-        var layerIdx    = (coords ? this.xyToIndex.apply(this, coords) : this.getSpawnPointIndex()),
+        var layerIdx    = (coords ? this.xyToIndex.apply(this, coords) : this.getDefaultSpawnPointIndex()),
             tileIdx     = "PLAYER",
             cli         = account.getClient();
     
