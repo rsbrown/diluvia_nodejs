@@ -47,7 +47,7 @@ app.listen(3000);
 
 var server = new Server(app);
 
-var redirectBackOrRoot = function(res) {
+var redirectBackOrRoot = function(req, res) {
     if (global["store_location"]) {
         res.redirect(global["store_location"]);
     } else {
