@@ -19,7 +19,6 @@ var Zone = module.exports = function(width, height) {
     this._shouldBeInactive  = [];
     this._updatedAt         = new Date().getTime();
     this._accountTile       = {};
-    this._zoneTick          = 0;
     this._accounts          = [];
     this._updatedTiles      = [];
     
@@ -103,9 +102,6 @@ Zone.prototype = {
         else {
             layer[layerIdx] = tileIdx;
         }
-
-        //this._updatedAt = new Date().getTime();
-        //this._zoneTick++;
 
         return layer;
     },

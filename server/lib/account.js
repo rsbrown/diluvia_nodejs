@@ -1,9 +1,10 @@
 var START_HITPOINTS = 100;
 var uidCounter      = 0;
 
-var Account = module.exports = function(options) {
+var Account = module.exports = function(world, options) {
     options             = options || {};
     
+    this._world         = world;
     this._uid           = uidCounter++;
     
     this._username      = options.username;
@@ -31,6 +32,10 @@ Account.prototype = {
     
     getLayerTileIndex: function() {
         return this._currentZone.getAccountLayerTileIndex(this);
+    },
+    
+    teleport: function(zoneId) {
+        this._world.teleport(this, zoneId);
     },
     
     addToBackpack: function(item) {

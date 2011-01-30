@@ -1,50 +1,21 @@
 require.paths.unshift("./lib");
 require.paths.unshift("./ext");
 
-var express = require("express"),
-    io      = require("socket.io"),
-    redis   = require("redis-client"),
-    Env     = require("env"),
-    Client  = require("client"),
-    World   = require("world"),
-    Account = require("account"),
-    connect = require("connect"),
-    auth    = require("connect-auth"),
-    OAuth = require('oauth').OAuth;
-    
-var Defs        = require("defs"),
+var express     = require("express"),
+    io          = require("socket.io"),
+    redis       = require("redis-client"),
+    Env         = require("env"),
+    Client      = require("client"),
+    World       = require("world"),
+    Account     = require("account"),
+    connect     = require("connect"),
+    auth        = require("connect-auth"),
+    Server      = require("server"),
+    OAuth       = require('oauth').OAuth,
+    Defs        = require("defs"),
     Zone        = require("zone"),
     Tile        = require("tile"),
     SpawnTile   = require("spawn_tile");
-
-// var r = redis.createClient();
-// r.stream.on( 'connect', function() {
-//   r.get( 'default', function( err, data ) {
-// 
-//     var defaultZone = new Zone(64, 64);
-//     var defaultTile = new Tile({image: Defs.Images.baseTile}),
-//     spawnTile       = new SpawnTile();
-//     var defaultTileIdx = defaultZone.addTile(defaultTile);
-//     var spawnTileIdx   = defaultZone.addTile(spawnTile);
-//     
-//     if (!data) {
-//       for (var i = 0; i < (64 * 64); i++) {
-//           defaultZone.setLayerTile(0, i, defaultTileIdx);
-//       }
-// 
-//       defaultZone.setLayerTile(1, 64, spawnTileIdx);
-//       
-//       r.set( 'default', JSON.stringify(defaultZone), function() {
-//         console.log("CREATED NEW MAP");
-//       });
-//     } else {
-//       var obj = JSON.parse( data.toString() );
-//       defaultZone.setLayers(obj["_layers"]);
-//       console.log("MAP IS ALREADY THERE");
-//     }
-//     world.setDefaultZone(defaultZone);
-//   });
-// });
 
 try {
     var keys = require('./auth_keys');
@@ -74,11 +45,7 @@ app.use(auth([auth.Twitter(twitterSecrets)]));
 
 app.listen(3000);
 
-var socket      = io.listen(app),
-    world       = new World();
-
-world.setDefaultZone(world.generateDefaultZone());
-
+var server = new Server(app);
 
 var redirectBackOrRoot = function(res) {
     if (global["store_location"]) {
@@ -153,18 +120,4 @@ app.get('/edit', function(req, res){
   res.render('editor', {locals: {flash: req.session.flash}});
 });
 
-socket.on("connection", function(conn) {
-    var account = new Account(),
-        client  = new Client(conn, account);
-    
-    world.addAccount(account);
-    
-    conn.on("message", function(msg) {
-        console.log(msg);
-        client.onMessage(msg);
-    });
-    
-    conn.on("disconnect", function() {
-        client.onDisconnect();
-    });
-});
+
