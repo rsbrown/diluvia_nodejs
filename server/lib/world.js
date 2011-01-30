@@ -137,6 +137,10 @@ World.prototype = {
             zone.setBackground(conf.background);
         }
         
+        if (conf.music) {
+            zone.setMusic(conf.music);
+        }
+        
         this.setZone(conf.zoneId, zone);
     }
 };

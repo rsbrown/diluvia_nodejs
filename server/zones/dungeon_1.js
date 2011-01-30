@@ -1,6 +1,7 @@
 {
     "zoneId":       "zones:1",
     "dimensions":   [ 30, 30 ],
+    "music":        "/media/music/dungeon_music.wav",
     
     "tiles": {
         "_":    "BASE_GRASS",

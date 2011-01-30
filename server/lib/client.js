@@ -47,6 +47,7 @@ Client.prototype = {
                 
         this.sendMessage("ZoneData", {
             "background":   zone.getBackground(),
+            "music":        zone.getMusic(),
             "tiles":        tileData
         });
     },
