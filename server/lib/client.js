@@ -56,6 +56,10 @@ Client.prototype = {
         this.sendMessage("MoveFailed", null);
     },
     
+    sendPlaySound: function(sound) {
+        this.sendMessage("PlaySound", sound);
+    },
+    
     sendZoneState: function(zone, layerState) {
         if (!layerState) {
             var layers      = zone.getLayers(),

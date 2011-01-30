@@ -8,8 +8,12 @@ var SpawnTile = module.exports = function(options) {
 };
 
 SpawnTile.prototype = {
-    moveInto: function(actor) {
+    canMoveInto: function(actor) {
         return true;
+    },
+    
+    moveInto: function(actor) {
+        
     },
     
     getImage:       function() { return this._image; },

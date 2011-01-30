@@ -55,7 +55,23 @@ Account.prototype = {
     },
     
     takeDamage: function(amount) {
+        this._hitpoints = Math.min(0, this._hitpoints - amount);
         
+        if (this._hitpoints <= 0) {
+            this.die();
+        }
+    },
+    
+    die: function() {
+        var oldZone = this.getCurrentZone();
+        
+        this._hitpoints = 100;
+        this._world.removeAccount(this);
+        this._world.addAccount(this);
+        
+        this.getClient().sendPlaySound("scream");
+        
+        oldZone.playSound("scream");
     },
     
     setClient: function(client) {

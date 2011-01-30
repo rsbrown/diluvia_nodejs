@@ -2,7 +2,8 @@ var Tile            = require("tile"),
     WallTile        = require("wall_tile"),
     ActorTile       = require("actor_tile"),
     SpawnTile       = require("spawn_tile"),
-    PortalTile      = require("portal_tile");
+    PortalTile      = require("portal_tile"),
+    PainTile        = require("pain_tile");
 
 var Defs = module.exports = {
     COMMAND_INTERVAL:       250,
@@ -68,6 +69,6 @@ var Defs = module.exports = {
 
         PORTAL:             new PortalTile({ image: "sprites.png:2,8" }),
 		WATER:              new WallTile({ image: "sprites.png:0,7" }),
-		LAVA:               new Tile({ image: "sprites.png:8,7" })
+		LAVA:               new PainTile({ image: "sprites.png:8,7" })
     }
 };

@@ -9,9 +9,13 @@ var PortalTile = module.exports = function(options) {
 };
 
 PortalTile.prototype = {
-    moveInto: function(actor) {
-        actor.teleport(this._destZone, this._destCoords);
+    canMoveInto: function(actor) {
         return "silent";
+    },
+    
+    moveInto: function(actor) {
+        console.log("TELEPORT!!!!!!");
+        actor.teleport(this._destZone, this._destCoords);
     },
     
     getImage:       function() { return this._image; },
