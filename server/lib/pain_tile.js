@@ -7,7 +7,7 @@ var PainTile = module.exports = function(options) {
 
 PainTile.prototype = {
     moveInto: function(actor) {
-        actor.takeDamage(50);
+        actor.takeDamage(25);
         return true;
     },
     

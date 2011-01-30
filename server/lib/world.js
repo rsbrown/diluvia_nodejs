@@ -47,7 +47,9 @@ World.prototype = {
     },
     
     removeAccount: function(account) {
-        
+        var zone = this.account.getCurrentZone();
+        zone.removeAccount(account);
+        this._accounts.splice(this._accounts.indexOf(account), 1);
     },
     
     teleport: function(account, zoneId, coords) {

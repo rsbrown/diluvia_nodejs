@@ -55,7 +55,17 @@ Account.prototype = {
     },
     
     takeDamage: function(amount) {
+        this._hitpoints = Math.min(0, this._hitpoints - amount);
         
+        if (this._hitpoints <= 0) {
+            this.die();
+        }
+    },
+    
+    die: function() {
+        this._hitpoints = 100;
+        world.removeAccount(this);
+        world.addAccount(this);
     },
     
     setClient: function(client) {
