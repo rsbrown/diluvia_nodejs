@@ -26,6 +26,10 @@ var Zone = module.exports = function(width, height) {
 };
 
 Zone.prototype = {
+    getDimensions: function() {
+        return this._dimensions;
+    },
+    
     getSpawnPointIndex: function() {
         var layer = this._layers[OBJECT_LAYER],
             spawnTiles = [];

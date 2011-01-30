@@ -76,7 +76,9 @@ var checkPaint = function() {
 };
 
 var parseZoneState = function(state) {
-   zonestate = state;
+
+   zonestate = state.layers;
+   
 };
 
 var blockPaint = function() {

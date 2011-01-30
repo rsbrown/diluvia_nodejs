@@ -27,6 +27,10 @@ Account.prototype = {
         return this._currentZone; 
     },
     
+    getLayerTileIndex: function() {
+        return this._currentZone.getAccountLayerTileIndex(this);
+    },
+    
     addToBackpack: function(item) {
         // TODO
     },

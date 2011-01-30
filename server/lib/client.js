@@ -51,7 +51,7 @@ Client.prototype = {
     
     sendZoneState: function(zone) {
         var layers      = zone.getLayers(),
-            stateData   = {};
+            layerState  = {};
 
         for (var layerIdx = 0, layerLen = layers.length; layerIdx < layerLen; layerIdx++) {
             var layer   = layers[layerIdx],
@@ -61,10 +61,14 @@ Client.prototype = {
                 data[tileIdx] = layer[tileIdx];
             }
             
-            stateData[layerIdx] = data;
+            layerState[layerIdx] = data;
         }
         
-        this.sendMessage("ZoneState", stateData);
+        this.sendMessage("ZoneState", {
+            "playerIdx":    this._account.getLayerTileIndex(),
+            "dimensions":   this._account.getCurrentZone().getDimensions(),
+            "layers":       layerState
+        });
     },
     
     sendMessage: function(type, attrs) {
