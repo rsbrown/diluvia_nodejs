@@ -14,8 +14,23 @@ var defaultZone = new Zone(64, 64),
     }),
     spawnTile   = new SpawnTile();
     
-var defaultTileIdx = defaultZone.addTile(defaultTile);
-var spawnTileIdx   = defaultZone.addTile(spawnTile);
+
+var dungeonTiles = {
+	'top': 			new Tile({ image: Defs.Images.dungeonTWallTile }),
+	'topright': 	new Tile({ image: Defs.Images.dungeonTRWallTile }),
+	'right':		new Tile({ image: Defs.Images.dungeonRWallTile }),
+	'btmright': 	new Tile({ image: Defs.Images.dungeonBRWallTile }),
+	'btm': 			new Tile({ image: Defs.Images.dungeonBWallTile }),
+	'btmleft':		new Tile({ image: Defs.Images.dungeonBLWallTile }),
+	'left': 		new Tile({ image: Defs.Images.dungeonLWallTile }),
+	'topleft': 		new Tile({ image: Defs.Images.dungeonTLWallTile })
+};
+
+
+
+var defaultTileIdx     = defaultZone.addTile(defaultTile);
+var spawnTileIdx       = defaultZone.addTile(spawnTile);
+
 
 for (var i = 0; i < (64 * 64); i++) {
     defaultZone.setLayerTile(0, i, defaultTileIdx);
