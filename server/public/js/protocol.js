@@ -33,6 +33,8 @@ Protocol.prototype = {
         var self = this;
         
         if (msg) {
+            //console.log(msg);
+            
             if (msg.type == "ZoneData") {
                 var zoneData = this._zoneData = msg.attrs;
                 
