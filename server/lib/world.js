@@ -26,8 +26,8 @@ World.prototype = {
     addAccount: function(account) {
         this._accounts.push(account);
         
-        defaultZone.addAccount(account);
         account.setCurrentZone(defaultZone);
+        defaultZone.addAccount(account);
     },
     
     removeAccount: function(account) {
