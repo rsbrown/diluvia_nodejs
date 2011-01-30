@@ -7,7 +7,8 @@ var express = require("express"),
     World   = require("world"),
     Account = require("account"),
     connect = require("connect"),
-    auth    = require("connect-auth");
+    auth    = require("connect-auth"),
+    OAuth = require('oauth').OAuth;
     
 try {
     var keys = require('./auth_keys');
@@ -21,7 +22,7 @@ catch(e) {
 }
 
 var twitterSecrets = {consumerKey: twitterConsumerKey, consumerSecret: twitterConsumerSecret};
-console.log(twitterSecrets);
+//console.log(twitterSecrets);
 var app = express.createServer();
 
 
