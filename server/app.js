@@ -51,15 +51,6 @@ r.stream.on( 'connect', function() {
     world.setDefaultZone(defaultZone);
   });
 });
-
-var setZoneState = function() {
-    if (username) {
-        
-    }
-    else {
-        console.log("COULDN'T SET STATE WITHOUT USER");
-    }
-};
     
 
 try {
@@ -100,8 +91,8 @@ var redirectBackOrRoot = function(req, res) {
     }
 };
 
-var preParseRequest = function(req, res) {
-    setUser(req, res);
+var preParseRequest = function(req, res, uname) {
+    setUser(req, res, uname);
     if (!req.session.flash) {
         req.session.flash = {};
     }
@@ -120,7 +111,9 @@ var setUser = function(req, res, user) {
     else {
         username = req.session["username"] = null;
     }
+  
     if (username) {
+        
         var uKey = "users:" + username;
         r.get(uKey, function(err, data) {
            if (!data) {
@@ -130,15 +123,64 @@ var setUser = function(req, res, user) {
                userData = data;
            }
         });
+        
+        r.llen("users", function(err, data) {
+           
+           if (data && data > 0) {
+      
+               var i;
+               var userKnown = false;
+               var q;
+               var self = this;
+               for (i = 0; i < data; i++) {
+                   console.log(i);
+                   r.lindex("users", i, function(err, name) {
+                       if (name.toString() == username) {
+                           self.userKnown = true;
+                       } 
+                   });
+                   if (self.userKnown) {
+                       break;
+                   }
+               }
+               if (!self.userKnown) {
+                   r.rpush("users", username);
+               }
+           }
+           else {
+               r.rpush("users", username);
+           }
+        });
+        
     }
 };
 
+var getUsers = function() {
+  r.get("users", function(err, data) {
+    if (!data) {
+        return [];
+    }  
+    else {
+        console.log(data);
+        return data;
+    }
+  });
+};
+
 app.get('/', function(req, res){
+    getUsers();
     preParseRequest(req, res);
     //req.session["isAuthenticated"] = false; 
     req.session["store_location"] = '/';
-    setZoneState();
+    //setZoneState();
     res.render('index', {locals: {username: username, flash: req.session.flash}});
+});
+
+// Simple code to set the session and avoid twitter auth
+app.get('/setSession/:user', function(req, res) {
+   //setUser(req, res, req.params.user);
+   preParseRequest(req, res, req.params.user);
+   res.render('index', {locals: {username: username, flash: req.session.flash}});
 });
 
 app.get('/play', function(req, res){
@@ -147,11 +189,6 @@ app.get('/play', function(req, res){
   res.render('world', {locals: {flash: req.session.flash}});
 });
 
-app.get('/setSession/:user', function(req, res) {
-   setUser(req, res, req.params.user);
-   preParseRequest(req, res);
-   res.render('index', {locals: {username: username, flash: req.session.flash}});
-});
 
 app.get('/play/:user', function(req, res) {
     setUser(req, res, req.params.user);
@@ -163,7 +200,9 @@ app.get('/play/:user', function(req, res) {
 app.get ('/auth/twitter', function(req, res, params) {
     preParseRequest(req, res);
     console.log(req);
-    if (!req.session.auth) { req.session.auth = {}; }
+    if (!req.session.auth) { 
+        req.session.auth = {}; 
+    }
     req.authenticate(['twitter'], function(error, authenticated) { 
         //console.log("authenticated: " + authenticated);
         if( authenticated ) {
