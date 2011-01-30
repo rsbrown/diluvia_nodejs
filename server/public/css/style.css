@@ -111,5 +111,6 @@ canvas {
 }
 
 #viewport_container {
-    overflow:   hidden;
+    overflow: hidden !important;
+	position: absolute;
 }

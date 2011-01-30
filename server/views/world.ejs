@@ -4,15 +4,16 @@
     
     $(document).ready(function() {
         new DiluviaController("<%=SOCKET_IO_HOSTNAME%>", <%=SOCKET_IO_OPTIONS%>);
+        
+        $('#viewport_container').css({
+            'width': $(window).width() + "px",
+            'height': $(window).height() - $('header').outerHeight() + "px"
+        });
     });
+    
+
 </script>
 
-<div id="viewport_container" style="width: 100%; height: 100%; position: absolute; bottom: 0">
-    <canvas id="viewport"></canvas>
+<div id="viewport_container">
+    <canvas id="viewport" height="4096" width="4096"></canvas>
 </div>
-
-<script type="text/javascript" charset="utf-8">
-    var vpc = document.getElementById("viewport_container");
-    vpc.parentNode.removeChild(vpc);
-    document.body.appendChild(vpc);
-</script>
