@@ -27,6 +27,9 @@ Client.prototype = {
             else if (msg.type == "CommandEnd") {
                 this._account.onEnd(msg.command);
             }
+            else if (msg.type == "Command") {
+                this._account.onCommand(msg.command);
+            }
         }
     },
     

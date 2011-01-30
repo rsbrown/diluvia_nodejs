@@ -30,8 +30,6 @@ Canvas.prototype = {
             this._sizedZone = true;
         }
         
-        this.updateViewportPosition();
-        
         for (var li = 0; li < layerCount; li++) {
             var layer = zoneState.layers[li];
             
@@ -56,6 +54,8 @@ Canvas.prototype = {
                 );
             }
         }
+        
+        this.updateViewportPosition();
     },
     
     updateViewportPosition: function() {
@@ -70,7 +70,9 @@ Canvas.prototype = {
             canvasLeft      = vpCX - actorCanvasX,
             canvasTop       = vpCY - actorCanvasY;
 
-        this._element.style.left = canvasLeft + "px";
-        this._element.style.top  = canvasTop  + "px";
+        $(this._element).css({
+            "left": canvasLeft + "px",
+            "top":  canvasTop  + "px"
+        });
     }
 }
