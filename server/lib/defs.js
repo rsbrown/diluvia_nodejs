@@ -10,10 +10,14 @@ var Defs = module.exports = {
         
     Tiles: {
         PLAYER:             new ActorTile({ image: "sprites.png:5,4" }),
+        PLAYER_N:           new ActorTile({ image: "dude.png:0,0" }),
+        PLAYER_S:           new ActorTile({ image: "dude.png:2,0" }),
+        PLAYER_E:           new ActorTile({ image: "dude.png:1,0" }),
+        PLAYER_W:           new ActorTile({ image: "dude.png:3,0" }),
         SPAWN:              new SpawnTile({ image: "sprites.png:2,8" }),
         ROCK:               new WallTile({ image: "sprites.png:3,4" }),
         BASE_GRASS:         new Tile({ image: "sprites.png:2,7" }),
-        BASE_EMPTY:         new Tile({ image: "sprites.png:6,4" }),
+        BASE_EMPTY:         new Tile({ image: "sprites.png:4,5" }),
         BASE_STONE:         new Tile({ image: "sprites.png:4,7" }),
 		SPAWN_STONE:        new SpawnTile({ image: "sprites.png:4,7" }),
 		SPAWN_GRASS:        new SpawnTile({ image: "sprites.png:2,7" }),

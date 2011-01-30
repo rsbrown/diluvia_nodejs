@@ -31,7 +31,7 @@ Protocol.prototype = {
     _parseMessage: function(msg) {
         var self = this;
         
-        if (msg) {            
+        if (msg) {
             if (msg.type == "ZoneData") {
                 var zoneData = this._zoneData = msg.attrs,
                     tileData = zoneData.tiles;                

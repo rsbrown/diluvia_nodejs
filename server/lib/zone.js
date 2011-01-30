@@ -7,6 +7,13 @@ var LAYER_COUNT     = 3,
     BASE_LAYER      = 0,
     OBJECT_LAYER    = 1,
     ACTOR_LAYER     = 2;
+
+var ACTOR_DIRECTIONAL_KEYS = {
+    "n":  "PLAYER_N",
+    "s":  "PLAYER_S",
+    "e":  "PLAYER_E",
+    "w":  "PLAYER_W" 
+};
     
 var Zone = module.exports = function(width, height) {
     var self = this;
@@ -208,10 +215,18 @@ Zone.prototype = {
     move: function(account, dir) {
         var layerTileIdx    = this.getAccountLayerTileIndex(account),
             tileIdx         = this.getLayerTile(ACTOR_LAYER, layerTileIdx),
-            tile            = this.getTile(tileIdx);
+            tile            = this.getTile(tileIdx),
+            dirTileIdx      = ACTOR_DIRECTIONAL_KEYS[dir];
 
         var potentialIdx = this.indexForDirectionalMove(layerTileIdx, dir);
 
+        // change the tile for the player to the directional
+        if (tileIdx != dirTileIdx) {
+            this.setLayerTile(ACTOR_LAYER, layerTileIdx, dirTileIdx);
+            this._updatedTiles.push(layerTileIdx);
+            tileIdx = dirTileIdx;
+        }
+        
         if (potentialIdx != -1) {
             var canMove = true;
             // it's within the zone
