@@ -63,8 +63,5 @@ Canvas.prototype = {
             "left": canvasLeft + "px",
             "top":  canvasTop  + "px"
         });
-    },
-    
-    updateViewportPosition: function() {
     }
 }
