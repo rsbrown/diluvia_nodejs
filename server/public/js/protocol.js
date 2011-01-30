@@ -33,10 +33,15 @@ Protocol.prototype = {
         
         if (msg) {            
             if (msg.type == "ZoneData") {
-                var zoneData = this._zoneData = msg.attrs;
+                var zoneData = this._zoneData = msg.attrs,
+                    tileData = zoneData.tiles;                
                 
-                for (var key in zoneData) {
-                    var item        = zoneData[key],
+                if (zoneData.background) {
+                    self._controller.preloadImage(zoneData.background);
+                }
+                
+                for (var key in tileData) {
+                    var item        = tileData[key],
                         imgParts    = item.image.split(':'),
                         rowcol      = imgParts[1].split(',');
                                         

@@ -45,7 +45,10 @@ Client.prototype = {
             };
         }
                 
-        this.sendMessage("ZoneData", tileData);
+        this.sendMessage("ZoneData", {
+            "background":   zone.getBackground(),
+            "tiles":        tileData
+        });
     },
     
     sendMoveFailed: function() {

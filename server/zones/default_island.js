@@ -1,10 +1,12 @@
 {
     "zoneId":       "zones:0",
-    "dimensions":   [ 10, 10 ],
+    "dimensions":   [ 30, 20 ],
+    "background":   "background_island.png",
     
     "tiles": {
+        "Z":    { "class": "PortalTile", "options": { "zone": "zones:666", "dropAt": [ 3, 3 ] } },
         "S":    "SPAWN",
-        "_":    "BASE_GRASS",
+        "_":    "BASE_EMPTY",
         ".":    "BASE_STONE",
         "A":    "DUNGEON_TOWER_1_1",
         "B":    "DUNGEON_TOWER_1_2",

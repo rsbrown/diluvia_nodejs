@@ -5,14 +5,15 @@ var Tile            = require("tile"),
     PortalTile      = require("portal_tile");
 
 var Defs = module.exports = {
-    COMMAND_INTERVAL:  250,
-    CLIENT_INTERVAL:   100,
-            
+    COMMAND_INTERVAL:       250,
+    CLIENT_INTERVAL:        100,
+        
     Tiles: {
         PLAYER:             new ActorTile({ image: "sprites.png:5,4" }),
         SPAWN:              new SpawnTile({ image: "sprites.png:2,8" }),
         ROCK:               new WallTile({ image: "sprites.png:3,4" }),
         BASE_GRASS:         new Tile({ image: "sprites.png:2,7" }),
+        BASE_EMPTY:         new Tile({ image: "sprites.png:6,4" }),
         BASE_STONE:         new Tile({ image: "sprites.png:4,7" }),
 		SPAWN_STONE:        new SpawnTile({ image: "sprites.png:4,7" }),
 		SPAWN_GRASS:        new SpawnTile({ image: "sprites.png:2,7" }),

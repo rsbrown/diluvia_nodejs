@@ -64,11 +64,11 @@ Zone.prototype = {
         return this._accountTile[account.getUid()];
     },
     
-    addAccount: function(account) {
-        var layerIdx    = this.getDefaultSpawnPointIndex(),
+    addAccount: function(account, coords) {
+        var layerIdx    = (coords ? this.xyToIndex.apply(this, coords) : this.getSpawnPointIndex()),
             tileIdx     = "PLAYER",
             cli         = account.getClient();
-                
+    
         this._accountTile[account.getUid()] = layerIdx;
         this._accounts.push(account);
         
@@ -250,7 +250,7 @@ Zone.prototype = {
         }
     },
     
-    _resendTiles: function(updatedTiles) {
+    _resendTiles: function(updatedTiles) {        
         if (updatedTiles.length > 0) {
             var layerState = {};
 
@@ -261,7 +261,8 @@ Zone.prototype = {
                     var updatedTile = updatedTiles[i];
                     data[updatedTile] = this.getLayerTile(li, updatedTile);
                 }
-                                
+                
+                console.log("RESEND: " + li + " = " + JSON.stringify(data));
                 layerState[li] = data;
             }
             
@@ -319,5 +320,13 @@ Zone.prototype = {
             client.sendZoneData(this);
             client.sendZoneState(this);
         }
+    },
+    
+    getBackground: function() {
+        return this._background;
+    },
+    
+    setBackground: function(bg) {
+        this._background = bg;
     }
 };

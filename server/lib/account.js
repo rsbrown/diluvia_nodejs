@@ -34,8 +34,8 @@ Account.prototype = {
         return this._currentZone.getAccountLayerTileIndex(this);
     },
     
-    teleport: function(zoneId) {
-        this._world.teleport(this, zoneId);
+    teleport: function(zoneId, coords) {
+        this._world.teleport(this, zoneId, coords);
     },
     
     addToBackpack: function(item) {

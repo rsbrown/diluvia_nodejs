@@ -49,14 +49,14 @@ World.prototype = {
         
     },
     
-    teleport: function(account, zoneId) {
+    teleport: function(account, zoneId, coords) {
         var oldZone     = account.getCurrentZone(),
             newZone     = this.getZone(zoneId);
         
         if (newZone) {
             oldZone.removeAccount(account);
             account.setCurrentZone(newZone);
-            newZone.addAccount(account);   
+            newZone.addAccount(account, coords);
         }
         else {
             console.log("Tried to teleport to " + zoneId + ", which doesn't exist!");
@@ -131,6 +131,10 @@ World.prototype = {
                     zone.setLayerTile(mli, i, tileIdx);
                 }
             }
+        }
+        
+        if (conf.background) {
+            zone.setBackground(conf.background);
         }
         
         this.setZone(conf.zoneId, zone);

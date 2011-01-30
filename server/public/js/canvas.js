@@ -7,8 +7,7 @@ var Canvas = function(controller, element) {
     this._context       = element.getContext("2d");
     this._controller    = controller;
     
-    this._sizedZone     = false;
-    this._vpIdx         = 0;
+    this._lastDims      = [ 0, 0 ];
     
     this._element.style.position = "absolute";
 };
@@ -19,38 +18,74 @@ Canvas.prototype = {
             playerIdx   = zoneState.playerIdx,
             layerCount  = zoneDims[2],
             tileWidth   = Diluvia.TILE_DIMS[0],
-            tileHeight  = Diluvia.TILE_DIMS[1];
-        
-        if (!this._sizedZone) {
+            tileHeight  = Diluvia.TILE_DIMS[1],
+            bgImg;
+                    
+        if (zoneData.background) {
+            bgImg = this._controller.getImage(zoneData.background);
+        }
+            
+        if (zoneDims[0] != this._lastDims[0] || zoneDims[1] != this._lastDims[1]) {
+            this._element.width = this._element.width;            
             this._element.setAttribute("width",     zoneDims[0] * tileWidth);
             this._element.setAttribute("height",    zoneDims[1] * tileHeight);
-            this._sizedZone = true;
         }
+        
+        this._lastDims = zoneDims;
+        
+        var layerIndexes = [];
         
         for (var li = 0; li < layerCount; li++) {
             var layer = zoneState.layers[li];
             
             for (var key in layer) {
-                var layerTileIdx    = layer[key],
-                    tile            = zoneData[layerTileIdx],
-                    col             = Math.floor(key / zoneDims[0]),
-                    row             = key % zoneDims[0],
-                    destPixelCoords = Diluvia.rowColToPixels(row, col),
-                    image           = this;
-
+                if (layerIndexes.indexOf(key) == -1) {
+                    layerIndexes.push(key);
+                }
+            }
+        }
+        
+        for (var i = 0, len = layerIndexes.length; i < len; i++) {
+            var key             = layerIndexes[i],
+                col             = Math.floor(key / zoneDims[0]),
+                row             = key % zoneDims[0],
+                destPixelCoords = Diluvia.rowColToPixels(row, col);
+            
+            if (bgImg) {
                 this._context.drawImage(
-                    this._controller.getImage(tile.imagePath),
-                    tile.coords[0],
-                    tile.coords[1],
+                    bgImg,
+                    destPixelCoords[0],
+                    destPixelCoords[1],
                     Diluvia.TILE_DIMS[0],
                     Diluvia.TILE_DIMS[1],
                     destPixelCoords[0],
                     destPixelCoords[1],
                     Diluvia.TILE_DIMS[0],
-                    Diluvia.TILE_DIMS[1]                    
+                    Diluvia.TILE_DIMS[1]                        
                 );
             }
+            
+            for (var li = 0; li < layerCount; li++) {
+                var layerTileIdx = zoneState.layers[li][key];
+                
+                if (layerTileIdx) {
+                    var tile = zoneData.tiles[layerTileIdx];
+                
+                    this._context.drawImage(
+                        this._controller.getImage(tile.imagePath),
+                        tile.coords[0],
+                        tile.coords[1],
+                        Diluvia.TILE_DIMS[0],
+                        Diluvia.TILE_DIMS[1],
+                        destPixelCoords[0],
+                        destPixelCoords[1],
+                        Diluvia.TILE_DIMS[0],
+                        Diluvia.TILE_DIMS[1]                    
+                    );                    
+                }
+            }
         }
+        
         
         var vpCX            = this._viewport.width() / 2,
             vpCY            = this._viewport.height() / 2,
