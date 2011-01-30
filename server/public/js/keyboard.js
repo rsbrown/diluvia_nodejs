@@ -11,17 +11,20 @@ var Keyboard = function(controller) {
     $(window).keydown(function(ev) {
         var kc = ev.keyCode;
     
-        if (!keysDown[kc]) {
+        // if (!keysDown[kc]) {
               var cmd = KEYCODE_COMMANDS[kc];
     
               if (cmd) {
                   keysDown[kc] = true;
-                  controller.commandStart(cmd);
+                  // controller.commandStart(cmd);
+                  controller.move(cmd);
               }
-        }
+        // }
     
         ev.preventDefault();
     });
+    
+    /*
     
     $(window).keyup(function(ev) {
         var kc  = ev.keyCode;
@@ -36,6 +39,7 @@ var Keyboard = function(controller) {
     
         ev.preventDefault();
     });
+    */
     
     // $(window).keydown(function(ev) {
     //     var kc  = ev.keyCode;

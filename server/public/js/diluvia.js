@@ -2,7 +2,7 @@ var Diluvia = {
     IMAGE_BASE_PATH:        "images/",
     TILE_DIMS:              [64, 64],
     CANVAS_ID:              "viewport",
-    INTERVAL_DELAY:         50,
+    INTERVAL_DELAY:         10,
     
     rowColToPixels: function(row, col) {
         return [row * Diluvia.TILE_DIMS[0], col * Diluvia.TILE_DIMS[1]];
@@ -65,6 +65,10 @@ DiluviaController.prototype = {
         if (!this.isLoadingImages() && this._hasRecvData && this._hasRecvState && this._stateQueue.length > 0) {
             this._canvas.paint(this._protocol.getZoneData(), this._stateQueue.shift());
         }
+    },
+    
+    move: function(cmd) {
+        this._protocol.send({ "type": "Move", "command": cmd });
     },
     
     commandStart: function(cmd) {
