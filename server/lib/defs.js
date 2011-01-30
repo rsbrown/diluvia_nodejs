@@ -28,6 +28,14 @@ var Defs = module.exports = {
 		TREE_2: 			new WallTile({ image: "sprites.png:4,2" }),
 		TREE_3: 			new WallTile({ image: "sprites.png:3,3" }),
 		TREE_4: 			new WallTile({ image: "sprites.png:4,3" }),
+		
+		MONSTER_1:          new WallTile({ image: "sprites.png:8,2" }),
+		MONSTER_2:          new WallTile({ image: "sprites.png:8,3" }),
+		MONSTER_3:          new WallTile({ image: "sprites.png:8,4" }),
+		MONSTER_4:          new WallTile({ image: "sprites.png:9,2" }),
+		MONSTER_5:          new WallTile({ image: "sprites.png:9,3" }),
+		MONSTER_6:          new WallTile({ image: "sprites.png:9,4" }),
+		
 
 		DUNGEON_TOWER_1_1:  new WallTile({ image: "sprites.png:0,2" }),
 		DUNGEON_TOWER_1_2:  new WallTile({ image: "sprites.png:1,2" }),

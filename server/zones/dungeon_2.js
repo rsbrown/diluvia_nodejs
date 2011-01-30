@@ -1,7 +1,7 @@
 
 {
     "zoneId":       "zones:2",
-    "dimensions":   [ 15, 10 ],
+    "dimensions":   [ 7, 7 ],
     
     "tiles": {
         "_":    "BASE_GRASS",
@@ -18,10 +18,7 @@
         "7":    "DUNGEON_WALL_L",
         "8":    "DUNGEON_WALL_TL",
 
-        
-        "F":    { "class": "PortalTile", "options": { "zone": "zones:1", "image": "sprites.png:5,1", "dropAt": [ 2, 2 ] } }
-
-
+        "F":    { "class": "PortalTile", "options": { "zone": "zones:1", "image": "sprites.png:5,1", "dropAt": [ 11, 16 ] } }
     },
     
     "baseMap":  [   
@@ -38,15 +35,12 @@
                 ],
     
     "objectMap": [  
-                    "811111111111112",
-                    "7             3",
-                    "7             3",
-                    "7             3",
-                    "7             3",
-                    "7             3",
-                    "7             3",
-                    "7             3",
-                    "7             3",
-                    "65555555555F554"
+                    "8111112",
+                    "7     3",
+                    "7     3",
+                    "7     3",
+                    "7     3",
+                    "7     3",
+                    "655F554"
                 ]
 }
