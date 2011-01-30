@@ -1,6 +1,6 @@
 {
     "zoneId":       "zones:1",
-    "dimensions":   [ 30, 30 ],
+    "dimensions":   [ 30, 20 ],
     "music":        "/media/music/dungeon_music.wav",
     
     "tiles": {
@@ -17,6 +17,14 @@
         "6":    "DUNGEON_WALL_BL",
         "7":    "DUNGEON_WALL_L",
         "8":    "DUNGEON_WALL_TL",
+        
+        "@":    "DUNGEON_CORNER_TR",
+        "*":    "DUNGEON_CORNER_TL",
+        "$":    "DUNGEON_CORNER_BR",
+        "^":    "DUNGEON_CORNER_BL",
+        
+        
+        
 
 		"A":    "DUNGEON_DOOR_T",
         "B":    "DUNGEON_OPEN_T",
@@ -33,7 +41,7 @@
         "Y":    { "class": "PortalTile", "options": { "zone": "zones:2", "image": "sprites.png:4,0", "dropAt": [ 2, 2 ] } },
         "Z":    { "class": "PortalTile", "options": { "zone": "zones:3", "image": "sprites.png:4,0", "dropAt": [ 2, 2 ] } },
         
-		"9":    { "class": "PortalTile", "options": { "zone": "zones:0", "image": "sprites.png:4,1", "dropAt": [ 18, 9 ] } },
+		"9":    { "class": "PortalTile", "options": { "zone": "zones:0", "image": "sprites.png:8,1", "dropAt": [ 18, 9 ] } },
 
 		
         "R":    "ROCK",
@@ -76,21 +84,11 @@
     "objectMap": [  
                     "811111111111111111111111111112",
                     "7                            3",
-                    "7                            3",
-                    "7                            3",
-                    "7                            3",
-                    "7                            3",
-                    "7                            3",
-                    "7                            3",
-                    "7                            3",
-                    "7                            3",
-                    "7                            3",
-                    "7   LLLLLLLLL                3",
-                    "7   LLLLLLLLL                3",
-                    "7   LLLLLLLLL                3",
-                    "7   LLLLLLLLL                3",
-                    "7                            3",
-                    "655555555555555 55555555555554",
+                    "7 LLLLLLLLLLLLLLLLLLLLL      3",
+                    "7 LLLLLLLLLLLLLLLLLLLLL      3",
+                    "7 LLLLLLLLLLLLLLLLLLLLL      3",
+                    "7               LLLLLLL      3",
+                    "65555555555555@ *5555555555554",
                     "000000000000007 30000000000000",
                     "000000000000007 30000000000000",
                     "000000000000007 30000000000000",
@@ -99,7 +97,7 @@
                     "000000000000007 30000000000000",
                     "000000000000007 30000000000000",
                     "000000000000007 30000000000000",
-                    "00000000811Y111 111Z1120000000",
+                    "00000000811Y11$ ^11Z1120000000",
                     "000000007             30000000",
                     "000000007             30000000",
                     "000000007      S      30000000",

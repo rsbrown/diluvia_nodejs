@@ -48,6 +48,12 @@ var Defs = module.exports = {
         DUNGEON_WALL_BL:    new WallTile({ image: "sprites.png:0,1" }),
         DUNGEON_WALL_L:     new WallTile({ image: "sprites.png:3,0" }),
         DUNGEON_WALL_TL:    new WallTile({ image: "sprites.png:0,0" }),
+        
+        DUNGEON_CORNER_TR:  new WallTile({ image: "sprites.png:11,0" }),
+        DUNGEON_CORNER_TL:  new WallTile({ image: "sprites.png:10,0" }),
+        DUNGEON_CORNER_BR:  new WallTile({ image: "sprites.png:11,1" }),
+        DUNGEON_CORNER_BL:  new WallTile({ image: "sprites.png:10,1" }),
+        
 		DUNGEON_DOOR_T:     new WallTile({ image: "sprites.png:5,0" }),
 		DUNGEON_OPEN_T:     new WallTile({ image: "sprites.png:4,0" }),
 		DUNGEON_DOOR_R:     new WallTile({ image: "sprites.png:4,1" }),
@@ -62,6 +68,6 @@ var Defs = module.exports = {
 
         PORTAL:             new PortalTile({ image: "sprites.png:2,8" }),
 		WATER:              new WallTile({ image: "sprites.png:0,7" }),
-		LAVA:               new PainTile({ image: "sprites.png:8,7" })
+		LAVA:               new Tile({ image: "sprites.png:8,7" })
     }
 };
