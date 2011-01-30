@@ -11,6 +11,7 @@ var Defs = module.exports = {
     Tiles: {
         PLAYER:             new ActorTile({ image: "sprites.png:5,4" }),
         SPAWN:              new SpawnTile({ image: "sprites.png:2,8" }),
+        ROCK:               new WallTile({ image: "sprites.png:3,4" }),
         BASE_GRASS:         new Tile({ image: "sprites.png:3,7" }),
         BASE_STONE:         new Tile({ image: "sprites.png:4,7" }),
         DUNGEON_WALL_T:     new WallTile({ image: "sprites.png:2,0" }),

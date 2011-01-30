@@ -1,15 +1,21 @@
 var Defs        = require("defs"),
     Zone        = require("zone"),
     Tile        = require("tile"),
-    SpawnTile   = require("spawn_tile");
+    SpawnTile   = require("spawn_tile"),
+    PortalTile  = require("portal_tile"),
+    WallTile    = require("wall_tile"),
+    fs          = require("fs");
 
 var World = module.exports = function() {
     this._accounts      = [];
     this._defaultTiles  = [];
     this._zones         = {};
+    
+    this._loadZones();
 };
 
-World.DEFAULT_ZONE_ID = "zones:0";
+World.DEFAULT_ZONE_ID   = "zones:0";
+World.MAP_LAYER_KEYS    = [ "baseMap", "objectMap" ];
 
 World.prototype = {
     setDefaultZone: function(zone) {
@@ -47,9 +53,15 @@ World.prototype = {
         var oldZone     = account.getCurrentZone(),
             newZone     = this.getZone(zoneId);
         
-        oldZone.removeAccount(account);
-        account.setCurrentZone(newZone);
-        newZone.addAccount(account);
+        if (newZone) {
+            oldZone.removeAccount(account);
+            account.setCurrentZone(newZone);
+            newZone.addAccount(account);   
+        }
+        else {
+            console.log("Tried to teleport to " + zoneId + ", which doesn't exist!");
+        }
+        
     },
     
     emptyZone: function(width, height) {
@@ -69,5 +81,58 @@ World.prototype = {
         zone.setLayerTile(1, 64, "SPAWN");
 
         return zone;
+    },
+    
+    _loadZones: function(options) {
+        var self = this;
+        
+        fs.readdir("zones", function(err, files) {
+            if (err) {
+                console.log("Could not find zone config directory!");
+            }
+            else {
+                for (var i = 0, len = files.length; i < len; i++) {
+                    fs.readFile("zones/" + files[i], function(err, data) {
+                        var obj = JSON.parse(data);
+                        self.createZoneFromConfig(obj);
+                    });
+                }
+            }
+        });
+    },
+    
+    createZoneFromConfig: function(conf) {
+        var zone = this.emptyZone(conf.dimensions[0], conf.dimensions[1]);        
+        
+        //console.log(conf);
+        
+        for (var mli = 0, mllen = World.MAP_LAYER_KEYS.length; mli < mllen; mli++) {
+            var confKey         = World.MAP_LAYER_KEYS[mli],
+                confMapLayer    = conf[confKey];
+                mapLayerStr     = confMapLayer.join("");
+            
+            for (var i = 0, len = mapLayerStr.length; i < len; i++) {
+                var ch = mapLayerStr.charAt(i);
+                
+                if (ch != " ") {
+                    var lookup  = conf.tiles[ch],
+                        tileIdx;
+                    
+                    if ((typeof lookup) == "string") {
+                        tileIdx = lookup;
+                    }
+                    else {
+                        var klass   = eval(lookup.class),
+                            tile    = new klass(lookup.options);
+                
+                        tileIdx = zone.addTile(tile);
+                    }
+            
+                    zone.setLayerTile(mli, i, tileIdx);
+                }
+            }
+        }
+        
+        this.setZone(conf.zoneId, zone);
     }
 };
