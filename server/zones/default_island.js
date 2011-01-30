@@ -19,7 +19,7 @@
         "H":    "DUNGEON_TOWER_3_2",
         "I":    "DUNGEON_TOWER_3_3",
         "J":    "DUNGEON_TOWER_4_1",
-        "K":    { "class": "PortalTile", "options": { "zone": "zones:2", "image": "sprites.png:1,5" } },
+        "K":    { "class": "PortalTile", "options": { "zone": "zones:1", "image": "sprites.png:1,5" } },
         "L":    "DUNGEON_TOWER_4_3",
         "1":    "TREE_1",
         "2":    "TREE_2",

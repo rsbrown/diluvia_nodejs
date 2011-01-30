@@ -1,5 +1,5 @@
 {
-    "zoneId":       "zones:2",
+    "zoneId":       "zones:1",
     "dimensions":   [ 30, 30 ],
     
     "tiles": {
@@ -27,7 +27,7 @@
         "H":    "DUNGEON_OPEN_L",
 
 
-		"9":    { "class": "PortalTile", "options": { "zone": "zones:1", "image": "sprites.png:4,1" } },
+		"9":    { "class": "PortalTile", "options": { "zone": "zones:0", "image": "sprites.png:4,1" } },
 
 		
         "R":    "ROCK",
