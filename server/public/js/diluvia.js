@@ -2,7 +2,7 @@ var Diluvia = {
     IMAGE_BASE_PATH:        "images/",
     TILE_DIMS:              [64, 64],
     CANVAS_ID:              "viewport",
-    INTERVAL_DELAY:         50,
+    INTERVAL_DELAY:         10,
     
     rowColToPixels: function(row, col) {
         return [row * Diluvia.TILE_DIMS[0], col * Diluvia.TILE_DIMS[1]];
