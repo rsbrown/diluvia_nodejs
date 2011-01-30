@@ -48,6 +48,10 @@ Client.prototype = {
         this.sendMessage("ZoneData", tileData);
     },
     
+    sendMoveFailed: function() {
+        this.sendMessage("MoveFailed", null);
+    },
+    
     sendZoneState: function(zone, layerState) {
         if (!layerState) {
             var layers      = zone.getLayers(),

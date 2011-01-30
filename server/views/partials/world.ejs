@@ -1,4 +1,31 @@
+<div id="bump-sound"></div>
+<div class="bg-music" id="bg-music-0"></div>
+<div class="bg-music" id="bg-music-1"></div>
+<div class="bg-music" id="bg-music-2"></div>
+<div class="bg-music" id="bg-music-3"></div>
+<div class="bg-music" id="bg-music-4"></div>
+<div class="bg-music" id="bg-music-5"></div>
+<div class="bg-music" id="bg-music-6"></div>
+
+<div id="loading"><img src="images/loading.gif" /></div>
+<div id="viewport_container">
+    <canvas id="viewport" height="4096" width="4096"></canvas>
+</div>
+
 <script type="text/javascript" charset="utf-8">
+    var backgroundMusicFiles = [
+                       'dungeon_music.wav', 
+                       'go_from_my_window.mp3', 
+                       'seiomaccorgo.mp3', 
+                       'witches.mp3', 
+                       'jewel.mp3', 
+                       'larossignol.mp3', 
+                       'browning.mp3', 
+                       'leyenda.mp3'
+                     ];
+    //var musicIdx = Math.floor(Math.random()*backgroundMusicFiles.length);
+    var musicIdx = 0;
+
     document.body.style = "height: 100%; width: 100%;";
     document.style      = "height: 100%; width: 100%";
     
@@ -19,11 +46,47 @@
           size_element($('#viewport_container'));
           size_element($('#main'));
         });
-    
+        
+        $("div#welcome").html(
+          "<div id='audio-controls'><div id='audio-pause' style='display: none;'><a href='#'><img src='/images/icons/pause.png'/></a></div><div id='audio-play'><a href='#'><img src='/images/icons/play.png'/></a></div></div>"
+        );
+        
+        $("#bump-sound").jPlayer( {
+          swfPath: "/media",
+          ready: function () {
+            this.element.jPlayer("setFile", "/media/sounds/bump.mp3"); // Defines the mp3
+          },
+          preload: 'auto'
+        });
+
+        $(".bg-music").each ( function() {
+          $(this).jPlayer( {
+            swfPath: "/media",
+            ready: function () {
+              var idx = this.element.attr("id").replace("bg-music-", "");
+              this.element.jPlayer("setFile", "/media/music/" + backgroundMusicFiles[idx]);
+            }
+          });
+
+          $(this).jPlayer("onSoundComplete", function() {
+            if (musicIdx > 7) { musicIdx = 0;} else { musicIdx = musicIdx+1; }
+            $("#bg-music-" + musicIdx).jPlayer("play");
+          });
+        });
+
+        $("#audio-pause a").click(function(e){
+          e.preventDefault();
+          $("#bg-music-" + musicIdx).jPlayer("pause");
+          $("#audio-pause").hide();
+          $("#audio-play").show();
+        });
+
+        $("#audio-play a").click(function(e){
+          e.preventDefault();
+          $("#bg-music-" + musicIdx).jPlayer("play");
+          $("#audio-play").hide();
+          $("#audio-pause").show();
+        });
+
     });
 </script>
-
-<div id="loading"><img src="images/loading.gif" /></div>
-<div id="viewport_container">
-    <canvas id="viewport" height="4096" width="4096"></canvas>
-</div>

@@ -214,7 +214,6 @@ Zone.prototype = {
 
         if (potentialIdx != -1) {
             var canMove = true;
-
             // it's within the zone
             for (var i = 0; i < LAYER_COUNT; i++) {
                 var otherTileIdx = this._layers[i][potentialIdx],
@@ -239,10 +238,15 @@ Zone.prototype = {
                 this._updatedTiles.push(potentialIdx);
 
                 console.log("MOVE " + account.getUid() + ": " + layerTileIdx + " => " + potentialIdx + " (" + tileIdx + ")");
+            } else {
+                console.log("User tried to move out of map");
+                account.getClient().sendMoveFailed();
             }
+            
         }
         else {
             console.log("User tried to move out of map");
+            account.getClient().sendMoveFailed();
         }
     },
     
