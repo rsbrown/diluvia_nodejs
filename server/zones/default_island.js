@@ -2,6 +2,7 @@
     "zoneId":       "zones:0",
     "dimensions":   [ 30, 20 ],
     "background":   "background_island.png",
+    "music":        "/media/music/seiomaccorgo.mp3",
     
     "tiles": {
         "S":    "SPAWN",

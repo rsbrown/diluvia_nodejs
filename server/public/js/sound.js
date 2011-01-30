@@ -2,9 +2,7 @@ var Sound = function() {
     this._audios    = {};
     this._loops     = {};
     
-    this.addAudio("bgmusic1", "/media/music/dungeon_music.wav");
     this.addAudio("bump", "/media/sounds/bump.mp3");
-    this.loopAudio("bgmusic1");
 };
 
 Sound.prototype = {
@@ -28,14 +26,7 @@ Sound.prototype = {
             
             this._loops[key] = audio;
             
-            document.body.appendChild(audio);
-            
-            audio.addEventListener("ended", function() { 
-                if (self._loops[key]) {
-                    self.loopAudio(key);
-                }
-            });
-            
+            //audio.loop = "loop"
             audio.play();
         }
     },
@@ -43,11 +34,9 @@ Sound.prototype = {
     cancelLoops: function() {
         for (key in this._loops) {
             var audio = this._loops[key];
-
-            audio.pause();
-            audio.currentTime = 0;
             
-            document.body.removeChild(audio);
+            audio.pause();
+            audio.currentTime = 0;      
         }
         
         this._loops = {};

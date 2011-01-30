@@ -8,6 +8,7 @@ var Canvas = function(controller, element) {
     this._controller    = controller;
     
     this._lastDims      = [ 0, 0 ];
+    this._lastMusic     = null;
     
     this._element.style.position = "absolute";
 };
@@ -23,6 +24,11 @@ Canvas.prototype = {
                     
         if (zoneData.background) {
             bgImg = this._controller.getImage(zoneData.background);
+        }
+        
+        if (zoneData.music != this._lastMusic) {
+            this._controller.changeMusic(zoneData.music);
+            this._lastMusic = zoneData.music;
         }
             
         if (zoneDims[0] != this._lastDims[0] || zoneDims[1] != this._lastDims[1]) {

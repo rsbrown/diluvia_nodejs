@@ -94,5 +94,11 @@ DiluviaController.prototype = {
     
     command: function(cmd) {
         this._protocol.send({ "type": "Command", "command": cmd });
+    },
+    
+    changeMusic: function(music) {
+        this._sound.cancelLoops();
+        this._sound.addAudio(music, music);
+        this._sound.loopAudio(music);
     }
 };

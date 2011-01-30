@@ -351,5 +351,13 @@ Zone.prototype = {
     
     setBackground: function(bg) {
         this._background = bg;
+    },
+    
+    getMusic: function() {
+        return this._music;
+    },
+    
+    setMusic: function(music) {
+        this._music = music;
     }
 };
