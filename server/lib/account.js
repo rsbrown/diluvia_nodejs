@@ -10,7 +10,7 @@ var Account = module.exports = function(world, options) {
     this._username      = options.username;
     this._password      = options.password;
     
-    this._zones         = [];
+    this._zones         = {};
     this._backpack      = [];
     this._awards        = [];
     
@@ -112,6 +112,14 @@ Account.prototype = {
         
         this._queue = [];
     },
+    
+    addZone: function(key, zone) {
+        this._zones[key] = zone;
+    },
+    
+    removeZone: function(key) {
+        delete this._zones[key];
+    }
 };
 
 
