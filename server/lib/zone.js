@@ -86,6 +86,8 @@ Zone.prototype = {
 
         this._resendTiles([layerIdx]);
         
+        this.playSound("portal");
+        
         return tileIdx;
     },
     
