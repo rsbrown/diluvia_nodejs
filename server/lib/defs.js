@@ -62,6 +62,6 @@ var Defs = module.exports = {
 
         PORTAL:             new PortalTile({ image: "sprites.png:2,8" }),
 		WATER:              new WallTile({ image: "sprites.png:0,7" }),
-		LAVA:               new Tile({ image: "sprites.png:8,7" })
+		LAVA:               new PainTile({ image: "sprites.png:8,7" })
     }
 };
