@@ -25,7 +25,6 @@ var Keyboard = function(controller) {
     });
     
     /*
-    
     $(window).keyup(function(ev) {
         var kc  = ev.keyCode;
     

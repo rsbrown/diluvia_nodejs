@@ -113,6 +113,10 @@ Zone.prototype = {
         return this._layers;
     },
     
+    setLayers: function(layers) {
+        this._layers = layers;
+    },
+    
     getTiles: function() {
         return this._tiles;
     },

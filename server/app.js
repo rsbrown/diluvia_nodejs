@@ -11,6 +11,40 @@ var express = require("express"),
     auth    = require("connect-auth"),
     OAuth = require('oauth').OAuth;
     
+var Defs        = require("defs"),
+    Zone        = require("zone"),
+    Tile        = require("tile"),
+    SpawnTile   = require("spawn_tile");
+
+var r = redis.createClient();
+r.stream.on( 'connect', function() {
+  r.get( 'default', function( err, data ) {
+
+    var defaultZone = new Zone(64, 64);
+    var defaultTile = new Tile({image: Defs.Images.baseTile}),
+    spawnTile       = new SpawnTile();
+    var defaultTileIdx = defaultZone.addTile(defaultTile);
+    var spawnTileIdx   = defaultZone.addTile(spawnTile);
+    
+    if (!data) {
+      for (var i = 0; i < (64 * 64); i++) {
+          defaultZone.setLayerTile(0, i, defaultTileIdx);
+      }
+
+      defaultZone.setLayerTile(1, 64, spawnTileIdx);
+      
+      r.set( 'default', JSON.stringify(defaultZone), function() {
+        console.log("CREATED NEW MAP");
+      });
+    } else {
+      var obj = JSON.parse( data.toString() );
+      defaultZone.setLayers(obj["_layers"]);
+      console.log("MAP IS ALREADY THERE");
+    }
+    world.setDefaultZone(defaultZone);
+  });
+});
+    
 try {
     var keys = require('./auth_keys');
     for(var key in keys) {
@@ -23,12 +57,7 @@ catch(e) {
 }
 
 var twitterSecrets = {consumerKey: twitterConsumerKey, consumerSecret: twitterConsumerSecret};
-//console.log(twitterSecrets);
 var app = express.createServer();
-
-
-
-
 
 app.use(express.staticProvider(__dirname + "/public"));
 app.set('views', __dirname + '/views');
@@ -44,8 +73,8 @@ app.use(auth([auth.Twitter(twitterSecrets)]));
 
 app.listen(3000);
 
-var socket  = io.listen(app),
-    world   = new World();
+var socket      = io.listen(app),
+    world       = new World();
     
 var redirectBackOrRoot = function(res) {
     if (global["store_location"]) {

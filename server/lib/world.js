@@ -3,32 +3,18 @@ var Defs        = require("defs"),
     Tile        = require("tile"),
     SpawnTile   = require("spawn_tile");
 
-var World = module.exports = function() {
+var World = module.exports = function(defaultZone) {
     this._accounts = [];
 };
 
-
-var defaultZone = new Zone(64, 64),
-    defaultTile = new Tile({
-        image: Defs.Images.baseTile
-    }),
-    spawnTile   = new SpawnTile();
-    
-var defaultTileIdx = defaultZone.addTile(defaultTile);
-var spawnTileIdx   = defaultZone.addTile(spawnTile);
-
-for (var i = 0; i < (64 * 64); i++) {
-    defaultZone.setLayerTile(0, i, defaultTileIdx);
-}
-
-defaultZone.setLayerTile(1, 64, spawnTileIdx);
-
 World.prototype = {
+    setDefaultZone: function(zone) {
+      this._defaultZone = zone;
+    },
     addAccount: function(account) {
         this._accounts.push(account);
-        
-        account.setCurrentZone(defaultZone);
-        defaultZone.addAccount(account);
+        account.setCurrentZone(this._defaultZone);
+        this._defaultZone.addAccount(account);
     },
     
     removeAccount: function(account) {

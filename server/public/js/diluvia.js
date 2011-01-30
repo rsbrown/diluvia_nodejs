@@ -21,6 +21,8 @@ var DiluviaController = function(server, options) {
     this._hasRecvState  = false;
     this._interval      = setInterval(function() { self._onInterval(); }, Diluvia.INTERVAL_DELAY);
     this._stateQueue    = [];
+    
+    this._loadingInterval      = setInterval(function() { self._onLoadingInterval(); }, Diluvia.INTERVAL_DELAY);
 };
 
 DiluviaController.prototype = {
@@ -65,6 +67,13 @@ DiluviaController.prototype = {
         if (!this.isLoadingImages() && this._hasRecvData && this._hasRecvState && this._stateQueue.length > 0) {
             this._canvas.paint(this._protocol.getZoneData(), this._stateQueue.shift());
         }
+    },
+    
+    _onLoadingInterval: function() {
+      if (!this.isLoadingImages() && this._hasRecvState) {
+          $("div#loading").hide();
+          clearInterval(this._laodingInterval);
+      }
     },
     
     move: function(cmd) {
