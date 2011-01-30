@@ -38,8 +38,8 @@
         "L":    "LAVA",
         
         
-        "Y":    { "class": "PortalTile", "options": { "zone": "zones:2", "image": "sprites.png:4,0", "dropAt": [ 2, 2 ] } },
-        "Z":    { "class": "PortalTile", "options": { "zone": "zones:3", "image": "sprites.png:4,0", "dropAt": [ 2, 2 ] } },
+        "Y":    { "class": "PortalTile", "options": { "zone": "zones:2", "image": "sprites.png:4,0", "dropAt": [ 3, 8 ] } },
+        "Z":    { "class": "PortalTile", "options": { "zone": "zones:3", "image": "sprites.png:4,0", "dropAt": [ 3, 8 ] } },
         
 		"9":    { "class": "PortalTile", "options": { "zone": "zones:0", "image": "sprites.png:8,1", "dropAt": [ 18, 9 ] } },
 
@@ -84,11 +84,11 @@
     "objectMap": [  
                     "811111111111111111111111111112",
                     "7                            3",
-                    "7 LLLLLLLLLLLLLLLLLLLLL      3",
-                    "7 LLLLLLLLLLLLLLLLLLLLL      3",
-                    "7 LLLLLLLLLLLLLLLLLLLLL      3",
-                    "7               LLLLLLL      3",
-                    "65555555555555@ *5555555555554",
+                    "7 LLLLLLLLLLLLLL*55@         3",
+                    "7 LLLLLLLLLLLLLL3007         3",
+                    "7 LLLLLLLLLLLLLL3007         3",
+                    "7               3007         3",
+                    "65555555555555@ 30065555555554",
                     "000000000000007 30000000000000",
                     "000000000000007 30000000000000",
                     "000000000000007 30000000000000",

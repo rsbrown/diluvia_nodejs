@@ -17,7 +17,7 @@ var Defs = module.exports = {
         SPAWN:              new SpawnTile({ image: "sprites.png:2,8" }),
         ROCK:               new WallTile({ image: "sprites.png:3,4" }),
         BASE_GRASS:         new Tile({ image: "sprites.png:2,7" }),
-        BASE_EMPTY:         new Tile({ image: "sprites.png:4,5" }),
+        BASE_EMPTY:         new Tile({ image: "sprites.png:0,9" }),
         BASE_STONE:         new Tile({ image: "sprites.png:4,7" }),
 		SPAWN_STONE:        new SpawnTile({ image: "sprites.png:4,7" }),
 		SPAWN_GRASS:        new SpawnTile({ image: "sprites.png:2,7" }),
@@ -58,13 +58,13 @@ var Defs = module.exports = {
 		DUNGEON_OPEN_T:     new WallTile({ image: "sprites.png:4,0" }),
 		DUNGEON_DOOR_R:     new WallTile({ image: "sprites.png:4,1" }),
 		DUNGEON_OPEN_R:     new WallTile({ image: "sprites.png:5,1" }),
-		DUNGEON_DOOR_B:     new WallTile({ image: "sprites.png:6,1" }),
-		DUNGEON_OPEN_B:     new WallTile({ image: "sprites.png:6,0" }),
+		DUNGEON_DOOR_B:     new WallTile({ image: "sprites.png:6,0" }),
+		DUNGEON_OPEN_B:     new WallTile({ image: "sprites.png:5,1" }),
 		DUNGEON_DOOR_L:     new WallTile({ image: "sprites.png:7,0" }),
 		DUNGEON_OPEN_L:     new WallTile({ image: "sprites.png:7,1" }),
 		
 		
-		DUNGEON_CEILING:    new WallTile({ image: "sprites.png:0,9" }),
+		DUNGEON_CEILING:    new WallTile({ image: "sprites.png:12,7" }),
 
         PORTAL:             new PortalTile({ image: "sprites.png:2,8" }),
 		WATER:              new WallTile({ image: "sprites.png:0,7" }),
