@@ -20,7 +20,7 @@ Client.prototype = {
                 this._account.onEnd(msg.command);
             }
             else if (msg.type == "Move") {
-                this._account.move(msg.command);
+                this._account.onCommand(msg.command);
             }
             else if (msg.type == "Command") {
                 this._account.onCommand(msg.command);
@@ -37,10 +37,10 @@ Client.prototype = {
         var tiles       = zone.getTiles(),
             tileData    = {};
 
-        for (var i = 0, len = tiles.length; i < len; i++) {
-            var tile = tiles[i];
+        for (var key in tiles) {
+            var tile = tiles[key];
             
-            tileData[i] = {
+            tileData[key] = {
                 image: tile.getImage()
             };
         }

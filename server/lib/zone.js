@@ -1,5 +1,7 @@
 var Defs            = require("defs"),
-    ActorTile       = require("actor_tile");
+    Tile            = require("tile");
+    ActorTile       = require("actor_tile"),
+    SpawnTile       = require("spawn_tile");
 
 var LAYER_COUNT     = 3,
     BASE_LAYER      = 0,
@@ -10,7 +12,7 @@ var Zone = module.exports = function(width, height) {
     var self = this;
     
     this._layers            = [];
-    this._tiles             = [];
+    this._tiles             = {};
     this._dimensions        = [width, height, LAYER_COUNT];
     this._cmdInterval       = setInterval(function() { self._onCommandInterval(); }, Defs.COMMAND_INTERVAL);
     this._active            = [];
@@ -25,6 +27,10 @@ var Zone = module.exports = function(width, height) {
     for (var i = 0; i < LAYER_COUNT; i++) {
         this._layers[i] = {};
     }
+    
+    for (var key in Defs.Tiles) {
+        this._tiles[key] = Defs.Tiles[key];
+    }
 };
 
 Zone.prototype = {
@@ -36,11 +42,11 @@ Zone.prototype = {
         var layer       = this._layers[OBJECT_LAYER],
             spawnTiles  = [];
         
-        for (var i = 0, len = this._tiles.length; i < len; i++) {
-            var tile = this._tiles[i];
+        for (var key in this._tiles) {
+            var tile = this._tiles[key];
             
             if (tile.spawnTile) {
-                spawnTiles.push(i);
+                spawnTiles.push(key);
             }
         }
         
@@ -60,22 +66,21 @@ Zone.prototype = {
     },
     
     addAccount: function(account) {
-        var tile        = new ActorTile(account),
-            layerIdx    = this.getSpawnPointIndex(),
-            tileIdx     = this.addTile(tile),
+        var layerIdx    = this.getSpawnPointIndex(),
+            tileIdx     = "PLAYER",
             cli         = account.getClient();
                 
         this._accountTile[account.getUid()] = layerIdx;
         this._accounts.push(account);
         
         this.setLayerTile(ACTOR_LAYER, layerIdx, tileIdx);
-                // 
-                // cli.sendZoneData(this);
-                // cli.sendZoneState(this);
-                // 
-        this._resendAll();
-                
-        return tile;
+
+        cli.sendZoneData(this);
+        cli.sendZoneState(this);
+
+        this._resendTiles([layerIdx]);
+        
+        return tileIdx;
     },
     
     removeAccount: function(account) {
@@ -122,8 +127,8 @@ Zone.prototype = {
     },
     
     addTile: function(tile) {
-        var idx = this._tiles.length;
-        this._tiles.push(tile);
+        var idx = Object.keys(this._tiles).length;
+        this._tiles[idx] = tile;
         return idx;
     },
     
@@ -200,54 +205,49 @@ Zone.prototype = {
         }
         
         if (dir) {
-          this.move(account, dir);
+            this.move(account, dir);
         }
     },
     
-    moveClient: function() {
-      this._resendTiles(this._updatedTiles);
-    },
-    
     move: function(account, dir) {
-      var layerTileIdx    = this.getAccountLayerTileIndex(account),
-          tileIdx         = this.getLayerTile(ACTOR_LAYER, layerTileIdx),
-          tile            = this.getTile(tileIdx);
+        var layerTileIdx    = this.getAccountLayerTileIndex(account),
+            tileIdx         = this.getLayerTile(ACTOR_LAYER, layerTileIdx),
+            tile            = this.getTile(tileIdx);
 
-      var potentialIdx = this.indexForDirectionalMove(layerTileIdx, dir);
-  
-      if (potentialIdx != -1) {
-          var canMove = true;
-      
-          // it's within the zone
-          for (var i = 0; i < LAYER_COUNT; i++) {
-              var otherTileIdx = this._layers[i][potentialIdx],
-                  tile         = this.getTile(otherTileIdx);
-          
-              if (tile) {
-                  if (!tile.moveInto(account)) {
-                      // FAIL MOVEMENT
-                      canMove = false;
-                      break;
-                  }
-              }
-          }
-      
-          if (canMove) {
-              this.setLayerTile(ACTOR_LAYER, layerTileIdx, null);
-              this.setLayerTile(ACTOR_LAYER, potentialIdx, tileIdx);
-              
-              this._accountTile[account.getUid()] = potentialIdx;
-              
-              this._updatedTiles.push(layerTileIdx);
-              this._updatedTiles.push(potentialIdx);
-              
-              console.log("MOVE " + account.getUid() + ": " + layerTileIdx + " => " + potentialIdx + " (" + tileIdx + ")");
-          }
-      }
-      else {
-          console.log("User tried to move out of map");
-      }
-      
+        var potentialIdx = this.indexForDirectionalMove(layerTileIdx, dir);
+
+        if (potentialIdx != -1) {
+            var canMove = true;
+
+            // it's within the zone
+            for (var i = 0; i < LAYER_COUNT; i++) {
+                var otherTileIdx = this._layers[i][potentialIdx],
+                    tile         = this.getTile(otherTileIdx);
+
+                if (tile) {
+                    if (!tile.moveInto(account)) {
+                        // FAIL MOVEMENT
+                        canMove = false;
+                        break;
+                    }
+                }
+            }
+
+            if (canMove) {
+                this.setLayerTile(ACTOR_LAYER, layerTileIdx, null);
+                this.setLayerTile(ACTOR_LAYER, potentialIdx, tileIdx);
+
+                this._accountTile[account.getUid()] = potentialIdx;
+
+                this._updatedTiles.push(layerTileIdx);
+                this._updatedTiles.push(potentialIdx);
+
+                console.log("MOVE " + account.getUid() + ": " + layerTileIdx + " => " + potentialIdx + " (" + tileIdx + ")");
+            }
+        }
+        else {
+            console.log("User tried to move out of map");
+        }
     },
     
     _resendTiles: function(updatedTiles) {

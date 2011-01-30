@@ -78,14 +78,14 @@ Account.prototype = {
     },
     
     move: function(command) {
-      if (command == "n" || command == "s" || command == "e" || command == "w") {
-          dir = command;
-      }
-      
-      if (dir) {
-        this._currentZone.move(this, dir);
-        this._currentZone.moveClient();
-      }
+        if (command == "n" || command == "s" || command == "e" || command == "w") {
+            dir = command;
+        }
+
+        if (dir) {
+            this._currentZone.move(this, dir);
+            this._currentZone.moveClient();
+        }
     },
     
     getUid: function() {

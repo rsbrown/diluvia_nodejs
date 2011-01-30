@@ -17,35 +17,35 @@ var Defs        = require("defs"),
     Tile        = require("tile"),
     SpawnTile   = require("spawn_tile");
 
-var r = redis.createClient();
-r.stream.on( 'connect', function() {
-  r.get( 'island:<username>', function( err, data ) {
+// var r = redis.createClient();
+// r.stream.on( 'connect', function() {
+//   r.get( 'default', function( err, data ) {
+// 
+//     var defaultZone = new Zone(64, 64);
+//     var defaultTile = new Tile({image: Defs.Images.baseTile}),
+//     spawnTile       = new SpawnTile();
+//     var defaultTileIdx = defaultZone.addTile(defaultTile);
+//     var spawnTileIdx   = defaultZone.addTile(spawnTile);
+//     
+//     if (!data) {
+//       for (var i = 0; i < (64 * 64); i++) {
+//           defaultZone.setLayerTile(0, i, defaultTileIdx);
+//       }
+// 
+//       defaultZone.setLayerTile(1, 64, spawnTileIdx);
+//       
+//       r.set( 'default', JSON.stringify(defaultZone), function() {
+//         console.log("CREATED NEW MAP");
+//       });
+//     } else {
+//       var obj = JSON.parse( data.toString() );
+//       defaultZone.setLayers(obj["_layers"]);
+//       console.log("MAP IS ALREADY THERE");
+//     }
+//     world.setDefaultZone(defaultZone);
+//   });
+// });
 
-    var defaultZone = new Zone(64, 64);
-    var defaultTile = new Tile({image: Defs.Images.baseTile}),
-    spawnTile       = new SpawnTile();
-    var defaultTileIdx = defaultZone.addTile(defaultTile);
-    var spawnTileIdx   = defaultZone.addTile(spawnTile);
-    
-    if (!data) {
-      for (var i = 0; i < (64 * 64); i++) {
-          defaultZone.setLayerTile(0, i, defaultTileIdx);
-      }
-
-      defaultZone.setLayerTile(1, 64, spawnTileIdx);
-      
-      r.set( 'island:<username>', JSON.stringify(defaultZone), function() {
-        console.log("CREATED NEW MAP");
-      });
-    } else {
-      var obj = JSON.parse( data.toString() );
-      defaultZone.setLayers(obj["_layers"]);
-      console.log("MAP IS ALREADY THERE");
-    }
-    world.setDefaultZone(defaultZone);
-  });
-});
-    
 try {
     var keys = require('./auth_keys');
     for(var key in keys) {
@@ -76,10 +76,13 @@ app.listen(3000);
 
 var socket      = io.listen(app),
     world       = new World();
-    
-var redirectBackOrRoot = function(req, res) {
-    if (req.session["store_location"]) {
-        res.redirect(req.session["store_location"]);
+
+world.setDefaultZone(world.generateDefaultZone());
+
+
+var redirectBackOrRoot = function(res) {
+    if (global["store_location"]) {
+        res.redirect(global["store_location"]);
     } else {
         res.redirect("/");
     }

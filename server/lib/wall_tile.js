@@ -1,11 +1,11 @@
 var Defs = require("defs");
 
-var ActorTile = module.exports = function(options) {
+var WallTile = module.exports = function(options) {
     options             = options        || {};
     this._image         = options.image  || "empty.png:0,0";
 };
 
-ActorTile.prototype = {
+WallTile.prototype = {
     moveInto: function(actor) {
         return false;
     },
