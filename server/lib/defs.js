@@ -21,6 +21,7 @@ var Defs = module.exports = {
         BASE_STONE:         new Tile({ image: "sprites.png:4,7" }),
 		SPAWN_STONE:        new SpawnTile({ image: "sprites.png:4,7" }),
 		SPAWN_GRASS:        new SpawnTile({ image: "sprites.png:2,7" }),
+		EMPTY_WALL:         new WallTile({ image: "sprites.png:0,6" }),
 
 		TREE_1: 			new WallTile({ image: "sprites.png:3,2" }),
 		TREE_2: 			new WallTile({ image: "sprites.png:4,2" }),
