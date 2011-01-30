@@ -4,6 +4,7 @@ You'll need NPM modules:
 
   * express
   * socket.io
+  * ejs
   
 Run it with:
 

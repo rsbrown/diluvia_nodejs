@@ -74,3 +74,11 @@ header {
 	color: #6f6f6f;
 	font-size: 13px;
 }
+
+canvas {
+    
+}
+
+#viewport_container {
+    overflow:   hidden;
+}
