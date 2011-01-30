@@ -15,13 +15,13 @@ var DiluviaController = function(server, options) {
     this._protocol      = new Protocol(this, server, options);
     this._keyboard      = new Keyboard(this);
     this._canvas        = new Canvas(this, document.getElementById(Diluvia.CANVAS_ID));
+    this._sound         = new Sound();
     this._preload       = [];
     this._imageCache    = {};
     this._hasRecvData   = false;
     this._hasRecvState  = false;
     this._interval      = setInterval(function() { self._onInterval(); }, Diluvia.INTERVAL_DELAY);
     this._stateQueue    = [];
-    
     this._loadingInterval      = setInterval(function() { self._onLoadingInterval(); }, Diluvia.INTERVAL_DELAY);
 };
 
@@ -52,6 +52,10 @@ DiluviaController.prototype = {
     
     getImage: function(path) {
         return this._imageCache[path];
+    },
+    
+    getSound: function(){
+        return this._sound;
     },
     
     updatedZoneData: function(zoneData) {
