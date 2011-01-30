@@ -20,11 +20,12 @@ var DiluviaController = function(server, options) {
     this._hasRecvData   = false;
     this._hasRecvState  = false;
     this._interval      = setInterval(function() { self._onInterval(); }, Diluvia.INTERVAL_DELAY);
+    this._stateQueue    = [];
 };
 
 DiluviaController.prototype = {
     preloadImage: function(path) {
-        if (this._preload.indexOf(path) == -1) {
+        if (this._preload.indexOf(path) == -1 && !this._imageCache[path]) {
             var image   = new Image(),
                 self    = this;
         
@@ -57,11 +58,12 @@ DiluviaController.prototype = {
     
     updatedZoneState: function(zoneState) {
         this._hasRecvState = true;
+        this._stateQueue.push(zoneState);
     },
     
     _onInterval: function() {
-        if (!this.isLoadingImages() && this._hasRecvData && this._hasRecvState) {
-            this._canvas.paint(this._protocol.getZoneData(), this._protocol.getZoneState());
+        if (!this.isLoadingImages() && this._hasRecvData && this._hasRecvState && this._stateQueue.length > 0) {
+            this._canvas.paint(this._protocol.getZoneData(), this._stateQueue.shift());
         }
     },
     
