@@ -1,5 +1,5 @@
 {
-    "zoneId":       "zones:2",
+    "zoneId":       "zones:1",
     "dimensions":   [ 30, 30 ],
     
     "tiles": {
@@ -27,7 +27,7 @@
         "H":    "DUNGEON_OPEN_L",
 
 
-		"9":    { "class": "PortalTile", "options": { "zone": "zones:1", "image": "sprites.png:4,1" } },
+		"9":    { "class": "PortalTile", "options": { "zone": "zones:0", "image": "sprites.png:4,1" } },
 
 		
         "R":    "ROCK",
@@ -72,7 +72,7 @@
                     "7                            3",
                     "7                            3",
                     "7                            3",
-                    "7       S                    3",
+                    "7                            3",
                     "7                            3",
                     "7                            3",
                     "7                            3",
@@ -96,7 +96,7 @@
                     "7       811B111B111B112      3",
                     "7       7             3      3",
                     "7       7             3      3",
-                    "7       7             3      3",
+                    "7       7      S      3      3",
 					"655555556555555955555545555554"
                 ]
 }
