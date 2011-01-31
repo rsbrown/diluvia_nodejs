@@ -1,4 +1,5 @@
-<div id="loading"><img src="images/loading.gif" /></div>
+<div id="loading"><img src="images/icons/loading_b.gif" /></div>
+<div id="connection-lost">Connection lost. Retrying... <img src='images/icons/loading_w.gif' /></div>
 <div id="viewport_container">
     <canvas id="viewport" height="4096" width="4096"></canvas>
 </div>
@@ -25,6 +26,16 @@
     $(document).ready(function() {
         var diluvia = new DiluviaController("<%=SOCKET_IO_HOSTNAME%>", <%=SOCKET_IO_OPTIONS%>);
         
+        var $helpDialog = $('<div></div>')
+          .html(
+            '<div>to move: arrow keys</div> \
+             <div>to chat: enter</div>'
+          )
+          .dialog({
+          autoOpen: false,
+          title: 'Diluvia'
+        });
+        
         size_element($('#viewport_container'));
         size_element($('#main'));
         
@@ -35,7 +46,11 @@
         });
         
         $("div#welcome").html(
-          "<div id='audio-controls'><div id='audio-pause'><a href='#'><img src='/images/icons/pause.png'/></a></div><div style='display: none;' id='audio-play'><a href='#'><img src='/images/icons/play.png'/></a></div></div>"
+          "<div id='audio-controls'>                                                                               \
+            <div id='help'><a href='#'><img src='/images/icons/help.png'/></a></div>                                                                                      \
+            <div id='audio-pause'><a href='#'><img src='/images/icons/pause.png'/></a></div>                       \
+            <div style='display: none;' id='audio-play'><a href='#'><img src='/images/icons/play.png'/></a></div>  \
+          </div>"
         );
         
         $("#audio-pause a").click(function(e){
@@ -50,6 +65,12 @@
           diluvia.getSound().loopAudio("bgmusic1");
           $("#audio-play").hide();
           $("#audio-pause").show();
+        });
+        
+        $("#help a").click(function(e){
+          e.preventDefault();
+          $helpDialog.dialog('open');
+          return false;
         });
         
     });

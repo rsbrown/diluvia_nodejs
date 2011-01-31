@@ -43,6 +43,10 @@ header {
 	color: #999;
 	font-style: italic;
 }
+#welcome div{
+    float: left;
+    padding: 0 5px;
+}
 #content {
 	padding: 30px 30px 48px;
 	color: #d0d0d0;
@@ -153,4 +157,8 @@ canvas {
 
 .chat_message {
     color:      white;
+}
+
+#connection-lost {
+    display: none;
 }

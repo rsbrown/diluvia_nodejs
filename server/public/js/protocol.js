@@ -1,24 +1,40 @@
+const RETRY_INTERVAL = 2000;
+var timeout;
 
 var Protocol = function(controller, server, options) {
     var self            = this;
     
     this._controller    = controller;
-    this._socket        = new io.Socket(server, options);
-    
+    this._server        = server;
+    this._sock_options  = options;
+    this._socket        = new io.Socket(this._server, this._sock_options);
+    this._connected     = false;
     this._zoneData      = {};
-
+    
     this._socket.connect();
 
     this._socket.on("connect", function() {
-        
+        this._connected = true;
+        clearTimeout(timeout);
+        $("#connection-lost").dialog('close');
     });
 
     this._socket.on("message", function(msg) {
-        self._parseMessage(msg);
+        self.parseMessage(msg);
     });
 
     this._socket.on("disconnect", function() {
-        
+        connected = false;
+        $("#connection-lost").dialog({
+            resizable: false,
+            modal: true,
+            closeOnEscape: false,
+            open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); },
+            buttons: {
+                Cancel: function() {window.location.href = "/";}
+            }
+        });
+        self.retryConnectOnFailure(RETRY_INTERVAL);
     });
 
 };
@@ -28,7 +44,21 @@ Protocol.prototype = {
         this._socket.send(msg);
     },
     
-    _parseMessage: function(msg) {
+    retryConnectOnFailure: function(retryInMilliseconds) {
+        var self = this;
+        setTimeout(function() {
+          if (!connected) {
+            self._socket = new io.Socket(this._server, this._sock_options);
+            $.get('/ping', function(data) {
+              connected = true;
+              window.location.href = unescape(window.location.pathname);
+            });
+            self.retryConnectOnFailure(retryInMilliseconds);
+          }
+        }, retryInMilliseconds);
+    },
+    
+    parseMessage: function(msg) {
         var self = this;
         
         if (msg) {

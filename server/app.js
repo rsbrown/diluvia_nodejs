@@ -20,6 +20,7 @@ var express     = require("express"),
 
 var r = redis.createClient();
 var username = null;
+var uidCounter      = 0;
 var userData = {};
 
 r.stream.on( 'connect', function() {
@@ -176,6 +177,10 @@ app.get('/', function(req, res){
     res.render('index', {locals: {username: username, flash: req.session.flash}});
 });
 
+app.get('/ping', function(req, res) {
+    res.send('pong');
+});
+
 // Simple code to set the session and avoid twitter auth
 app.get('/setSession/:user', function(req, res) {
    //setUser(req, res, req.params.user);
@@ -184,6 +189,7 @@ app.get('/setSession/:user', function(req, res) {
 });
 
 app.get('/play', function(req, res){
+  
   preParseRequest(req, res);
   req.session["store_location"] = '/play';
   res.render('world', {locals: {flash: req.session.flash}});
@@ -191,7 +197,6 @@ app.get('/play', function(req, res){
 
 
 app.get('/play/:user', function(req, res) {
-    setUser(req, res, req.params.user);
     preParseRequest(req, res);
     req.session["store_location"] = '/play';
     res.render('world', {locals: {flash: req.session.flash}});
