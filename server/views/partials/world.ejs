@@ -31,6 +31,7 @@
         $(window).resize(function() {
           size_element($('#viewport_container'));
           size_element($('#main'));
+          diluvia.repaintCanvas();
         });
         
         $("div#welcome").html(
