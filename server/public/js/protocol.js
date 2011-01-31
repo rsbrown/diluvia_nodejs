@@ -66,6 +66,9 @@ Protocol.prototype = {
                 var sound = self._controller.getSound();
                 sound.playAudio(msg.attrs);
             }
+            else if (msg.type == "Chat") {
+                self._controller.displayChatMessage(msg.attrs);
+            }
         }
     },
     

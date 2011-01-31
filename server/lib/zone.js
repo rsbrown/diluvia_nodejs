@@ -168,6 +168,15 @@ Zone.prototype = {
         }
     },
     
+    chat: function(user, text) {
+        for (var i = 0, len = this._accounts.length; i < len; i++) {
+            var account = this._accounts[i],
+                client  = account.getClient();
+            
+            client.sendMessage("Chat", user + "> " + text);
+        }
+    },
+    
     _onCommandInterval: function() {
         var idx;
         

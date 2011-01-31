@@ -133,3 +133,24 @@ canvas {
     overflow: hidden !important;
 	position: absolute;
 }
+
+#chat_box {
+    position: absolute;
+    width:    100%;
+    z-Index:  100;
+    bottom:   0px;
+    left:     0px;
+    height:   25px;
+}
+
+#chat_messages {
+    position:   absolute;
+    width:      100%;
+    z-Index:    90;
+    bottom:     0px;
+    left:       0px;
+}
+
+.chat_message {
+    color:      white;
+}

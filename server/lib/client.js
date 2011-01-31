@@ -25,6 +25,9 @@ Client.prototype = {
             else if (msg.type == "Command") {
                 this._account.onCommand(msg.command);
             }
+            else if (msg.type == "Chat") {
+                this._account.onChat(msg.text);
+            }
         }
     },
     

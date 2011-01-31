@@ -98,6 +98,10 @@ Account.prototype = {
         this._currentZone.stopCommand(this, command);
     },
     
+    onChat: function(text) {
+        this._currentZone.chat("User #" + this._uid, text);
+    },
+    
     move: function(command) {
         if (command == "n" || command == "s" || command == "e" || command == "w") {
             dir = command;

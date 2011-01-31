@@ -10,19 +10,24 @@ var Diluvia = {
 };
 
 var DiluviaController = function(server, options) {
-    var self            = this;
+    var self                = this;
     
-    this._protocol         = new Protocol(this, server, options);
-    this._keyboard         = new Keyboard(this);
-    this._canvas           = new Canvas(this, document.getElementById(Diluvia.CANVAS_ID));
-    this._sound            = new Sound();
-    this._preload          = [];
-    this._imageCache       = {};
-    this._hasRecvData      = false;
-    this._hasRecvState     = false;
-    this._interval         = setInterval(function() { self._onInterval(); }, Diluvia.INTERVAL_DELAY);
-    this._stateQueue       = [];
-    this._loadingInterval  = setInterval(function() { self._onLoadingInterval(); }, Diluvia.INTERVAL_DELAY);
+    this._protocol          = new Protocol(this, server, options);
+    this._keyboard          = new Keyboard(this);
+    this._canvas            = new Canvas(this, document.getElementById(Diluvia.CANVAS_ID));
+    this._sound             = new Sound();
+    this._preload           = [];
+    this._imageCache        = {};
+    this._hasRecvData       = false;
+    this._hasRecvState      = false;
+    this._interval          = setInterval(function() { self._onInterval(); }, Diluvia.INTERVAL_DELAY);
+    this._stateQueue        = [];
+    this._loadingInterval   = setInterval(function() { self._onLoadingInterval(); }, Diluvia.INTERVAL_DELAY);
+    
+    this._chatBoxElement    = $('<input id="chat_box">');
+    this._chat              = new Chat(document.body);
+    
+    $(document.body).append(this._chatBoxElement);
 };
 
 DiluviaController.prototype = {
@@ -96,9 +101,32 @@ DiluviaController.prototype = {
         this._protocol.send({ "type": "Command", "command": cmd });
     },
     
+    getChat: function() {
+        return this._chat;
+    },
+    
     changeMusic: function(music) {
         this._sound.cancelLoops();
         this._sound.addAudio(music, music);
         this._sound.loopAudio(music);
+    },
+    
+    showChatBox: function() {
+        $(this._chatBoxElement).show();
+        $(this._chatBoxElement).focus();
+    },
+    
+    sendChatMessageInChatBox: function() {
+        var jqBox = $(this._chatBoxElement);
+        
+        this._protocol.send({ "type": "Chat", "text": jqBox.val() });
+        
+        jqBox.val("");
+        jqBox.hide();
+    },
+    
+    displayChatMessage: function(text) {
+        this._chat.addMessage(text);
+        this._sound.playAudio("chat");
     }
 };

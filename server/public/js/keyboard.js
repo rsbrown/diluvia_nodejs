@@ -1,4 +1,4 @@
-var KEYCODE_COMMANDS = {
+var KEYCODE_MOVE_COMMANDS = {
     38: "n",
     40: "s",
     39: "e",
@@ -6,48 +6,39 @@ var KEYCODE_COMMANDS = {
 };
 
 var Keyboard = function(controller) {
-    var keysDown = {};
+    var keysDown = {},
+        chatting = false;
 
     $(window).keydown(function(ev) {
-        var kc = ev.keyCode;
+        var kc  = ev.keyCode,
+            cmd = KEYCODE_MOVE_COMMANDS[kc];
     
-        // if (!keysDown[kc]) {
-              var cmd = KEYCODE_COMMANDS[kc];
-    
-              if (cmd) {
-                  keysDown[kc] = true;
-                  // controller.commandStart(cmd);
-                  controller.move(cmd);
-              }
-        // }
-    
-        ev.preventDefault();
-    });
-    
-    /*
-    $(window).keyup(function(ev) {
-        var kc  = ev.keyCode;
-    
-        delete keysDown[kc];
-    
-        var cmd = KEYCODE_COMMANDS[kc];
-    
-        if (cmd) {
-            controller.commandEnd(cmd);
+        if (cmd && !chatting) {
+            keysDown[kc] = true;
+            // controller.commandStart(cmd);
+            controller.move(cmd);
+
+            ev.preventDefault();
         }
-    
-        ev.preventDefault();
+
     });
-    */
-    
-    // $(window).keydown(function(ev) {
-    //     var kc  = ev.keyCode;
-    //     var cmd = KEYCODE_COMMANDS[kc];
-    // 
-    //     if (cmd) {
-    //         controller.command(cmd);
-    //     }
-    // 
-    //     ev.preventDefault();        
-    // });
+
+    $(window).keypress(function(ev) {
+        var kc = ev.keyCode;
+        
+        if (!KEYCODE_MOVE_COMMANDS[kc]) {
+            if (kc == 13) { // enter
+                if (!chatting) {
+                    controller.showChatBox();
+                    chatting = true;
+                }
+                else {
+                    controller.sendChatMessageInChatBox();
+                    chatting = false;
+                }
+                
+                ev.preventDefault();
+            }
+        }
+    });
 };
