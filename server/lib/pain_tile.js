@@ -1,21 +1,53 @@
-var Defs = require("defs");
+var Defs    = require("defs"),
+    Tile    = require("tile"),
+    _       = require("underscore");
+
+var DEFAULT_DAMAGE              = 25,
+    DEFAULT_DAMAGE_INTERVAL     = 1000;
 
 var PainTile = module.exports = function(options) {
-    options             = options        || {};
-    this._image         = options.image  || "empty.png:0,0";
+    Tile.apply(this, arguments);
+    
+    this._damage    = options.damage    || DEFAULT_DAMAGE;
+    this._interval  = options.interval  || DEFAULT_DAMAGE_INTERVAL;
+    
+    this._damaging  = [];
+    
+    this._setupDamageInterval();
 };
 
-PainTile.prototype = {
-    canMoveInto: function(actor) {
-        return true;
-    },
-    
+_.extend(PainTile.prototype, Tile.prototype, {
     moveInto: function(actor) {
-        actor.takeDamage(25);
+        var idx = this._damaging.indexOf(actor);
+
+        if (idx == -1) {
+            this._damaging.push(actor);
+        }
     },
     
-    getImage:       function() { return this._image; },
-    getLabel:       function() { return ""; },
-    getTitle:       function() { return ""; },
-    getDescription: function() { return ""; }
-};
+    moveOut: function(actor) {
+        var idx = this._damaging.indexOf(actor);
+        
+        if (idx != -1) {
+            this._damaging.splice(actor, 1);
+        }
+    },
+    
+    _damageActor: function(actor) {
+        actor.takeDamage(this._damage);
+    },
+    
+    _onDamageInterval: function() {
+        for (var i = 0, len = this._damaging.length; i < len; i++) {
+            this._damageActor(this._damaging[i]);
+        }
+    },
+    
+    _setupDamageInterval: function() {
+        var self = this;
+
+        setInterval(function() {
+            self._onDamageInterval();
+        }, this._interval);
+    }
+});

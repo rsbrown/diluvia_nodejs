@@ -105,9 +105,7 @@ World.prototype = {
     },
     
     createZoneFromConfig: function(conf) {
-        var zone = this.emptyZone(conf.dimensions[0], conf.dimensions[1]);        
-        
-        //console.log(conf);
+        var zone = this.emptyZone(conf.dimensions[0], conf.dimensions[1]);
         
         for (var mli = 0, mllen = World.MAP_LAYER_KEYS.length; mli < mllen; mli++) {
             var confKey         = World.MAP_LAYER_KEYS[mli],

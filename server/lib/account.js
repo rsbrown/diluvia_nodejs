@@ -55,23 +55,28 @@ Account.prototype = {
     },
     
     takeDamage: function(amount) {
-        this._hitpoints = Math.min(0, this._hitpoints - amount);
+        var zone    = this.getCurrentZone(),
+            client  = this.getClient();
+        
+        this._hitpoints = Math.max(0, this._hitpoints - amount);
+        
+        client.sendFlash("red");
         
         if (this._hitpoints <= 0) {
             this.die();
+            
+            client.sendPlaySound("scream");            
+            zone.playSound("scream");
+        }
+        else {
+            zone.playSound("ouch");
         }
     },
     
-    die: function() {
-        var oldZone = this.getCurrentZone();
-        
+    die: function() {        
         this._hitpoints = 100;
         this._world.removeAccount(this);
-        this._world.addAccount(this);
-        
-        this.getClient().sendPlaySound("scream");
-        
-        oldZone.playSound("scream");
+        this._world.addAccount(this);        
     },
     
     setClient: function(client) {

@@ -1,20 +1,13 @@
-var Defs = require("defs");
+var Defs    = require("defs"),
+    Tile    = require("tile"),
+    _       = require("underscore");
 
 var ActorTile = module.exports = function(options) {
-    options             = options        || {};
-    this._image         = options.image  || "empty.png:0,0";
+    Tile.apply(this, arguments);
 };
 
-ActorTile.prototype = {
-    moveInto: function(actor) {
-    },
-    
+_.extend(ActorTile.prototype, Tile.prototype, {
     canMoveInto: function(actor) {
         return false;
-    },
-    
-    getImage:       function() { return this._image; },
-    getLabel:       function() { return ""; },
-    getTitle:       function() { return ""; },
-    getDescription: function() { return ""; }
-};
+    }
+});

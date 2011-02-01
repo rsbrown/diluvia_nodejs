@@ -63,6 +63,10 @@ Client.prototype = {
         this.sendMessage("PlaySound", sound);
     },
     
+    sendFlash: function(color) {
+        this.sendMessage("Flash", color);
+    },
+    
     sendZoneState: function(zone, layerState) {
         if (!layerState) {
             var layers      = zone.getLayers(),

@@ -6,6 +6,7 @@ var Sound = function() {
     this.addAudio("scream", "/media/sounds/scream.mp3");
     this.addAudio("portal", "/media/sounds/button-43.mp3");
     this.addAudio("chat",   "/media/sounds/button-22.mp3");
+    this.addAudio("ouch",   "/media/sounds/grunt.mp3");
 };
 
 Sound.prototype = {

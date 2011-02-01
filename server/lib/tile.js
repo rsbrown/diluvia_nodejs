@@ -13,6 +13,9 @@ Tile.prototype = {
     moveInto: function(actor) {
     },
     
+    moveOut: function(actor) {
+    },
+    
     canMoveInto: function(actor) {
         return true;
     },

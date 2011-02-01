@@ -87,6 +87,7 @@ Zone.prototype = {
         this._resendTiles([layerIdx]);
         
         this.playSound("portal");
+        cli.sendFlash("black");
         
         return tileIdx;
     },
@@ -94,11 +95,21 @@ Zone.prototype = {
     removeAccount: function(account) {
         var layerIdx = this._accountTile[account.getUid()];
         
+        // notify tiles that the actor has moved out of them
+        for (var i = 0; i < LAYER_COUNT; i++) {
+            var prevTileIdx = this._layers[i][layerIdx],
+                prevTile    = this.getTile(prevTileIdx);
+                            
+            if (prevTile) {
+                prevTile.moveOut(account);
+            }
+        }
+        
         delete this._accountTile[account.getUid()];
         this._accounts.splice(this._accounts.indexOf(account), 1);
         
         this.setLayerTile(ACTOR_LAYER, layerIdx, null);
-        
+                
         this._resendAll();
     },
     
@@ -274,11 +285,17 @@ Zone.prototype = {
                 console.log("MOVE " + account.getUid() + ": " + layerTileIdx + " => " + potentialIdx + " (" + tileIdx + ")");
 
                 for (var i = 0; i < LAYER_COUNT; i++) {
-                    var otherTileIdx = this._layers[i][potentialIdx],
-                        tile         = this.getTile(otherTileIdx);
+                    var prevTileIdx = this._layers[i][layerTileIdx],
+                        prevTile    = this.getTile(prevTileIdx);
+                        nextTileIdx = this._layers[i][potentialIdx],
+                        nextTile    = this.getTile(nextTileIdx);
                     
-                    if (tile) {
-                        tile.moveInto(account);
+                    if (prevTile) {
+                        prevTile.moveOut(account);
+                    }
+                    
+                    if (nextTile) {
+                        nextTile.moveInto(account);
                     }
                 }
             } else {

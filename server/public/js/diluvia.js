@@ -3,6 +3,7 @@ var Diluvia = {
     TILE_DIMS:              [64, 64],
     CANVAS_ID:              "viewport",
     INTERVAL_DELAY:         10,
+    FLASH_DURATION:         250,
     
     rowColToPixels: function(row, col) {
         return [row * Diluvia.TILE_DIMS[0], col * Diluvia.TILE_DIMS[1]];
@@ -28,7 +29,12 @@ var DiluviaController = function(server, options) {
     this._chatBoxElement    = $('<input id="chat_box">');
     this._chat              = new Chat(document.body);
     
-    $(document.body).append(this._chatBoxElement);
+    $(document).ready(function() {
+        $(document.body).append(self._chatBoxElement); 
+        self._chatBoxElement.hide();
+        
+        $(document.body).css({ overflow: "hidden" });
+    });
 };
 
 DiluviaController.prototype = {
@@ -88,7 +94,7 @@ DiluviaController.prototype = {
     },
     
     repaintCanvas: function() {
-      this._canvas.paint(this._protocol.getZoneData(), this._currentZoneState);
+        this._canvas.paint(this._protocol.getZoneData(), this._currentZoneState);
     },
     
     move: function(cmd) {
@@ -134,5 +140,29 @@ DiluviaController.prototype = {
     displayChatMessage: function(text) {
         this._chat.addMessage(text);
         this._sound.playAudio("chat");
+    },
+    
+    flash: function(color) {
+        console.log("FLASHING " + color);
+        
+        var flashDiv = $("<div></div>");
+        
+        flashDiv.css({
+            position:       "absolute",
+            top:            "0px",
+            left:           "0px",
+            right:          "0px",
+            bottom:         "0px",
+            width:          "100%",
+            height:         "100%",
+            zIndex:         "254",
+            background:     color
+        });
+        
+        $(document.body).append(flashDiv);
+        
+        flashDiv.fadeOut(Diluvia.FLASH_DURATION, function() {
+            flashDiv.remove();
+        });
     }
 };

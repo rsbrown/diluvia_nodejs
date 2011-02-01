@@ -5,6 +5,7 @@ You'll need NPM modules:
   * express
   * socket.io
   * ejs
+  * underscore
   
 You'll also need a running redis server. If you have MacPorts, install it with:
 

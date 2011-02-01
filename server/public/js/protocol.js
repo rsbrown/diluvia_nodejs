@@ -99,6 +99,9 @@ Protocol.prototype = {
             else if (msg.type == "Chat") {
                 self._controller.displayChatMessage(msg.attrs);
             }
+            else if (msg.type == "Flash") {
+                self._controller.flash(msg.attrs);
+            }
         }
     },
     
