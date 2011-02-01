@@ -16,7 +16,19 @@ var express     = require("express"),
     Routes      = require("routes"),
     Persistence = require("persistence"),
     RedisStore  = require("connect-redis"),
-    Web         = require("web");
+    Web         = require("web"),
+    util        = require("util"),
+    spawn       = require("child_process").spawn;
+
+// Find the last commit ID for git
+var git = spawn("git", [ "rev-parse", "--short", "HEAD" ]);
+
+git.stdout.on("data", function(data) {
+    gitRevision         = data.toString().substring(0, data.length - 1);    
+    Defs.GIT_REVISION   = gitRevision;
+    
+    util.log("Diluvia Server version: " + gitRevision);
+});
 
 var app = express.createServer();
 
@@ -32,6 +44,7 @@ app.use(express.session({
 }));
 
 app.listen(3000);
+
 
 var gameServer  = new GameServer(app),
     web         = new Web(app);

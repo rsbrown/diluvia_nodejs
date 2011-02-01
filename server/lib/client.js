@@ -32,6 +32,8 @@ Client.prototype = {
                     var account = this._server.getAccountForSession(msg.sessionId);
                     
                     if (account) {
+                        this._server.onSuccessfulHandshake(this);
+
                         this._handshake = true;
                         this._account   = account;
                         

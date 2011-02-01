@@ -28,9 +28,13 @@ var DiluviaController = function(server, options) {
     
     this._chatBoxElement    = $('<input id="chat_box">');
     this._chat              = new Chat(document.body);
+    this._serverInfo        = {};
+    this._infoElement       = $('<div id="info_area"></div>');
     
     $(document).ready(function() {
         $(document.body).append(self._chatBoxElement); 
+        $(document.getElementById(Diluvia.CANVAS_ID).parentNode).append(self._infoElement);
+        
         self._chatBoxElement.hide();
         
         $(document.body).css({ overflow: "hidden" });
@@ -166,5 +170,14 @@ DiluviaController.prototype = {
         flashDiv.fadeOut(Diluvia.FLASH_DURATION, function() {
             flashDiv.remove();
         });
-    }
+    },
+    
+    setServerInfo: function(serverInfo) { 
+        this._serverInfo = serverInfo;
+    
+        if (serverInfo.revision) {
+            this._infoElement.html("Diluvia Server Revision " + serverInfo.revision);
+        }
+    },
+    getServerInfo: function(serverInfo) { return this._serverInfo; }
 };

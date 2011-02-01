@@ -1,5 +1,6 @@
 var io          = require("socket.io"),
     _           = require("underscore"),
+    Defs        = require("defs"),
     Client      = require("client"),
     World       = require("world"),
     Account     = require("account"),
@@ -37,9 +38,19 @@ GameServer.prototype = {
         });   
     },
     
+    getInfo: function() {
+        return {
+            revision: Defs.GIT_REVISION
+        };
+    },
+    
     getAccountForSession: function(sessionId) {
         // TODO: replace with code that gets an account by session ID 
         var account = new Account(this._world);
         return account;
+    },
+    
+    onSuccessfulHandshake: function(client) {
+        client.sendMessage("ServerInfo", this.getInfo());
     }
 };
