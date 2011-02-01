@@ -119,8 +119,10 @@ DiluviaController.prototype = {
     
     changeMusic: function(music) {
         this._sound.cancelLoops();
-        this._sound.addAudio(music, music);
-        this._sound.loopAudio(music);
+        
+        if (music) {
+            this._sound.loopAudio(music);
+        }
     },
     
     showChatBox: function() {
