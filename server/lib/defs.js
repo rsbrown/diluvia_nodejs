@@ -8,6 +8,7 @@ var Tile            = require("tile"),
 var Defs = module.exports = {
     COMMAND_INTERVAL:       250,
     CLIENT_INTERVAL:        100,
+    GIT_REVISION:           "unresolved",
         
     Tiles: {
         PLAYER:             new ActorTile({ image: "dude.png:0,0" }),

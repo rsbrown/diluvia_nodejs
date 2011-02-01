@@ -110,6 +110,9 @@ Protocol.prototype = {
             else if (msg.type == "Flash") {
                 self._controller.flash(msg.attrs);
             }
+            else if (msg.type == "ServerInfo") {
+                self._controller.setServerInfo(msg.attrs);
+            }
         }
     },
     

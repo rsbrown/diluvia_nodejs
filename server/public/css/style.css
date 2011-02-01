@@ -162,3 +162,13 @@ canvas {
 #connection-lost {
     display: none;
 }
+
+#info_area {
+    position:   absolute;
+    z-Index:    90;
+    top:        0px;
+    right:      0px;
+    padding:    3px;
+    font-size:  9px;
+    color:      white;
+}
