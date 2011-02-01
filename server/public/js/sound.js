@@ -53,6 +53,7 @@ Sound.prototype = {
                         id:         src, 
                         url:        src,
                         autoPlay:   false,
+                        debugMode:  false,
                         autoLoad:   true
                     });
                 
