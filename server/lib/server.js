@@ -7,15 +7,15 @@ var io          = require("socket.io"),
     Routes      = require("routes");
 
 var Server = module.exports = function(app, redis) {
-    this.socket     = io.listen(app);
-    var world       = new World();
-    this.redis = redis;
+    this._socket  = io.listen(app);
+    this._redis   = redis;
+    var world   = new World();
 
     for (var key in Routes) {
         app.get(key, Util.bind(Routes[key], this));
     }
 
-    this.socket.on("connection", function(conn) {
+    this._socket.on("connection", function(conn) {
         var account = new Account(world),
         client  = new Client(conn, account);
 
@@ -65,23 +65,23 @@ Server.prototype = {
 
         if (username) {
             var uKey = "users:" + username;
-            this.redis.get(uKey, function(err, data) {
+            this._redis.get(uKey, function(err, data) {
                 if (!data) {
-                    this.redis.set(uKey, "{}");
+                    this._redis.set(uKey, "{}");
                 }
                 else {
                     userData = data;
                 }
             });
 
-            this.redis.llen("users", function(err, user_count) {
+            this._redis.llen("users", function(err, user_count) {
                 var self        =  this,
                     userKnown   = false,
                     q;
 
                 if (user_count && user_count > 0) {
                     for (i = 0; i < data; i++) {
-                        this.redis.lindex("users", i, function(err, name) {
+                        this._redis.lindex("users", i, function(err, name) {
                             if (name.toString() == username) {
                                 self.userKnown = true;
                             }
@@ -91,11 +91,11 @@ Server.prototype = {
                         }
                     }
                     if (!self.userKnown) {
-                        this.redis.rpush("users", username);
+                        this._redis.rpush("users", username);
                     }
                 }
                 else {
-                  this.redis.rpush("users", username);
+                  this._redis.rpush("users", username);
                 }
             });
 
@@ -103,7 +103,7 @@ Server.prototype = {
     },
 
     _getUsers: function() {
-        this.redis.get("users", function(err, data) {
+        this._redis.get("users", function(err, data) {
             if (!data) {
                 return [];
             }
