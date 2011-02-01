@@ -2,3 +2,4 @@ mkmf.log
 server/lib/env.js
 .DS_Store
 **/.DS_Store
+dump.rdb
