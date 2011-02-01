@@ -14,7 +14,9 @@ var Protocol = function(controller, server, options) {
     this._socket.connect();
 
     this._socket.on("connect", function() {
+        self._handshake();
         this._connected = true;
+        
         clearTimeout(timeout);
         $("#connection-lost").dialog('close');
     });
@@ -25,6 +27,7 @@ var Protocol = function(controller, server, options) {
 
     this._socket.on("disconnect", function() {
         connected = false;
+        
         $("#connection-lost").dialog({
             resizable: false,
             modal: true,
@@ -40,21 +43,26 @@ var Protocol = function(controller, server, options) {
 };
 
 Protocol.prototype = {
+    _handshake: function() {
+        this.send({ type: "Handshake", sessionId: DILUVIA_SESSION || null });
+    },
+    
     send: function(msg) {
         this._socket.send(msg);
     },
     
     retryConnectOnFailure: function(retryInMilliseconds) {
         var self = this;
+        
         setTimeout(function() {
-          if (!connected) {
-            self._socket = new io.Socket(this._server, this._sock_options);
-            $.get('/ping', function(data) {
-              connected = true;
-              window.location.href = unescape(window.location.pathname);
-            });
-            self.retryConnectOnFailure(retryInMilliseconds);
-          }
+            if (!connected) {
+                self._socket = new io.Socket(this._server, this._sock_options);
+                $.get('/ping', function(data) {
+                    connected = true;
+                    window.location.href = unescape(window.location.pathname);
+                });
+                self.retryConnectOnFailure(retryInMilliseconds);
+            }
         }, retryInMilliseconds);
     },
     

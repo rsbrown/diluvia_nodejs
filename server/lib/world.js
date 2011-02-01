@@ -39,7 +39,7 @@ World.prototype = {
     getZone: function(zoneId) {
         return this._zones[zoneId];
     },
-    
+        
     addAccount: function(account) {
         this._accounts.push(account);
         account.setCurrentZone(this.getDefaultZone());
