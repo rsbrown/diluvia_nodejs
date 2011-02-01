@@ -80,11 +80,14 @@ Account.prototype = {
     },
     
     setClient: function(client) {
-        if (client == null) {
-            this._currentZone.removeAccount(this);
-        }
-        
         this._client = client;
+        
+        if (client == null) {
+            this._world.removeAccount(this);
+        }
+        else {
+            this._world.addAccount(this);
+        }
     },
     
     getClient: function() {

@@ -1,39 +1,51 @@
 var Defs = require("defs");
 
-var Client = module.exports = function(conn, account) {
-    var self = this;
-    
+var Client = module.exports = function(server, conn) {
     this._conn          = conn;
-    this._account       = account;
+    this._server        = server;
     this._lastUpdate    = 0;
-    
-    account.setClient(this);
+    this._handshake     = false;
 };
 
 Client.prototype = {
     onMessage: function(msg) {
         if (msg) {
-            if (msg.type == "CommandStart") {
-                this._account.onStart(msg.command);
+            if (this._handshake) {
+                if (msg.type == "CommandStart") {
+                    this._account.onStart(msg.command);
+                }
+                else if (msg.type == "CommandEnd") {
+                    this._account.onEnd(msg.command);
+                }
+                else if (msg.type == "Move") {
+                    this._account.onCommand(msg.command);
+                }
+                else if (msg.type == "Command") {
+                    this._account.onCommand(msg.command);
+                }
+                else if (msg.type == "Chat") {
+                    this._account.onChat(msg.text);
+                }
             }
-            else if (msg.type == "CommandEnd") {
-                this._account.onEnd(msg.command);
-            }
-            else if (msg.type == "Move") {
-                this._account.onCommand(msg.command);
-            }
-            else if (msg.type == "Command") {
-                this._account.onCommand(msg.command);
-            }
-            else if (msg.type == "Chat") {
-                this._account.onChat(msg.text);
+            else {
+                if (msg.type == "Handshake") {
+                    var account = this._server.getAccountForSession(msg.sessionId);
+                    
+                    if (account) {
+                        this._handshake = true;
+                        this._account   = account;
+                        
+                        account.setClient(this);
+                    }
+                }
             }
         }
     },
     
     onDisconnect: function() {
-        this._account.setClient(null);
-        clearInterval(this._interval);
+        if (this._account) {
+            this._account.setClient(null);
+        }
     },
     
     sendZoneData: function(zone) {

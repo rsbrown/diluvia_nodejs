@@ -1,45 +1,18 @@
-var io          = require("socket.io"),
-    Client      = require("client"),
-    World       = require("world"),
-    Account     = require("account"),
-    PortalTile  = require("portal_tile"),
-    Util        = require("utilities"),
+var _           = require("underscore"),
+    Persistence = require("persistence"),
     Routes      = require("routes");
 
-var Server = module.exports = function(app, redis) {
-    this._socket  = io.listen(app);
-    this._redis   = redis;
-    this._world   = new World();
-
-    for (var key in Routes) {
-        app.get(key, Util.bind(Routes[key], this));
-    }
-
-    Util.bind(this._initWebSocket, this)(); //TODO call this from load of play page, passing in the account
+var Web = module.exports = function(app) {
+    var self = this;
+    
+    // Bind all the routes
+    _(Routes).each(function(val, key) { 
+        app.get(key, _(val).bind(self));
+    });
 };
 
-
-Server.prototype = {
-    _initWebSocket: function() {
-        var world = this._world;
-        this._socket.on("connection", function(conn) {
-            var account = new Account(world),
-                client  = new Client(conn, account);
-
-            world.addAccount(account);
-
-            conn.on("message", function(msg) {
-                console.log(msg);
-                client.onMessage(msg);
-            });
-
-            conn.on("disconnect", function() {
-                client.onDisconnect();
-            });
-        });
-    },
-
-    _redirectBackOrRoot: function(req, res) {
+Web.prototype = {
+    redirectBackOrRoot: function(req, res) {
         if (global["store_location"]) {
             res.redirect(global["store_location"]);
           } else {
@@ -47,8 +20,8 @@ Server.prototype = {
           }
     },
 
-    _preParseRequest: function(req, res, uname) {
-        this._setUser(req, res, uname);
+    preParseRequest: function(req, res, uname) {
+        this.setUser(req, res, uname);
         if (!req.session.flash) {
             req.session.flash = {};
         }
@@ -57,7 +30,9 @@ Server.prototype = {
         if (!req.session.flash.info) {req.session.flash.info = false;}
     },
 
-    _setUser: function(req, res, user) {
+    setUser: function(req, res, user) {
+        var redis = Persistence.getRedis();
+        
         if (user) {
             username = req.session["username"] = user;
         }
@@ -70,23 +45,23 @@ Server.prototype = {
 
         if (username) {
             var uKey = "users:" + username;
-            this._redis.get(uKey, function(err, data) {
+            redis.get(uKey, function(err, data) {
                 if (!data) {
-                    this._redis.set(uKey, "{}");
+                    redis.set(uKey, "{}");
                 }
                 else {
                     userData = data;
                 }
             });
 
-            this._redis.llen("users", function(err, user_count) {
+            redis.llen("users", function(err, user_count) {
                 var self        =  this,
                     userKnown   = false,
                     q;
 
                 if (user_count && user_count > 0) {
                     for (i = 0; i < data; i++) {
-                        this._redis.lindex("users", i, function(err, name) {
+                        redis.lindex("users", i, function(err, name) {
                             if (name.toString() == username) {
                                 self.userKnown = true;
                             }
@@ -96,19 +71,21 @@ Server.prototype = {
                         }
                     }
                     if (!self.userKnown) {
-                        this._redis.rpush("users", username);
+                        redis.rpush("users", username);
                     }
                 }
                 else {
-                  this._redis.rpush("users", username);
+                  redis.rpush("users", username);
                 }
             });
 
         }
     },
 
-    _getUsers: function() {
-        this._redis.get("users", function(err, data) {
+    getUsers: function() {
+        var redis = Persistence.getRedis();
+        
+        redis.get("users", function(err, data) {
             if (!data) {
                 return [];
             }
