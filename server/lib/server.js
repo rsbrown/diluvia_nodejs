@@ -9,31 +9,36 @@ var io          = require("socket.io"),
 var Server = module.exports = function(app, redis) {
     this._socket  = io.listen(app);
     this._redis   = redis;
-    var world   = new World();
+    this._world   = new World();
 
     for (var key in Routes) {
         app.get(key, Util.bind(Routes[key], this));
     }
 
-    this._socket.on("connection", function(conn) {
-        var account = new Account(world),
-        client  = new Client(conn, account);
-
-        world.addAccount(account);
-
-        conn.on("message", function(msg) {
-          console.log(msg);
-          client.onMessage(msg);
-        });
-
-        conn.on("disconnect", function() {
-          client.onDisconnect();
-        });
-    });
+    Util.bind(this._initWebSocket, this)(); //TODO call this from load of play page, passing in the account
 };
 
 
 Server.prototype = {
+    _initWebSocket: function() {
+        var world = this._world;
+        this._socket.on("connection", function(conn) {
+            var account = new Account(world),
+                client  = new Client(conn, account);
+
+            world.addAccount(account);
+
+            conn.on("message", function(msg) {
+                console.log(msg);
+                client.onMessage(msg);
+            });
+
+            conn.on("disconnect", function() {
+                client.onDisconnect();
+            });
+        });
+    },
+
     _redirectBackOrRoot: function(req, res) {
         if (global["store_location"]) {
             res.redirect(global["store_location"]);
