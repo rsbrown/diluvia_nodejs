@@ -6,9 +6,9 @@ soundManager.useFlashBlock = false; // optionally, enable when you're ready to d
 
 var Sound = function() {
     var self = this;
-    
-    this._audios    = {};
-    this._loops     = {};
+    this._musicOn       = true;
+    this._audios        = {};
+    this._loops         = {};
     
     soundManager.onready(function() {
         self.addAudio("bump",   "/media/sounds/bump.mp3");
@@ -40,28 +40,48 @@ Sound.prototype = {
     },
     
     loopAudio: function(src) {
-        var self = this;
+        if (this._musicOn) {
         
-        console.log(src);
+            var self = this;
+            console.log(src);
         
-        if (!(src in this._loops)) {
-            var audio;
+            if (!(src in this._loops)) {
+                var audio;
             
-            soundManager.onready(function() {
-                var audio = soundManager.createSound({
-                    id:         src, 
-                    url:        src,
-                    autoPlay:   false,
-                    autoLoad:   true
-                });
+                soundManager.onready(function() {
+                    var audio = soundManager.createSound({
+                        id:         src, 
+                        url:        src,
+                        autoPlay:   false,
+                        autoLoad:   true
+                    });
                 
-                self._loops[src] = audio;
-                audio.play({ loops: 999 });                
-            });
-        }
-        else {
-            this._loops[src].play({ loops: 999 });
-        }
+                    self._loops[src] = audio;
+                    audio.play({ loops: 999 });                
+                });
+            }
+            else {
+                this._loops[src].play({ loops: 999 });
+            }
+            
+         }
+    },
+    
+    startMusic: function(src) {
+      this._musicOn = true;
+      this.loopAudio(src);
+    },
+    
+    stopMusic: function() {
+      this._musicOn = false;
+      this.cancelLoops();
+    },
+    
+    resetLoops: function(src) {
+      this.cancelLoops();
+      if (src) {
+        this.loopAudio(src);
+      }
     },
     
     cancelLoops: function() {

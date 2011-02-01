@@ -59,14 +59,14 @@
         
         $("#audio-pause a").click(function(e){
           e.preventDefault();
-          diluvia.getSound().cancelLoops();
+          diluvia.stopMusic();
           $("#audio-pause").hide();
           $("#audio-play").show();
         });
 
         $("#audio-play a").click(function(e){
           e.preventDefault();
-          diluvia.getSound().loopAudio("bgmusic1");
+          diluvia.startMusic();
           $("#audio-play").hide();
           $("#audio-pause").show();
         });

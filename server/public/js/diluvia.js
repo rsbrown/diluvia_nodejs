@@ -117,12 +117,16 @@ DiluviaController.prototype = {
         return this._chat;
     },
     
+    startMusic: function() {
+        this._sound.startMusic(this._protocol.getZoneData().music);
+    },
+    
+    stopMusic: function() {
+        this._sound.stopMusic();
+    },
+    
     changeMusic: function(music) {
-        this._sound.cancelLoops();
-        
-        if (music) {
-            this._sound.loopAudio(music);
-        }
+        this._sound.resetLoops(music);
     },
     
     showChatBox: function() {
