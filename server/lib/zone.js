@@ -282,7 +282,7 @@ Zone.prototype = {
                 this._updatedTiles.push(layerTileIdx);
                 this._updatedTiles.push(potentialIdx);
 
-                console.log("MOVE " + account.getUid() + ": " + layerTileIdx + " => " + potentialIdx + " (" + tileIdx + ")");
+                // console.log("MOVE " + account.getUid() + ": " + layerTileIdx + " => " + potentialIdx + " (" + tileIdx + ")");
 
                 for (var i = 0; i < LAYER_COUNT; i++) {
                     var prevTileIdx = this._layers[i][layerTileIdx],
@@ -304,7 +304,7 @@ Zone.prototype = {
             
         }
         else {
-            console.log("User tried to move out of map");
+            // console.log("User tried to move out of map");
             if (noisy) account.getClient().sendMoveFailed();
         }
     },

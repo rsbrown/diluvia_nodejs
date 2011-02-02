@@ -15,6 +15,7 @@ var DiluviaController = function(server, options) {
     
     this._protocol          = new Protocol(this, server, options);
     this._keyboard          = new Keyboard(this);
+    this._pointer           = new Pointer(this);
     this._canvas            = new Canvas(this, document.getElementById(Diluvia.CANVAS_ID));
     this._sound             = new Sound();
     this._preload           = [];

@@ -29,7 +29,6 @@ GameServer.prototype = {
         var client  = new Client(this, conn);
 
         conn.on("message", function(msg) {
-            console.log(msg);
             client.onMessage(msg);
         });
 

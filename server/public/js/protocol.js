@@ -70,8 +70,6 @@ Protocol.prototype = {
         var self = this;
         
         if (msg) {
-            console.log(msg);
-            
             if (msg.type == "ZoneData") {
                 var zoneData = this._zoneData = msg.attrs,
                     tileData = zoneData.tiles;                
@@ -97,7 +95,6 @@ Protocol.prototype = {
                 this._controller.updatedZoneState(msg.attrs);
             }
             else if (msg.type == "MoveFailed") {
-                console.log("playing sound");
                 self._controller.getSound().playAudio("bump");
             }
             else if (msg.type == "PlaySound") {
