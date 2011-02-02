@@ -83,7 +83,9 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         this._actors.push(actor);
         this._board.getLayer(ACTOR_LAYER).setTileId(tileIndex, tileId);
         
-        this.playSound("portal");    
+        this.playSound("portal");
+        
+        actor.land();
     },
     
     removeActor: function(actor) {

@@ -180,7 +180,7 @@ World.prototype = {
     spawnPlayer: function(account, player) {
         var zone = this.getDefaultZone();
         this.placeAccountInZone(account, zone, zone.getDefaultSpawnPointIndex());
-        player.spawn();        
+        player.spawn();
     },
     
     playerDeath: function(account, client, player) {
