@@ -1,5 +1,6 @@
 var _       = require("underscore"),
     Defs    = require("defs"),
+    Persistence = require("persistence"),
     events  = require("events");
 
 var Client = module.exports = function(conn) {
@@ -7,6 +8,7 @@ var Client = module.exports = function(conn) {
     
     this._conn          = conn;
     this._handshake     = false;
+    this._startTime     = new Date().getTime();
 };
 
 _.extend(Client.prototype, events.EventEmitter.prototype, {
@@ -35,6 +37,12 @@ _.extend(Client.prototype, events.EventEmitter.prototype, {
     },
     
     onDisconnect: function() {
+        var redis = Persistence.getRedis();
+        var sessionData = JSON.stringify({
+            session: this._conn.sessionId,
+            length:  (new Date().getTime() - this._startTime)/1000
+        });
+        redis.rpush("sessions", sessionData);
         this.emit("disconnect");
     },
     
