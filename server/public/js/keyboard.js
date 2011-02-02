@@ -16,12 +16,11 @@ var Keyboard = function(controller) {
         if (cmd && !chatting) {
             keysDown[kc] = true;
             controller.command(cmd);
-
             ev.preventDefault();
         }
 
     });
-
+    
     $(window).keypress(function(ev) {
         var kc = ev.keyCode;
         

@@ -35,9 +35,7 @@ var DiluviaController = function(server, options) {
     $(document).ready(function() {
         $(document.body).append(self._chatBoxElement); 
         $(document.getElementById(Diluvia.CANVAS_ID).parentNode).append(self._infoElement);
-        
         self._chatBoxElement.hide();
-        
         $(document.body).css({ overflow: "hidden" });
     });
 };

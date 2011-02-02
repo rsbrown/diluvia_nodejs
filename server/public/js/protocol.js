@@ -10,7 +10,7 @@ var Protocol = function(controller, server, options) {
     this._socket        = new io.Socket(this._server, this._sock_options);
     this._connected     = false;
     this._zoneData      = {};
-    
+
     this._socket.connect();
 
     this._socket.on("connect", function() {
@@ -114,5 +114,5 @@ Protocol.prototype = {
     },
     
     getZoneData: function() { return this._zoneData; },
-    getZoneState: function() { return this._zoneState; }
+    getZoneState: function() { return this._zoneState; },
 };
