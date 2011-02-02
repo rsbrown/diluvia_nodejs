@@ -21,7 +21,7 @@ Web.prototype = {
     },
 
     preParseRequest: function(req, res, uname) {
-        this.setUser(req, res, uname);
+        username = req.session["username"];
         if (!req.session.flash) {
             req.session.flash = {};
         }
@@ -29,10 +29,8 @@ Web.prototype = {
         if (!req.session.flash.warning) {req.session.flash.warning = false;}
         if (!req.session.flash.info) {req.session.flash.info = false;}
     },
-
     setUser: function(req, res, user) {
         var redis = Persistence.getRedis();
-        
         if (user) {
             username = req.session["username"] = user;
         }
@@ -78,13 +76,11 @@ Web.prototype = {
                   redis.rpush("users", username);
                 }
             });
-
         }
     },
-
     getUsers: function() {
         var redis = Persistence.getRedis();
-        
+    
         redis.get("users", function(err, data) {
             if (!data) {
                 return [];
@@ -94,4 +90,5 @@ Web.prototype = {
             }
         });
     }
+    
 };

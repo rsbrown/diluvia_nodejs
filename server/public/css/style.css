@@ -35,11 +35,13 @@ header {
 	top: 0;
 	left: 30px;
 }
-#welcome {
+.header-item {
 	position: absolute;
 	top: 0;
-	right: 30px;
+}
+#welcome {
 	line-height: 60px;
+	right: 30px;
 	color: #999;
 	font-style: italic;
 }
@@ -171,4 +173,15 @@ canvas {
     padding:    3px;
     font-size:  9px;
     color:      white;
+}
+
+#user-login {
+    right: 200px;
+    padding-top: 20px;
+    color: #DDDDDD;
+}
+
+a.logout{
+    font-size: 11px;
+    color: #DD3333;
 }

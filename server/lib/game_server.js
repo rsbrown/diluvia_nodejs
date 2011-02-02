@@ -77,7 +77,10 @@ GameServer.prototype = {
                     
                     if (zoneId) {
                         zone = world.getZone(zoneId);
-                        zone.chat(conn.sessionId, text);                        
+                        var uid = username || "guest" + (conn.sessionId+"").substring(0,3);
+                        if (text != "") {
+                            zone.chat(uid, text);
+                        }
                     }
                 });
             }

@@ -8,7 +8,7 @@ var Client = module.exports = function(conn) {
     
     this._conn          = conn;
     this._handshake     = false;
-    this._startTime     = new Date().getTime();
+    this._startTime     = new Date();
 };
 
 _.extend(Client.prototype, events.EventEmitter.prototype, {
@@ -40,7 +40,8 @@ _.extend(Client.prototype, events.EventEmitter.prototype, {
         var redis = Persistence.getRedis();
         var sessionData = JSON.stringify({
             session: this._conn.sessionId,
-            length:  (new Date().getTime() - this._startTime)/1000
+            start_time: this._startTime,
+            length:  (new Date().getTime() - this._startTime.getTime())/1000
         });
         redis.rpush("sessions", sessionData);
         this.emit("disconnect");
