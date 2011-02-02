@@ -37,6 +37,8 @@ GameServer.prototype = {
         client.on("receivedHandshakeRequest", function(sessionId) {
             account = server.getAccountForSession(sessionId);
             
+            client.sendMessage("ServerInfo", server.getInfo());
+            
             if (account) {
                 var actor   = world.spawnAccount(account, client),
                     zone    = world.getZone(actor.getZoneId());

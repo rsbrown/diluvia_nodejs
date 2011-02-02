@@ -85,7 +85,7 @@ World.prototype = {
                     )
                 });
             }
-                
+
             this._stateQueue = [];
         }
     },
