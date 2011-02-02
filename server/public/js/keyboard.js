@@ -15,8 +15,7 @@ var Keyboard = function(controller) {
     
         if (cmd && !chatting) {
             keysDown[kc] = true;
-            // controller.commandStart(cmd);
-            controller.move(cmd);
+            controller.command(cmd);
 
             ev.preventDefault();
         }

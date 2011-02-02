@@ -101,11 +101,7 @@ DiluviaController.prototype = {
     repaintCanvas: function() {
         this._canvas.paint(this._protocol.getZoneData(), this._currentZoneState);
     },
-    
-    move: function(cmd) {
-        this._protocol.send({ "type": "Move", "command": cmd });
-    },
-    
+        
     commandStart: function(cmd) {
         this._protocol.send({ "type": "CommandStart", "command": cmd });
     },

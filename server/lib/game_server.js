@@ -8,8 +8,8 @@ var io          = require("socket.io"),
     Routes      = require("routes");
 
 var GameServer = module.exports = function(app) {
-    this._socket  = io.listen(app);
     this._world   = new World();
+    this._socket  = io.listen(app);
 
     // I moved the route stuff back into Web because I think the "Server" itself
     // should be mostly concerned about game world state & events. I renamed it to
@@ -26,15 +26,56 @@ var GameServer = module.exports = function(app) {
 
 GameServer.prototype = {
     _onConnect: function(conn) {
-        var client  = new Client(this, conn);
+        var server  = this,
+            client  = new Client(conn),
+            world   = this._world,
+            account;
 
-        conn.on("message", function(msg) {
-            client.onMessage(msg);
+        conn.on("message", function(msg) { client.onMessage(msg); });
+        conn.on("disconnect", function() { client.onDisconnect(); });   
+        
+        client.on("receivedHandshakeRequest", function(sessionId) {
+            account = server.getAccountForSession(sessionId);
+            
+            if (account) {
+                var actor   = world.spawnAccount(account, client),
+                    zone    = world.getZone(actor.getZoneId());
+                                    
+                client.completeHandshake();
+                
+                client.sendZoneData(zone);
+                client.sendZoneState(world.composeZoneStateFor(actor, zone.getStateAttributes()));
+                
+                actor.on("changeZone", function() {
+                    var zoneId = actor.getZoneId();
+                    
+                    if (zoneId) {
+                        var zone = world.getZone(zoneId);
+                    
+                        client.sendZoneData(zone);
+                        client.sendZoneState(world.composeZoneStateFor(actor, zone.getStateAttributes()));
+                    }
+                });
+                
+                actor.on("landed", function() {
+                    client.sendFlash("black");
+                });
+                
+                client.on("receivedCommand", function(command) {
+                    var zoneId  = actor.getZoneId(),
+                        zone    = world.getZone(zoneId);
+                        
+                    zone.command(actor, command);
+                });
+
+                client.on("receivedChat", function(text) {
+                    var zoneId  = actor.getZoneId(),
+                        zone    = world.getZone(zoneId);
+                        
+                    zone.chat(conn.sessionId, text);
+                });
+            }
         });
-
-        conn.on("disconnect", function() {
-            client.onDisconnect();
-        });   
     },
     
     getInfo: function() {
@@ -48,7 +89,7 @@ GameServer.prototype = {
         var account = new Account(this._world);
         return account;
     },
-    
+        
     onSuccessfulHandshake: function(client) {
         client.sendMessage("ServerInfo", this.getInfo());
     }

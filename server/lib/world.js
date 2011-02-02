@@ -1,16 +1,25 @@
-var Defs        = require("defs"),
+var _           = require("underscore"),
+    events      = require("events"),
+    Defs        = require("defs"),
     Zone        = require("zone"),
     Tile        = require("tile"),
     SpawnTile   = require("spawn_tile"),
     PortalTile  = require("portal_tile"),
     WallTile    = require("wall_tile"),
     PainTile    = require("pain_tile"),
+    Player      = require("player"),
     fs          = require("fs");
+
+var QUEUE_INTERVAL = 25;
 
 var World = module.exports = function() {
     this._accounts      = [];
     this._defaultTiles  = [];
     this._zones         = {};
+    this._online        = [];
+    this._stateQueue    = [];
+
+    setInterval(_(this._onQueueInterval).bind(this), QUEUE_INTERVAL);
     
     this._loadZones();
 };
@@ -29,7 +38,9 @@ World.prototype = {
     
     setZone: function(zoneId, zone) {
         if (zone) {
+            zone._zoneId        = zoneId;
             this._zones[zoneId] = zone;
+            this._hookZone(zone);
         }
         else {
             delete this._zones[zoneId];
@@ -39,36 +50,188 @@ World.prototype = {
     getZone: function(zoneId) {
         return this._zones[zoneId];
     },
+    
+    _onQueueInterval: function() {
+        if (this._stateQueue.length > 0) {
+            var world       = this,
+                zoneStates  = {};
         
-    addAccount: function(account) {
-        this._accounts.push(account);
-        account.setCurrentZone(this.getDefaultZone());
-        this.getDefaultZone().addAccount(account);
+            for (var i = 0, len = this._stateQueue.length; i < len; i++) {
+                var item        = this._stateQueue[i],
+                    zone        = item[0],
+                    layerIndex  = item[1],
+                    tileIndex   = item[2],
+                    tileId      = item[3],
+                    zoneId      = zone.getZoneId();
+            
+                if (!(zoneId in zoneStates)) {
+                    zoneStates[zoneId] = {};
+                }
+            
+                if (!(layerIndex in zoneStates[zoneId])) {
+                    zoneStates[zoneId][layerIndex] = {};
+                }
+            
+                zoneStates[zoneId][layerIndex][tileIndex] = tileId;
+            }
+        
+            for (var zoneId in zoneStates) {
+                var state   = zoneStates[zoneId],
+                    zone    = world.getZone(zoneId);
+                        
+                _(this.getAccountsForZone(zone)).each(function(account) {
+                    account.getClient().sendZoneState(
+                        world.composeZoneStateFor(account.getPlayer(), state)
+                    )
+                });
+            }
+                
+            this._stateQueue = [];
+        }
     },
     
-    removeAccount: function(account) {
-        var zone = account.getCurrentZone();
-        zone.removeAccount(account);
-        this._accounts.splice(this._accounts.indexOf(account), 1);
+    _hookZone: function(zone) {
+        var self    = this,
+            board   = zone.getBoard();
+                
+        zone.on("chat", function(message) {
+            self._onZoneChat(zone, message);
+        });
+        
+        zone.on("sound", function(sound) {
+            self._onZoneSound(zone, sound);
+        });
+        
+        board.on("layerTileIdChange", function(layerIndex, tileIndex, tileId, prevTileId) {
+            var layers = board.getLayers();
+            
+            // we push all of them so client gets a full state stack to redraw the tile
+            for (var i = 0, len = layers.length; i < len; i++) {
+                self._stateQueue.push([zone, i, tileIndex, layers[i].getTileId(tileIndex)]);
+            }
+        });
+    },
+        
+    _onZoneChat: function(zone, message) {
+        _(this.getAccountsForZone(zone)).each(function(account) {
+            account.getClient().sendChat(message);
+        });
     },
     
-    teleport: function(account, zoneId, coords) {
-        var oldZone     = account.getCurrentZone(),
-            newZone     = this.getZone(zoneId);
+    _onZoneSound: function(zone, sound) {
+        _(this.getAccountsForZone(zone)).each(function(account) {
+            account.getClient().sendPlaySound(sound);
+        });        
+    },
+    
+    getAccountsForZone: function(zone) {
+        var zoneId = zone.getZoneId();
         
+        return _(this._online).select(function(account) {
+            return account.getPlayer().getZoneId() == zoneId;
+        });
+    },
+        
+    spawnAccount: function(account, client) {
+        var player  = new Player(),
+            world   = this;
+        
+        account.setClient(client);
+        account.setPlayer(player);
+        
+        this._online.push(account);
+        
+        // switch the player's tile when they change orientations
+        player.on("changeOrientation", function(orientation) {
+            var currentZone = world.getZone(player.getZoneId());
+            currentZone.setPlayerTileForOrientation(player, orientation);
+        });
+        
+        player.on("moveFailed", function() {
+            client.sendPlaySound("bump");
+        });
+        
+        player.on("tookDamage", function(damage, hitpoints) {
+            client.sendPlaySound("ouch");
+            client.sendFlash("red");
+            
+            if (hitpoints <= 0) {
+                world.playerDeath(account, client, player);
+            }
+        });
+    
+        client.on("disconnect", function() {
+            var currentZone = world.getZone(player.getZoneId()),
+                idx         = world._online.indexOf(account);
+            
+            world._online.splice(idx, 1);
+            
+            currentZone.removeActor(player);
+            
+            account.setClient(null);
+            account.setPlayer(null);
+        });
+        
+        this.spawnPlayer(account, player);
+        
+        return player;
+    },
+    
+    spawnPlayer: function(account, player) {
+        var zone = this.getDefaultZone();
+        this.placeAccountInZone(account, zone, zone.getDefaultSpawnPointIndex());
+        player.spawn();        
+    },
+    
+    playerDeath: function(account, client, player) {
+        var zone = this.getZone(player.getZoneId());
+        
+        zone.playSound("scream");
+        
+        player.die();
+        
+        this.removeAccountFromZone(account, zone);
+        this.spawnPlayer(account, player);
+    },
+    
+    placeAccountInZone: function(account, zone, tileIndex) {
+        var client  = account.getClient(),
+            player  = account.getPlayer();
+        
+        zone.addActor(player, "PLAYER", tileIndex);    
+    },
+    
+    removeAccountFromZone: function(account, zone) {
+        var client  = account.getClient(),
+            player  = account.getPlayer();
+        
+        zone.removeActor(player);
+    },
+    
+    composeZoneStateFor: function(actor, zoneState) {
+        return {
+            "playerIdx":    actor.getTileIndex(),
+            "layers":       zoneState
+        };
+    },
+
+    teleport: function(actor, zoneId, coords) {
+        var oldZoneId   = actor.getZoneId(),
+            oldZone     = this.getZone(oldZoneId),
+            newZone     = this.getZone(zoneId),
+            tileIndex   = (coords ? newZone.xyToIndex(coords[0], coords[1]) : newZone.getDefaultSpawnPointIndex());
+                
         if (newZone) {
-            oldZone.removeAccount(account);
-            account.setCurrentZone(newZone);
-            newZone.addAccount(account, coords);
+            oldZone.removeActor(actor);
+            newZone.addActor(actor, "PLAYER", tileIndex);            
         }
         else {
             console.log("Tried to teleport to " + zoneId + ", which doesn't exist!");
         }
-        
     },
     
     emptyZone: function(width, height) {
-        return new Zone(width || 64, height || 64);
+        return new Zone(this, null, {width: width || 64, height: height || 64});
     },
     
     generateDefaultZone: function(options) {
@@ -105,31 +268,33 @@ World.prototype = {
     },
     
     createZoneFromConfig: function(conf) {
-        var zone = this.emptyZone(conf.dimensions[0], conf.dimensions[1]);
+        var zone    = this.emptyZone(conf.dimensions[0], conf.dimensions[1]),
+            board   = zone.getBoard();
         
         for (var mli = 0, mllen = World.MAP_LAYER_KEYS.length; mli < mllen; mli++) {
             var confKey         = World.MAP_LAYER_KEYS[mli],
                 confMapLayer    = conf[confKey];
-                mapLayerStr     = confMapLayer.join("");
+                mapLayerStr     = confMapLayer.join(""),
+                layer           = board.getLayer(mli);
             
             for (var i = 0, len = mapLayerStr.length; i < len; i++) {
                 var ch = mapLayerStr.charAt(i);
                 
                 if (ch != " ") {
                     var lookup  = conf.tiles[ch],
-                        tileIdx;
+                        tileId;
                     
                     if ((typeof lookup) == "string") {
-                        tileIdx = lookup;
+                        tileId = lookup;
                     }
                     else {
                         var klass   = eval(lookup.class),
                             tile    = new klass(lookup.options);
                 
-                        tileIdx = zone.addTile(tile);
+                        tileId = zone.addTile(tile);
                     }
             
-                    zone.setLayerTile(mli, i, tileIdx);
+                    layer.setTileId(i, tileId);
                 }
             }
         }

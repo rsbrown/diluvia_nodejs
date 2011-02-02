@@ -25,7 +25,7 @@ _.extend(PainTile.prototype, Tile.prototype, {
         }
     },
     
-    moveOut: function(actor) {
+    moveOut: function(actor) {        
         var idx = this._damaging.indexOf(actor);
         
         if (idx != -1) {

@@ -11,10 +11,10 @@ var PortalTile = module.exports = function(options) {
 
 _.extend(PortalTile.prototype, Tile.prototype, {
     canMoveInto: function(actor) {
-        return "silent";
+        return true;
     },
     
-    moveInto: function(actor) {
-        actor.teleport(this._destZone, this._destCoords);
+    moveInto: function(actor, tileIndex, tileData, world) {
+        world.teleport(actor, this._destZone, this._destCoords);
     }
 });

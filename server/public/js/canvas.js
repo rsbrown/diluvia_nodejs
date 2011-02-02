@@ -15,7 +15,7 @@ var Canvas = function(controller, element) {
 
 Canvas.prototype = {
     paint: function(zoneData, zoneState) {        
-        var zoneDims    = zoneState.dimensions,
+        var zoneDims    = zoneData.dimensions,
             playerIdx   = zoneState.playerIdx,
             layerCount  = zoneDims[2],
             tileWidth   = Diluvia.TILE_DIMS[0],
@@ -70,24 +70,33 @@ Canvas.prototype = {
                     Diluvia.TILE_DIMS[1]                        
                 );
             }
-            
+                        
             for (var li = 0; li < layerCount; li++) {
-                var layerTileIdx = zoneState.layers[li][key];
+                var layer = zoneState.layers[li];
                 
-                if (layerTileIdx) {
-                    var tile = zoneData.tiles[layerTileIdx];
-                
-                    this._context.drawImage(
-                        this._controller.getImage(tile.imagePath),
-                        tile.coords[0],
-                        tile.coords[1],
-                        Diluvia.TILE_DIMS[0],
-                        Diluvia.TILE_DIMS[1],
-                        destPixelCoords[0],
-                        destPixelCoords[1],
-                        Diluvia.TILE_DIMS[0],
-                        Diluvia.TILE_DIMS[1]                    
-                    );                    
+                if (layer) {
+                    var tileId = layer[key];
+                    
+                    if (tileId) {
+                        var tile = zoneData.tiles[tileId];
+                        
+                        if (tile) {        
+                            this._context.drawImage(
+                                this._controller.getImage(tile.imagePath),
+                                tile.coords[0],
+                                tile.coords[1],
+                                Diluvia.TILE_DIMS[0],
+                                Diluvia.TILE_DIMS[1],
+                                destPixelCoords[0],
+                                destPixelCoords[1],
+                                Diluvia.TILE_DIMS[0],
+                                Diluvia.TILE_DIMS[1]                    
+                            );         
+                        }
+                        else {
+                            console.log("COULD NOT DRAW " + tileId);
+                        }           
+                    }
                 }
             }
         }

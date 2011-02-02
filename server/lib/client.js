@@ -1,76 +1,49 @@
-var Defs = require("defs");
+var _       = require("underscore"),
+    Defs    = require("defs"),
+    events  = require("events");
 
-var Client = module.exports = function(server, conn) {
+var Client = module.exports = function(conn) {
+    events.EventEmitter.call(this);
+    
     this._conn          = conn;
-    this._server        = server;
-    this._lastUpdate    = 0;
     this._handshake     = false;
 };
 
-Client.prototype = {
+_.extend(Client.prototype, events.EventEmitter.prototype, {
     onMessage: function(msg) {
         if (msg) {
+            console.log("MESSAGE: " + JSON.stringify(msg));
+            
             if (this._handshake) {
-                if (msg.type == "CommandStart") {
-                    this._account.onStart(msg.command);
-                }
-                else if (msg.type == "CommandEnd") {
-                    this._account.onEnd(msg.command);
-                }
-                else if (msg.type == "Move") {
-                    this._account.onCommand(msg.command);
-                }
-                else if (msg.type == "Command") {
-                    this._account.onCommand(msg.command);
+                if (msg.type == "Command") {
+                    this.emit("receivedCommand", msg.command);
                 }
                 else if (msg.type == "Chat") {
-                    this._account.onChat(msg.text);
+                    this.emit("receivedChat", msg.text);
                 }
             }
             else {
-                if (msg.type == "Handshake") {
-                    var account = this._server.getAccountForSession(msg.sessionId);
-                    
-                    if (account) {
-                        this._server.onSuccessfulHandshake(this);
-
-                        this._handshake = true;
-                        this._account   = account;
-                        
-                        account.setClient(this);
-                    }
+                if (msg.type == "Handshake") {                    
+                    this.emit("receivedHandshakeRequest", msg.sessionId);
                 }
             }
         }
     },
+
+    completeHandshake: function() {
+        this._handshake = true;
+    },
     
     onDisconnect: function() {
-        if (this._account) {
-            this._account.setClient(null);
-        }
+        this.emit("disconnect");
     },
     
     sendZoneData: function(zone) {
-        var tiles       = zone.getTiles(),
-            tileData    = {};
-
-        for (var key in tiles) {
-            var tile = tiles[key];
-            
-            tileData[key] = {
-                image: tile.getImage()
-            };
-        }
-                
-        this.sendMessage("ZoneData", {
-            "background":   zone.getBackground(),
-            "music":        zone.getMusic(),
-            "tiles":        tileData
-        });
+        this.sendMessage("ZoneData", zone.getRenderAttributes());
     },
     
-    sendMoveFailed: function() {
-        this.sendMessage("MoveFailed", null);
+    sendZoneState: function(zoneState) {
+        this.sendMessage("ZoneState", zoneState);
     },
     
     sendPlaySound: function(sound) {
@@ -81,32 +54,12 @@ Client.prototype = {
         this.sendMessage("Flash", color);
     },
     
-    sendZoneState: function(zone, layerState) {
-        if (!layerState) {
-            var layers      = zone.getLayers(),
-                layerState  = {};
-
-            for (var layerIdx = 0, layerLen = layers.length; layerIdx < layerLen; layerIdx++) {
-                var layer   = layers[layerIdx],
-                    data    = {};
-            
-                for (var tileIdx in layer) {
-                    data[tileIdx] = layer[tileIdx];
-                }
-            
-                layerState[layerIdx] = data;
-            }
-        }
-        
-        this.sendMessage("ZoneState", {
-            "playerIdx":    this._account.getLayerTileIndex(),
-            "dimensions":   this._account.getCurrentZone().getDimensions(),
-            "layers":       layerState
-        });
+    sendChat: function(message) {
+        this.sendMessage("Chat", message);
     },
     
     sendMessage: function(type, attrs) {
         this._conn.send({ "type": type, "attrs": attrs });
     },
-};
+});
 
