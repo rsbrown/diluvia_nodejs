@@ -62,17 +62,21 @@ GameServer.prototype = {
                 });
                 
                 client.on("receivedCommand", function(command) {
-                    var zoneId  = actor.getZoneId(),
-                        zone    = world.getZone(zoneId);
-                        
-                    zone.command(actor, command);
+                    var zoneId  = actor.getZoneId();
+                    
+                    if (zoneId) {
+                        var zone = world.getZone(zoneId);
+                        zone.command(actor, command);
+                    }
                 });
 
                 client.on("receivedChat", function(text) {
-                    var zoneId  = actor.getZoneId(),
-                        zone    = world.getZone(zoneId);
-                        
-                    zone.chat(conn.sessionId, text);
+                    var zoneId  = actor.getZoneId();
+                    
+                    if (zoneId) {
+                        zone = world.getZone(zoneId);
+                        zone.chat(conn.sessionId, text);                        
+                    }
                 });
             }
         });

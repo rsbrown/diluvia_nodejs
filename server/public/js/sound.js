@@ -68,20 +68,21 @@ Sound.prototype = {
     },
     
     startMusic: function(src) {
-      this._musicOn = true;
-      this.loopAudio(src);
+        this._musicOn = true;
+        this.loopAudio(src);
     },
     
     stopMusic: function() {
-      this._musicOn = false;
-      this.cancelLoops();
+        this._musicOn = false;
+        this.cancelLoops();
     },
     
     resetLoops: function(src) {
-      this.cancelLoops();
-      if (src) {
-        this.loopAudio(src);
-      }
+        this.cancelLoops();
+        
+        if (src) {
+            this.loopAudio(src);
+        }
     },
     
     cancelLoops: function() {
