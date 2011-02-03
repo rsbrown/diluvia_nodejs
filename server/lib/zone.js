@@ -22,7 +22,8 @@ var Zone = module.exports = function(world, zoneId, options) {
     this._active            = [];
     this._shouldBeInactive  = [];
     this._actors            = [];
-    
+    this._tileUid           = (new Date()).getTime();
+
     // initialize layers
     for (var i = 0; i < Defs.LAYER_COUNT; i++) {
         this._board.addLayer(new BoardLayer());
@@ -35,6 +36,10 @@ var Zone = module.exports = function(world, zoneId, options) {
 };
 
 _.extend(Zone.prototype, events.EventEmitter.prototype, {
+    getNextTileId: function() {
+        return this._tileUid++;
+    },
+    
     getZoneId: function() {
         return this._zoneId;
     },
@@ -166,7 +171,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
     },
     
     addTile: function(tile) {
-        var idx = Object.keys(this._tiles).length; // TODO: this won't be unique dudz
+        var idx = this.getNextTileId();
         this._tiles[idx] = tile;
         tile.setZone(this);
         return idx;
