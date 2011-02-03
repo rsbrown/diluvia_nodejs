@@ -40,7 +40,7 @@ GameServer.prototype = {
             client.sendMessage("ServerInfo", server.getInfo());
             
             if (account) {
-                var actor   = world.spawnAccount(account, client),
+                var actor   = world.playerInitialize(account, client),
                     zone    = world.getZone(actor.getZoneId());
                                     
                 client.completeHandshake();
@@ -68,7 +68,13 @@ GameServer.prototype = {
                     
                     if (zoneId) {
                         var zone = world.getZone(zoneId);
-                        zone.command(actor, command);
+                        
+                        if (command == "n" || command == "s" || command == "e" || command == "w") {
+                            zone.command(actor, command);
+                        }
+                        else {
+                            world.otherCommand(account, zone, command);
+                        }
                     }
                 });
 

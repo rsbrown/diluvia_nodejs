@@ -9,6 +9,7 @@ var Defs = module.exports = {
     COMMAND_INTERVAL:       250,
     CLIENT_INTERVAL:        100,
     GIT_REVISION:           "unresolved",
+    POISON_DEATH_DELAY:     15000, /* 15 seconds */
         
     Tiles: {
         PLAYER:             { class: "ActorTile",   image: "dude.png:0,0" },

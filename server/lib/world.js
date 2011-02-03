@@ -52,9 +52,10 @@ World.prototype = {
     },
     
     _onQueueInterval: function() {
+        var world = this;
+        
         if (this._stateQueue.length > 0) {
-            var world       = this,
-                zoneStates  = {};
+            var zoneStates  = {};
         
             for (var i = 0, len = this._stateQueue.length; i < len; i++) {
                 var item        = this._stateQueue[i],
@@ -87,6 +88,20 @@ World.prototype = {
             }
 
             this._stateQueue = [];
+        }
+        
+        var currentTime = (new Date()).getTime();
+        
+        for (var i = 0, len = this._online.length; i < len; i++) {
+            var account     = this._online[i],
+                player      = account.getPlayer(),
+                poisonedAt  = player.getPoisonedAt();
+            
+            if (poisonedAt) {
+                if (currentTime >= (poisonedAt + Defs.POISON_DEATH_DELAY)) {
+                    world.accountDeath(account);
+                }                
+            }
         }
     },
     
@@ -132,7 +147,7 @@ World.prototype = {
         });
     },
         
-    spawnAccount: function(account, client) {
+    playerInitialize: function(account, client) {
         var player  = new Player(),
             world   = this;
         
@@ -156,7 +171,7 @@ World.prototype = {
             client.sendFlash("red");
             
             if (hitpoints <= 0) {
-                world.playerDeath(account, client, player);
+                world.accountDeath(account);
             }
         });
     
@@ -172,26 +187,30 @@ World.prototype = {
             account.setPlayer(null);
         });
         
-        this.spawnPlayer(account, player);
+        this.accountSpawn(account);
         
         return player;
     },
     
-    spawnPlayer: function(account, player) {
-        var zone = this.getDefaultZone();
+    accountSpawn: function(account) {
+        var zone    = this.getDefaultZone(),
+            player  = account.getPlayer();
+            
         this.placeAccountInZone(account, zone, zone.getDefaultSpawnPointIndex());
+        
         player.spawn();
     },
     
-    playerDeath: function(account, client, player) {
-        var zone = this.getZone(player.getZoneId());
+    accountDeath: function(account) {
+        var player  = account.getPlayer(),
+            zone    = this.getZone(player.getZoneId());
         
         zone.playSound("scream");
         
         player.die();
         
         this.removeAccountFromZone(account, zone);
-        this.spawnPlayer(account, player);
+        this.accountSpawn(account);
     },
     
     placeAccountInZone: function(account, zone, tileIndex) {
@@ -213,6 +232,32 @@ World.prototype = {
             "playerIdx":    actor.getTileIndex(),
             "layers":       zoneState
         };
+    },
+    
+    otherCommand: function(account, zone, command) {
+        var client      = account.getClient(),
+            player      = account.getPlayer(),
+            tileIndex   = player.getTileIndex(),
+            orientation = player.getOrientation(),
+            otherIndex  = zone.indexForDirectionalMove(tileIndex, orientation),
+            actors      = zone.getActors();
+
+        if (command == "a") {
+            var otherActor;
+            
+            for (var i = 0, len = actors.length; i < len; i++) {
+                var actor = actors[i];
+                
+                if (actor.getTileIndex() == otherIndex) {
+                    otherActor = actor;
+                }
+            }
+            
+            if (otherActor) {
+                otherActor.poison();
+                client.sendFlash("purple");
+            }
+        }
     },
 
     teleport: function(actor, zoneId, coords) {

@@ -1,11 +1,12 @@
 var events  = require("events"),
-    _       = require("underscore");
+    _       = require("underscore"),
+    Defs    = require("defs");
 
 var Actor = module.exports = function() {
     events.EventEmitter.call(this);
 };
 
-_.extend(Actor.prototype, events.EventEmitter.prototype, {
+_.extend(Actor.prototype, events.EventEmitter.prototype, {    
     getStartingHitpoints: function() {
         return 100;
     },
@@ -60,7 +61,8 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
     },
     
     spawn: function() {
-        this._hitpoints = this.getStartingHitpoints();
+        this._hitpoints     = this.getStartingHitpoints();
+        this._poisonedAt    = null;
         this.emit("spawned");
     },
     
@@ -74,6 +76,16 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
     
     moveFailed: function() {
         this.emit("moveFailed");
+    },
+    
+    poison: function() {
+        if (!this._poisonedAt) {
+            this._poisonedAt = (new Date()).getTime();
+        }
+    },
+    
+    getPoisonedAt: function() {
+        return this._poisonedAt;
     },
     
     getRenderAttributes: function() {

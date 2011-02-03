@@ -187,13 +187,9 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         var dir;
         
         if (command == "n" || command == "s" || command == "e" || command == "w") {
-            dir = command;
+            this.move(actor, command);
         }
-        
-        if (dir) {
-            this.move(actor, dir);
-        }
-    },    
+    },
     
     indexToXy: function(idx) {
         var y = Math.floor(idx / this._dimensions[0]),
@@ -273,5 +269,9 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
     
     getStateAttributes: function() {
         return this._board.getRenderAttributes();
+    },
+    
+    getActors: function() {
+        return this._actors;
     }
 });
