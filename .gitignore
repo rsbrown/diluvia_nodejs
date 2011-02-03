@@ -1,5 +1,5 @@
 mkmf.log
 server/lib/env.js
+*.gz
 .DS_Store
-**/.DS_Store
 dump.rdb
