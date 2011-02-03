@@ -6,6 +6,9 @@ var Tile            = require("tile"),
     PainTile        = require("pain_tile");
 
 var Defs = module.exports = {
+    ROLE_ASSASSIN:          1,
+    ROLE_SEEKER:            2,
+    
     COMMAND_INTERVAL:       250,
     CLIENT_INTERVAL:        100,
     GIT_REVISION:           "unresolved",

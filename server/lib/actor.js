@@ -1,9 +1,11 @@
-var events  = require("events"),
-    _       = require("underscore"),
-    Defs    = require("defs");
+var events          = require("events"),
+    _               = require("underscore"),
+    Defs            = require("defs");
 
 var Actor = module.exports = function() {
     events.EventEmitter.call(this);
+    this._gameAttributes  = {};
+    this._role            = Defs.ROLEROLE_SEEKER;
 };
 
 _.extend(Actor.prototype, events.EventEmitter.prototype, {    
@@ -78,7 +80,7 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
         this.emit("moveFailed");
     },
     
-    poison: function() {
+    becomesPoisoned: function() {
         if (!this._poisonedAt) {
             this._poisonedAt = (new Date()).getTime();
         }
@@ -93,10 +95,19 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
         this.emit("changeGoalInventory", item);
     },
     
+    getRole: function() {
+        return this._role;
+    },
+    
+    setRole: function(role) {
+        this._role = role;
+        this.emit("changeRole", role);
+    },
+    
     getGoalInventory: function() {
         return this._goalInventory;
     },
-    
+
     getRenderAttributes: function() {
         return {
             zoneId:     this.getZoneId(),

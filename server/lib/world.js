@@ -168,6 +168,20 @@ World.prototype = {
             client.sendPlaySound("bump");
         });
         
+        player.on("changeRole", function(newRole) {
+            if (newRole == Defs.ROLE_ASSASSIN) {
+                client.sendChat(
+                    "You are now the assassin! \
+                     You may poison other players by approaching them and pressing 'a'. \
+                     Don't let them find your precious treasure!"
+                );
+            } else {
+                client.sendChat(
+                    "You have lost your assassin abilities."
+                );
+            }
+        });
+        
         player.on("tookDamage", function(damage, hitpoints) {
             client.sendPlaySound("ouch");
             client.sendFlash("red");
@@ -242,19 +256,21 @@ World.prototype = {
             actors      = zone.getActors();
 
         if (command == "attack") {
-            var otherActor;
-            
-            for (var i = 0, len = actors.length; i < len; i++) {
-                var actor = actors[i];
+            var successfullyAttacked = false;
+            if (player.getRole() == Defs.ROLE_ASSASSIN) {
+                var otherActor;
+                for (var i = 0, len = actors.length; i < len; i++) {
+                    var actor = actors[i];
                 
-                if (actor.getTileIndex() == otherIndex) {
-                    otherActor = actor;
+                    if (actor.getTileIndex() == otherIndex) {
+                        otherActor = actor;
+                    }
                 }
-            }
             
-            if (otherActor) {
-                otherActor.poison();
-                client.sendFlash("purple");
+                if (otherActor) {
+                    otherActor.becomesPoisoned();
+                    client.sendFlash("purple");
+                }
             }
         }
         else if (command == "drop") {
@@ -278,19 +294,37 @@ World.prototype = {
     },
     
     actorIntersectsGoal: function(actor, tile, zone, tileIndex, tileData, layerIndex) {
-        var layer   = zone.getBoard().getLayer(layerIndex),
-            tileId  = zone.getTileId(tile);
+        var layer        = zone.getBoard().getLayer(layerIndex),
+            tileId       = zone.getTileId(tile),
+            oldAssassin,
+            actors       = zone.getActors();
         
         layer.setTileId(tileIndex, null);
         actor.setGoalInventory({ tileId: tileId, tileData: tileData });
+        for (var i = 0, len = actors.length; i < len; i++) {
+            var actor = actors[i];
+        
+            if (actor.getRole() == Defs.ROLE_ASSASSIN) {
+                oldAssassin = actor;
+                break;
+            }
+        }
+    
+        if (oldAssassin) {
+            oldAssassin.setRole(Defs.ROLE_SEEKER);
+        }        
     },
     
     actorDropGoal: function(actor) {
         var goal = actor.getGoalInventory();
-                
         if (goal) {
             var successfullyDropped = false;
             var goalPoint = parseInt(actor.getTileIndex());
+            // *****************************************
+            // TODO: FIXME: VERY NAIVE ALGORITHM 
+            // IF YOU'RE ON A BAD TILE, IT JUST KEEPS MOVING RGHT
+            // UNTIL IT FINDS ONE THAT CAN BE DROPPED INTO.
+            // THIS CAN CAUSE AN INFINITE LOOP IF IT NEVER FINDS ONE.
             while (!successfullyDropped) {
                 successfullyDropped = this.placeGoal(
                     this.getZone(actor.getZoneId()),
@@ -300,7 +334,7 @@ World.prototype = {
                 );
                 goalPoint++;
             }
-            
+            actor.setRole(Defs.ROLE_ASSASSIN);
             actor.setGoalInventory(null);
         }
     },
