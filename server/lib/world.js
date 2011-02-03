@@ -101,7 +101,6 @@ World.prototype = {
             if (poisonedAt) {
                 if (currentTime >= (poisonedAt + Defs.POISON_DEATH_DELAY)) {
                     account.getClient().sendChat("You were poisoned!");
-                    world.actorDropGoal(player);
                     world.accountDeath(account);
                 }                
             }
@@ -207,9 +206,8 @@ World.prototype = {
             zone    = this.getZone(player.getZoneId());
         
         zone.playSound("scream");
-        
         player.die();
-        
+        this.actorDropGoal(player);
         this.removeAccountFromZone(account, zone);
         this.accountSpawn(account);
     },
