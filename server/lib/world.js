@@ -101,6 +101,7 @@ World.prototype = {
             if (poisonedAt) {
                 if (currentTime >= (poisonedAt + Defs.POISON_DEATH_DELAY)) {
                     account.getClient().sendChat("You were poisoned!");
+                    world.actorDropGoal(player);
                     world.accountDeath(account);
                 }                
             }
@@ -180,11 +181,9 @@ World.prototype = {
         client.on("disconnect", function() {
             var currentZone = world.getZone(player.getZoneId()),
                 idx         = world._online.indexOf(account);
-            
+            world.actorDropGoal(player);
             world._online.splice(idx, 1);
-            
             currentZone.removeActor(player);
-            
             account.setClient(null);
             account.setPlayer(null);
         });
@@ -292,16 +291,19 @@ World.prototype = {
         var goal = actor.getGoalInventory();
                 
         if (goal) {
-            var success = this.placeGoal(
-                this.getZone(actor.getZoneId()),
-                actor.getTileIndex(),
-                goal.tileId,
-                goal.tileData
-            );
-            
-            if (success) {
-                actor.setGoalInventory(null);
+            var successfullyDropped = false;
+            var goalPoint = parseInt(actor.getTileIndex());
+            while (!successfullyDropped) {
+                successfullyDropped = this.placeGoal(
+                    this.getZone(actor.getZoneId()),
+                    goalPoint,
+                    goal.tileId,
+                    goal.tileData
+                );
+                goalPoint++;
             }
+            
+            actor.setGoalInventory(null);
         }
     },
     

@@ -68,6 +68,11 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         return resIndex;
     },
     
+    getDefaultGoalPointIndex: function() {
+        // TODO: THIS IS DUMB. MAKE IT SMART.
+        return parseInt(this.getDefaultSpawnPointIndex()) + 1;
+    },
+
     getBoard: function() {
         return this._board;
     },

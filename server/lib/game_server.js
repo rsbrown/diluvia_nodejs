@@ -30,7 +30,6 @@ GameServer.prototype = {
             client  = new Client(conn);
             
         client.on("receivedHandshakeRequest", function(sessionId) {
-            console.log("GameServer.receivedHandshakeRequest");
             server.initAccount(client, sessionId);
         });
         conn.on("message", function(msg) { client.onMessage(msg); });
