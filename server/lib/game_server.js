@@ -95,21 +95,8 @@ GameServer.prototype = {
         }
     },
 
-    // ** TODO: This code will pull the session ID from the socket.io connection. Doesn't seem to work with XHR polling, though
-    // ** Once Firefox supports websockets again, we can go back to a full-WS transport protocol. Fuck XHR polling.
-    // initSession: function(client, fn) {
-    //   console.log(client.request.headers);
-    //   var sid = "NOSESSION";
-    //   var cookie = client.request.headers.cookie;
-    //   if (cookie) {
-    //       sid = unescape(cookie.match(/connect\.sid=([^;]+)/)[1]);
-    //       console.log("RETRIEVING SESSION ID = " + sid);
-    //   }
-    //   var redis = Persistence.getRedis();
-    //   redis.get(sid, function(err, data) {
-    //     fn(err, JSON.parse(data));
-    //   });      
-    // },
+    // Removed the cookie-based fetching of the session key because the Handshake is really
+    // the best way to get the session ID cookie. It works for everything, period.
     
     getInfo: function() {
         return {
