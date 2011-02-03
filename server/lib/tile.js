@@ -23,12 +23,12 @@ Tile.prototype = {
     moveOut: function(actor) {
     },
     
-    canMoveInto: function(actor, tileIndex, tileData) {
+    canMoveInto: function(actor, tileIndex, tileData, layerIndex) {
         return true;
     },
     
     setZone: function(zone) {
-        return this._zone;
+        this._zone = zone;
     },
     
     getZone: function() {
@@ -59,5 +59,6 @@ var ActorTile   = require("actor_tile"),
     SpawnTile   = require("spawn_tile"),
     PortalTile  = require("portal_tile"),
     WallTile    = require("wall_tile"),
-    PainTile    = require("pain_tile");
+    PainTile    = require("pain_tile"),
+    GoalTile    = require("goal_tile");
 

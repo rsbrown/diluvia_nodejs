@@ -3,7 +3,8 @@ var KEYCODE_MOVE_COMMANDS = {
     40: "s",
     39: "e",
     37: "w",
-    65: "a"
+    65: "attack",
+    69: "drop"
 };
 
 var Keyboard = function(controller) {

@@ -7,6 +7,7 @@ var _           = require("underscore"),
     PortalTile  = require("portal_tile"),
     WallTile    = require("wall_tile"),
     PainTile    = require("pain_tile"),
+    GoalTile    = require("goal_tile"),
     Player      = require("player"),
     fs          = require("fs");
 
@@ -146,7 +147,7 @@ World.prototype = {
             return account.getPlayer().getZoneId() == zoneId;
         });
     },
-        
+
     playerInitialize: function(account, client) {
         var player  = new Player(),
             world   = this;
@@ -242,7 +243,7 @@ World.prototype = {
             otherIndex  = zone.indexForDirectionalMove(tileIndex, orientation),
             actors      = zone.getActors();
 
-        if (command == "a") {
+        if (command == "attack") {
             var otherActor;
             
             for (var i = 0, len = actors.length; i < len; i++) {
@@ -258,6 +259,9 @@ World.prototype = {
                 client.sendFlash("purple");
             }
         }
+        else if (command == "drop") {
+            this.actorDropGoal(player);
+        }
     },
 
     teleport: function(actor, zoneId, coords) {
@@ -272,6 +276,46 @@ World.prototype = {
         }
         else {
             console.log("Tried to teleport to " + zoneId + ", which doesn't exist!");
+        }
+    },
+    
+    actorIntersectsGoal: function(actor, tile, zone, tileIndex, tileData, layerIndex) {
+        var layer   = zone.getBoard().getLayer(layerIndex),
+            tileId  = zone.getTileId(tile);
+        
+        layer.setTileId(tileIndex, null);
+        actor.setGoalInventory({ tileId: tileId, tileData: tileData });
+    },
+    
+    actorDropGoal: function(actor) {
+        var goal = actor.getGoalInventory();
+                
+        if (goal) {
+            var success = this.placeGoal(
+                this.getZone(actor.getZoneId()),
+                actor.getTileIndex(),
+                goal.tileId,
+                goal.tileData
+            );
+            
+            if (success) {
+                actor.setGoalInventory(null);
+            }
+        }
+    },
+    
+    placeGoal: function(zone, tileIndex, tileId, tileData) {
+        var layer   = zone.getBoard().getLayer(Defs.OBJECT_LAYER),
+            exist   = layer.getTileId(tileIndex);
+        
+        if (exist) {
+            return false;
+        }
+        else {
+            layer.setTileId(tileIndex, tileId);
+            layer.setTileData(tileIndex, tileData);
+            
+            return true;
         }
     },
     

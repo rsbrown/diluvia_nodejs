@@ -14,7 +14,7 @@ _.extend(PortalTile.prototype, Tile.prototype, {
         return true;
     },
     
-    moveInto: function(actor, tileIndex, tileData, world) {
+    moveInto: function(actor, tileIndex, tileData, layerIndex, world) {
         world.teleport(actor, this._destZone, this._destCoords);
     }
 });

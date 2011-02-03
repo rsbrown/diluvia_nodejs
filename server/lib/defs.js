@@ -10,7 +10,12 @@ var Defs = module.exports = {
     CLIENT_INTERVAL:        100,
     GIT_REVISION:           "unresolved",
     POISON_DEATH_DELAY:     15000, /* 15 seconds */
-        
+    
+    LAYER_COUNT:            3,
+    BASE_LAYER:             0,
+    OBJECT_LAYER:           1,
+    ACTOR_LAYER:            2,
+
     Tiles: {
         PLAYER:             { class: "ActorTile",   image: "dude.png:0,0" },
         PLAYER_N:           { class: "ActorTile",   image: "dude.png:0,0" },
@@ -89,6 +94,8 @@ var Defs = module.exports = {
 
         PORTAL:             { class: "PortalTile",  image: "sprites.png:2,8" },
 		WATER:              { class: "WallTile",    image: "sprites.png:0,7" },
-		LAVA:               { class: "PainTile",    image: "sprites.png:8,7" }
+		LAVA:               { class: "PainTile",    image: "sprites.png:8,7" },
+		
+		TREASURE:           { class: "GoalTile",    image: "sprites.png:4,5" }
     }
 };

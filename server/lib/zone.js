@@ -7,11 +7,6 @@ var _               = require("underscore"),
     Board           = require("board"),
     BoardLayer      = require("board_layer");
 
-var LAYER_COUNT     = 3,
-    BASE_LAYER      = 0,
-    OBJECT_LAYER    = 1,
-    ACTOR_LAYER     = 2;
-
 var Zone = module.exports = function(world, zoneId, options) {
     events.EventEmitter.call(this);
     
@@ -23,18 +18,19 @@ var Zone = module.exports = function(world, zoneId, options) {
     this._zoneId            = zoneId;
     this._board             = new Board();
     this._tiles             = {};
-    this._dimensions        = [options.width, options.height, LAYER_COUNT];
+    this._dimensions        = [options.width, options.height, Defs.LAYER_COUNT];
     this._active            = [];
     this._shouldBeInactive  = [];
     this._actors            = [];
     
     // initialize layers
-    for (var i = 0; i < LAYER_COUNT; i++) {
+    for (var i = 0; i < Defs.LAYER_COUNT; i++) {
         this._board.addLayer(new BoardLayer());
     }
     
     for (var key in Defs.Tiles) {
-        this._tiles[key] = Tile.instanceFromDefinition(Defs.Tiles[key]);
+        var tile = this._tiles[key] = Tile.instanceFromDefinition(Defs.Tiles[key]);
+        tile.setZone(this);
     }
 };
 
@@ -60,7 +56,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         }
         
         if (spawnTiles.length > 0) {
-            var layer = this._board.getLayer(OBJECT_LAYER);
+            var layer = this._board.getLayer(Defs.OBJECT_LAYER);
                         
             layer.eachTile(function(tileIndex, tileId, tileData) {
                 if (spawnTiles.indexOf(tileId) != -1 && resIndex == -1) {
@@ -81,7 +77,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         actor.setTileIndex(tileIndex);
         
         this._actors.push(actor);
-        this._board.getLayer(ACTOR_LAYER).setTileId(tileIndex, tileId);
+        this._board.getLayer(Defs.ACTOR_LAYER).setTileId(tileIndex, tileId);
         
         this.playSound("portal");
         
@@ -97,7 +93,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         if (idx != -1) {
             actor.setZoneId(null);
 
-            this._board.getLayer(ACTOR_LAYER).setTileId(oldTileIndex, null);
+            this._board.getLayer(Defs.ACTOR_LAYER).setTileId(oldTileIndex, null);
             this._actors.splice(idx, 1);
             
             // send moveOut notifications to tiles
@@ -105,7 +101,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
                 var tile = self.getTile(item[0]);
                 
                 if (tile) {
-                    tile.moveOut(actor, oldTileIndex, item[1], world);
+                    tile.moveOut(actor, oldTileIndex, item[1], item[2], world);
                 }
             });
 
@@ -114,21 +110,22 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
     },
     
     isTileIndexPassableBy: function(tileIndex, actor) {
-        var zone = this;
+        var zone    = this,
+            board   = this._board;
                 
-        return _(this._board.getLayers()).all(function(layer) {
+        return _(board.getLayers()).all(function(layer) {
             var tileId      = layer.getTileId(tileIndex),
                 tileData    = layer.getTileData(tileIndex),
                 tile        = zone.getTile(tileId);
                         
-            return tile ? tile.canMoveInto(actor, tileIndex, tileData) : true;
+            return tile ? tile.canMoveInto(actor, tileIndex, tileData, board.getLayerIndexFor(layer)) : true;
         });
     },
     
     move: function(actor, direction) {
         var world           = this._world,
             zone            = this,
-            layer           = this._board.getLayer(ACTOR_LAYER),
+            layer           = this._board.getLayer(Defs.ACTOR_LAYER),
             prevTileIndex   = actor.getTileIndex(),
             nextTileIndex   = this.indexForDirectionalMove(prevTileIndex, direction),
             prevTiles       = this._board.getTileIdAndDataFor(prevTileIndex),
@@ -145,7 +142,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
                 var tile = zone.getTile(tileIdAndData[0]);
                 
                 if (tile) {
-                    tile.moveOut(actor, prevTileIndex, tileIdAndData[1], world);
+                    tile.moveOut(actor, prevTileIndex, tileIdAndData[1], tileIdAndData[2], world);
                 }
             });
 
@@ -155,9 +152,9 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
                 var tile = zone.getTile(tileIdAndData[0]);
                 
                 if (tile) {
-                    tile.moveInto(actor, nextTileIndex, tileIdAndData[1], world);
+                    tile.moveInto(actor, nextTileIndex, tileIdAndData[1], tileIdAndData[2], world);
                 }
-            });    
+            });   
         }
         else {
             actor.moveFailed();
@@ -169,13 +166,22 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
     },
     
     addTile: function(tile) {
-        var idx = Object.keys(this._tiles).length;
+        var idx = Object.keys(this._tiles).length; // TODO: this won't be unique dudz
         this._tiles[idx] = tile;
+        tile.setZone(this);
         return idx;
     },
     
     getTile: function(idx) {
         return this._tiles[idx];
+    },
+    
+    getTileId: function(tile) {
+        for (var key in this._tiles) {
+            if (this._tiles[key] == tile) {
+                return key;
+            }
+        }
     },
         
     chat: function(user, text) {
@@ -247,7 +253,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
     },
     
     setPlayerTileForOrientation: function(player, orientation) {
-        var layer = this._board.getLayer(ACTOR_LAYER);
+        var layer = this._board.getLayer(Defs.ACTOR_LAYER);
         layer.setTileId(player.getTileIndex(), "PLAYER_" + orientation.toUpperCase());
     },
     

@@ -88,6 +88,15 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
         return this._poisonedAt;
     },
     
+    setGoalInventory: function(item) {
+        this._goalInventory = item;
+        this.emit("changeGoalInventory", item);
+    },
+    
+    getGoalInventory: function() {
+        return this._goalInventory;
+    },
+    
     getRenderAttributes: function() {
         return {
             zoneId:     this.getZoneId(),

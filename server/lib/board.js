@@ -30,12 +30,20 @@ _(Board.prototype).extend(events.EventEmitter.prototype, {
         return this._layers[layerIndex];
     },
     
+    getLayerIndexFor: function(layer) {
+        return this._layers.indexOf(layer);
+    },
+    
     getLayers: function() {
         return this._layers;
     },
     
     getTileIdAndDataFor: function(tileIndex) {
-        return _(this._layers).map(function (layer) { return [ layer.getTileId(tileIndex), layer.getTileData(tileIndex) ] });
+        var self = this;
+        
+        return _(this._layers).map(function (layer) { 
+            return [ layer.getTileId(tileIndex), layer.getTileData(tileIndex), self.getLayerIndexFor(layer) ]; 
+        });
     },
         
     getRenderAttributes: function() {
