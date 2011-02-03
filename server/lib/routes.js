@@ -23,12 +23,14 @@ var Routes = module.exports = {
     },
 
     '/play': function(req, res){
+        // console.log(JSON.stringify(req.session));
         this.preParseRequest(req, res);
         req.session["store_location"] = '/play';
         res.render('world', { 
             locals: { 
                 sessionId:  req.session.id,
-                flash:      req.session.flash
+                flash:      req.session.flash,
+                username:   req.session.username
             }
         });
     },
@@ -50,8 +52,8 @@ var Routes = module.exports = {
       req.authenticate(['facebook'], function(error, authenticated) { 
          if(authenticated ) {
             req.session.username = req.getAuthDetails()["user"]["name"];
-            console.log(JSON.stringify(req.session));
-            console.log(req.session.username);
+            // console.log(JSON.stringify(req.session));
+            // console.log(req.session.username);
             self.redirectBackOrRoot(req, res);
           }
           else {
@@ -64,7 +66,7 @@ var Routes = module.exports = {
     '/auth/twitter': function(req, res, params) {
         this.preParseRequest(req, res);
         req.authenticate(['twitter'], function(error, authenticated) {
-                console.log("authenticated: " + authenticated);
+                // console.log("authenticated: " + authenticated);
                 if( authenticated ) {
                     // CONGRATS, DO SOME STUFF
                 } else {

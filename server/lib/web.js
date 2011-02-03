@@ -21,7 +21,6 @@ Web.prototype = {
     },
 
     preParseRequest: function(req, res, uname) {
-        username = req.session["username"];
         if (!req.session.flash) {
             req.session.flash = {};
         }

@@ -100,6 +100,7 @@ World.prototype = {
             
             if (poisonedAt) {
                 if (currentTime >= (poisonedAt + Defs.POISON_DEATH_DELAY)) {
+                    account.getClient().sendChat("You were poisoned!");
                     world.accountDeath(account);
                 }                
             }

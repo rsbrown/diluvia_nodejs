@@ -29,7 +29,7 @@ var Pointer = function(controller) {
      });
 
     $("canvas").mousedown(function(ev) {
-        if (event.which != 1) return true;
+        if (ev.which != 1) return true;
         
         timeout = setInterval(function(){
             self.movePlayer();

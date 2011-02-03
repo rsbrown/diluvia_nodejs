@@ -39,9 +39,8 @@ app.use(express.bodyDecoder());
 app.use(express.cookieDecoder());
 app.use(express.session({
     secret:     "zZICGH40MKxHDTTqOCLbA4YN3CcvKoMOOZIkEkOc6C2LHuNMWHAEYzoeBjnqSzy3dpoDhZZhthe7y4ZpMpGpcQcdLVKHGhAlhAvkMxzlFC7eDleIEkXj3XMVWVVAd3Hbpp3epw9iBuBqvOZY4lZ7bdAgtN5VEVvRT5VM5UXzq7y1NX5uXkULPieYsuLFjyAlJRjczCCL",
-    store:      new RedisStore 
+    store:      new RedisStore
 }));
-// app.use(connect.gzip());
 
 var gameServer     = new GameServer(app),
     authController = new AuthController(app),

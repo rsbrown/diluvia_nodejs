@@ -20,78 +20,97 @@ var GameServer = module.exports = function(app) {
     // determine where that connection was coming from. If we pass in the
     // account here, it will be static for every connection. --RB
     
-    this._socket.on("connection", _(this._onConnect).bind(this));    
+    this._socket.on("connection", _(this._onConnect).bind(this));
 };
 
 
 GameServer.prototype = {
     _onConnect: function(conn) {
         var server  = this,
-            client  = new Client(conn),
+            client  = new Client(conn);
+            
+        client.on("receivedHandshakeRequest", function(sessionId) {
+            console.log("GameServer.receivedHandshakeRequest");
+            server.initAccount(client, sessionId);
+        });
+        conn.on("message", function(msg) { client.onMessage(msg); });
+        conn.on("disconnect", function() { client.onDisconnect(); });
+    },
+    
+    initAccount: function(client, sessionId) {
+        var server  = this,
             world   = this._world,
             account;
 
-        conn.on("message", function(msg) { client.onMessage(msg); });
-        conn.on("disconnect", function() { client.onDisconnect(); });   
+        account = new Account(this, sessionId);
+        client.sendMessage("ServerInfo", server.getInfo());
         
-        client.on("receivedHandshakeRequest", function(sessionId) {
-            account = server.getAccountForSession(sessionId);
+        if (account) {
+            var actor   = world.playerInitialize(account, client),
+                zone    = world.getZone(actor.getZoneId());
+                                
+            client.completeHandshake();
+            client.sendZoneData(zone);
+            client.sendZoneState(world.composeZoneStateFor(actor, zone.getStateAttributes()));
             
-            client.sendMessage("ServerInfo", server.getInfo());
+            actor.on("changeZone", function() {
+                var zoneId = actor.getZoneId();
+                
+                if (zoneId) {
+                    var zone = world.getZone(zoneId);
+                
+                    client.sendZoneData(zone);
+                    client.sendZoneState(world.composeZoneStateFor(actor, zone.getStateAttributes()));
+                }
+            });
             
-            if (account) {
-                var actor   = world.playerInitialize(account, client),
-                    zone    = world.getZone(actor.getZoneId());
-                                    
-                client.completeHandshake();
+            actor.on("landed", function() {
+                client.sendFlash("black");
+            });
+            
+            client.on("receivedCommand", function(command) {
+                var zoneId  = actor.getZoneId();
                 
-                client.sendZoneData(zone);
-                client.sendZoneState(world.composeZoneStateFor(actor, zone.getStateAttributes()));
-                
-                actor.on("changeZone", function() {
-                    var zoneId = actor.getZoneId();
+                if (zoneId) {
+                    var zone = world.getZone(zoneId);
                     
-                    if (zoneId) {
-                        var zone = world.getZone(zoneId);
-                    
-                        client.sendZoneData(zone);
-                        client.sendZoneState(world.composeZoneStateFor(actor, zone.getStateAttributes()));
+                    if (command == "n" || command == "s" || command == "e" || command == "w") {
+                        zone.command(actor, command);
                     }
-                });
-                
-                actor.on("landed", function() {
-                    client.sendFlash("black");
-                });
-                
-                client.on("receivedCommand", function(command) {
-                    var zoneId  = actor.getZoneId();
-                    
-                    if (zoneId) {
-                        var zone = world.getZone(zoneId);
-                        
-                        if (command == "n" || command == "s" || command == "e" || command == "w") {
-                            zone.command(actor, command);
-                        }
-                        else {
-                            world.otherCommand(account, zone, command);
-                        }
+                    else {
+                        world.otherCommand(account, zone, command);
                     }
-                });
+                }
+            });
 
-                client.on("receivedChat", function(text) {
-                    var zoneId  = actor.getZoneId();
-                    
-                    if (zoneId) {
-                        zone = world.getZone(zoneId);
-                        var uid = username || "guest" + (conn.sessionId+"").substring(0,3);
-                        if (text != "") {
-                            zone.chat(uid, text);
-                        }
+            client.on("receivedChat", function(text) {
+                var zoneId  = actor.getZoneId();
+                
+                if (zoneId) {
+                    zone = world.getZone(zoneId);
+                    if (text != "") {
+                        zone.chat(account.getUid(), text);
                     }
-                });
-            }
-        });
+                }
+            });
+        }
     },
+
+    // ** TODO: This code will pull the session ID from the socket.io connection. Doesn't seem to work with XHR polling, though
+    // ** Once Firefox supports websockets again, we can go back to a full-WS transport protocol. Fuck XHR polling.
+    // initSession: function(client, fn) {
+    //   console.log(client.request.headers);
+    //   var sid = "NOSESSION";
+    //   var cookie = client.request.headers.cookie;
+    //   if (cookie) {
+    //       sid = unescape(cookie.match(/connect\.sid=([^;]+)/)[1]);
+    //       console.log("RETRIEVING SESSION ID = " + sid);
+    //   }
+    //   var redis = Persistence.getRedis();
+    //   redis.get(sid, function(err, data) {
+    //     fn(err, JSON.parse(data));
+    //   });      
+    // },
     
     getInfo: function() {
         return {
@@ -99,12 +118,6 @@ GameServer.prototype = {
         };
     },
     
-    getAccountForSession: function(sessionId) {
-        // TODO: replace with code that gets an account by session ID 
-        var account = new Account(this._world);
-        return account;
-    },
-        
     onSuccessfulHandshake: function(client) {
         client.sendMessage("ServerInfo", this.getInfo());
     }

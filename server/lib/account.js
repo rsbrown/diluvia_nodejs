@@ -1,11 +1,10 @@
-var START_HITPOINTS = 100;
-var uidCounter      = 0;
+var Persistence = require("persistence");
 
-var Account = module.exports = function(world, options) {
-    options             = options || {};
-    
+var START_HITPOINTS = 100;
+
+var Account = module.exports = function(world, sessionId) {
+    this._uid           = null;
     this._world         = world;
-    this._uid           = uidCounter++;
     
     this._zones         = {};
     this._backpack      = [];
@@ -14,9 +13,26 @@ var Account = module.exports = function(world, options) {
     this._client        = null;
     this._player        = null;
     
+    this.initSession(sessionId);
 };
 
 Account.prototype = {
+
+    initSession: function(sessionId) {
+      var self = this,
+          redis = Persistence.getRedis();
+        
+      redis.get(sessionId, function(err, data) {
+         var sessionData = JSON.parse(data);
+         if (sessionData.username) {
+             self._uid = sessionData.username;
+         } else {
+             self._uid = "guest_" + (sessionId+"").substring(0,3);
+         }
+        console.log("INIT SESSION FOR USER " + self._uid);
+      });
+    },
+
     getPlayer: function() {
         return this._player;
     },

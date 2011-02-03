@@ -16,7 +16,6 @@ var Protocol = function(controller, server, options) {
     this._socket.on("connect", function() {
         self._handshake();
         this._connected = true;
-        
         clearTimeout(timeout);
         $("#connection-lost").dialog('close');
     });
