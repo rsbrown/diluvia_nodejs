@@ -105,6 +105,6 @@ var Defs = module.exports = {
 		WATER:              { class: "WallTile",    image: "sprites.png:0,7" },
 		LAVA:               { class: "PainTile",    image: "sprites.png:8,7" },
 		
-		TREASURE:           { class: "GoalTile",    image: "sprites.png:4,5" }
+		TREASURE:           { class: "GoalTile",    image: "sprites.png:5,5" }
     }
 };
