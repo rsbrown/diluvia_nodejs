@@ -198,6 +198,14 @@ World.prototype = {
                 world.accountDeath(account);
             }
         });
+        
+        player.on("died", function() {
+            _(world._online).each(function(otherAccount) {
+                otherAccount.getClient().sendChat(Defs.CHAT_INFO,
+                    account.getUid() + " died!"
+                )
+            });
+        });
     
         client.on("disconnect", function() {
             var currentZone = world.getZone(player.getZoneId()),
