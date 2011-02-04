@@ -5,7 +5,7 @@ var events          = require("events"),
 var Actor = module.exports = function() {
     events.EventEmitter.call(this);
     this._gameAttributes  = {};
-    this._role            = Defs.ROLEROLE_SEEKER;
+    this._role            = Defs.ROLE_SEEKER;
 };
 
 _.extend(Actor.prototype, events.EventEmitter.prototype, {    

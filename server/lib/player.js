@@ -5,6 +5,7 @@ var _       = require("underscore"),
 var Player = module.exports = function() {
     Actor.call(this);
     this._orientation = "n";
+    this._score       = 0;
 };
 
 _.extend(Player.prototype, Actor.prototype, events.EventEmitter.prototype, {
