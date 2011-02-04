@@ -30,7 +30,6 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
     
     setTileIndex: function(tileIndex) {
         this._tileIndex = tileIndex;
-        
         this.emit("changeTileIndex", tileIndex);
         this.emit("change");
     },
