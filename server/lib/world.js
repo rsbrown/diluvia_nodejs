@@ -182,6 +182,14 @@ World.prototype = {
             }
         });
         
+        player.on("changeGoalInventory", function(goalInventory) {
+            if (goalInventory != null) { 
+                client.sendChat(Defs.CHAT_ALERT,
+                    "You found the treasure! Press 'e' to drop it and become the assassin!"
+                );
+            }
+        })
+        
         player.on("tookDamage", function(damage, hitpoints) {
             client.sendPlaySound("ouch");
             client.sendFlash("red");
@@ -298,22 +306,16 @@ World.prototype = {
     
     actorIntersectsGoal: function(actor, tile, zone, tileIndex, tileData, layerIndex) {
         var layer        = zone.getBoard().getLayer(layerIndex),
-            tileId       = zone.getTileId(tile),
-            oldAssassin,
-            actors       = zone.getActors();
+            tileId       = zone.getTileId(tile);
+        
+        // TODO: make this more generic (work with multiple goals)        
+        var oldAssassin = _(zone.getActors()).detect(function(otherActor) { 
+            return otherActor.getRole() == Defs.ROLE_ASSASSIN;
+        });
         
         layer.popTile(tileIndex, tileData);
         actor.setGoalInventory(tileData);
         
-        for (var i = 0, len = actors.length; i < len; i++) {
-            var actor = actors[i];
-        
-            if (actor.getRole() == Defs.ROLE_ASSASSIN) {
-                oldAssassin = actor;
-                break;
-            }
-        }
-    
         if (oldAssassin) {
             oldAssassin.setRole(Defs.ROLE_SEEKER);
         }
