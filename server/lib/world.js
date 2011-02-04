@@ -100,7 +100,7 @@ World.prototype = {
             
             if (poisonedAt) {
                 if (currentTime >= (poisonedAt + Defs.POISON_DEATH_DELAY)) {
-                    account.getClient().sendChat("You were poisoned!");
+                    account.getClient().sendChat(Defs.CHAT_CRITICAL, "You were poisoned and died!");
                     world.accountDeath(account);
                 }                
             }
@@ -131,7 +131,7 @@ World.prototype = {
         
     _onZoneChat: function(zone, message) {
         _(this.getAccountsForZone(zone)).each(function(account) {
-            account.getClient().sendChat(message);
+            account.getClient().sendChat(Defs.CHAT_PLAYER, message);
         });
     },
     
@@ -170,13 +170,13 @@ World.prototype = {
         
         player.on("changeRole", function(newRole) {
             if (newRole == Defs.ROLE_ASSASSIN) {
-                client.sendChat(
+                client.sendChat(Defs.CHAT_ALERT,
                     "You are now the assassin! \
                      You may poison other players by approaching them and pressing 'a'. \
                      Don't let them find your precious treasure!"
                 );
             } else {
-                client.sendChat(
+                client.sendChat(Defs.CHAT_ALERT,
                     "You have lost your assassin abilities."
                 );
             }

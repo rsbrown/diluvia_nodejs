@@ -18,6 +18,12 @@ var Defs = module.exports = {
     BASE_LAYER:             0,
     OBJECT_LAYER:           1,
     ACTOR_LAYER:            2,
+    
+    CHAT_PLAYER:            "white",
+    CHAT_SYSTEM:            "#BBBBBB",
+    CHAT_CRITICAL:          "red",
+    CHAT_ALERT:             "#FFCC33", // orange-yellow-ish
+    CHAT_INFO:              "#00CC00",
 
     Tiles: {
         PLAYER:             { class: "ActorTile",   image: "dude.png:0,0" },

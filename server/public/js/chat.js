@@ -4,11 +4,16 @@ var Chat = function(parent) {
 };
 
 Chat.prototype = {
-    addMessage: function(text) {
-        var msgDiv = $('<div class="chat_message"></div>');
+    addMessage: function(msgData) {
+        var msgDiv  = $('<div class="chat_message"></div>'),
+            text    = msgData.text;
+            color   = msgData.color;
+        
+        msgDiv.css({ color: color });
         msgDiv.html(text);
+        
         this._chatMessageElement.append(msgDiv);
-        this._chatMessageElement.scrollTop(10000000);
+        this._chatMessageElement.scrollTop(10000000); // TODO: this is kind of a hack
     }
 };
 

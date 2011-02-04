@@ -142,8 +142,8 @@ DiluviaController.prototype = {
         jqBox.hide();
     },
     
-    displayChatMessage: function(text) {
-        this._chat.addMessage(text);
+    displayChatMessage: function(msgData) {
+        this._chat.addMessage(msgData);
         this._sound.playAudio("chat");
     },
     

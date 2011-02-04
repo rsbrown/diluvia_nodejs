@@ -63,8 +63,8 @@ _.extend(Client.prototype, events.EventEmitter.prototype, {
         this.sendMessage("Flash", color);
     },
     
-    sendChat: function(message) {
-        this.sendMessage("Chat", message);
+    sendChat: function(color, message) {
+        this.sendMessage("Chat", { color: color, text: message });
     },
     
     sendMessage: function(type, attrs) {
