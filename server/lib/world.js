@@ -208,13 +208,7 @@ World.prototype = {
         });
     
         client.on("disconnect", function() {
-            var currentZone = world.getZone(player.getZoneId()),
-                idx         = world._online.indexOf(account);
-            world.actorDropGoal(player);
-            world._online.splice(idx, 1);
-            currentZone.removeActor(player);
-            account.setClient(null);
-            account.setPlayer(null);
+            world.accountRemove(account);
         });
         
         this.accountSpawn(account);
@@ -229,6 +223,20 @@ World.prototype = {
         this.placeAccountInZone(account, zone, zone.getDefaultSpawnPointIndex());
         
         player.spawn();
+    },
+    
+    accountRemove: function(account) {
+        var player      = account.getPlayer(),
+            currentZone = this.getZone(player.getZoneId()),
+            idx         = this._online.indexOf(account);
+        
+        this.actorDropGoal(player);
+        this._online.splice(idx, 1);
+        
+        currentZone.removeActor(player);
+        
+        account.setClient(null);
+        account.setPlayer(null);
     },
     
     accountDeath: function(account) {
