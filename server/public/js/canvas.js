@@ -45,12 +45,10 @@ Canvas.prototype = {
             var layer = zoneState.layers[li];
             
             for (var key in layer) {
-                if (layerIndexes.indexOf(key) == -1) {
-                    layerIndexes.push(key);
-                }
+                layerIndexes.push(key);
             }
         }
-        
+                
         for (var i = 0, len = layerIndexes.length; i < len; i++) {
             var key             = layerIndexes[i],
                 col             = Math.floor(key / zoneDims[0]),
@@ -70,32 +68,36 @@ Canvas.prototype = {
                     Diluvia.TILE_DIMS[1]                        
                 );
             }
-                        
+                    
             for (var li = 0; li < layerCount; li++) {
                 var layer = zoneState.layers[li];
-                
+            
                 if (layer) {
-                    var tileId = layer[key];
+                    var tileSet = layer[key];
+                
+                    if (tileSet) {
+                        for (var tsi = 0, tslen = tileSet.length; tsi < tslen; tsi++) {
+                            var tileData    = tileSet[tsi],
+                                tileId      = tileData[0],
+                                tile        = zoneData.tiles[tileId];
                     
-                    if (tileId) {
-                        var tile = zoneData.tiles[tileId];
-                        
-                        if (tile) {        
-                            this._context.drawImage(
-                                this._controller.getImage(tile.imagePath),
-                                tile.coords[0],
-                                tile.coords[1],
-                                Diluvia.TILE_DIMS[0],
-                                Diluvia.TILE_DIMS[1],
-                                destPixelCoords[0],
-                                destPixelCoords[1],
-                                Diluvia.TILE_DIMS[0],
-                                Diluvia.TILE_DIMS[1]                    
-                            );         
+                            if (tile) {        
+                                this._context.drawImage(
+                                    this._controller.getImage(tile.imagePath),
+                                    tile.coords[0],
+                                    tile.coords[1],
+                                    Diluvia.TILE_DIMS[0],
+                                    Diluvia.TILE_DIMS[1],
+                                    destPixelCoords[0],
+                                    destPixelCoords[1],
+                                    Diluvia.TILE_DIMS[0],
+                                    Diluvia.TILE_DIMS[1]                    
+                                );         
+                            }
+                            else {
+                                console.log("COULD NOT DRAW " + tileId);
+                            }
                         }
-                        else {
-                            console.log("COULD NOT DRAW " + tileId);
-                        }           
                     }
                 }
             }

@@ -8,6 +8,6 @@ var ActorTile = module.exports = function(options) {
 
 _.extend(ActorTile.prototype, Tile.prototype, {
     canMoveInto: function(actor) {
-        return false;
+        return true;
     }
 });

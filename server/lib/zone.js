@@ -62,11 +62,15 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         
         if (spawnTiles.length > 0) {
             var layer = this._board.getLayer(Defs.OBJECT_LAYER);
-                        
-            layer.eachTile(function(tileIndex, tileId, tileData) {
-                if (spawnTiles.indexOf(tileId) != -1 && resIndex == -1) {
-                    resIndex = tileIndex;
-                }
+            
+            layer.eachTile(function(tileIndex, tileStack) {
+                _(tileStack).each(function(tileData) {
+                    var tileId = tileData[0];
+                    
+                    if (spawnTiles.indexOf(tileId) != -1 && resIndex == -1) {
+                        resIndex = tileIndex;
+                    }                    
+                });
             });
         }
 
@@ -82,7 +86,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         actor.setTileIndex(tileIndex);
         
         this._actors.push(actor);
-        this._board.getLayer(Defs.ACTOR_LAYER).setTileId(tileIndex, tileId);
+        this._board.getLayer(Defs.ACTOR_LAYER).pushTile(tileIndex, [ tileId, { actorId: actor.getActorId() } ]);
         
         this.playSound("portal");
         
@@ -91,26 +95,38 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
     
     removeActor: function(actor) {
         var self            = this,
+            zone            = this,
             idx             = this._actors.indexOf(actor),
-            oldTileIndex    = actor.getTileIndex(),
+            tileIndex       = actor.getTileIndex(),
             world           = this._world;
                 
         if (idx != -1) {
-            actor.setZoneId(null);
-
-            this._board.getLayer(Defs.ACTOR_LAYER).setTileId(oldTileIndex, null);
-            this._actors.splice(idx, 1);
+            var actorLayer  = this._board.getLayer(Defs.ACTOR_LAYER),
+                tiles       = actorLayer.getTiles(tileIndex),
+                tileData    = actor.getTileDataFrom(tiles);
             
-            // send moveOut notifications to tiles
-            _(this._board.getTileIdAndDataFor(oldTileIndex)).each(function(item) {
-                var tile = self.getTile(item[0]);
-                
-                if (tile) {
-                    tile.moveOut(actor, oldTileIndex, item[1], item[2], world);
-                }
-            });
+            if (tileData) {
+                actor.setZoneId(null);
 
-            actor.setTileIndex(null);
+                this._board.getLayer(Defs.ACTOR_LAYER).popTile(tileIndex, tileData);
+                this._actors.splice(idx, 1);
+            
+                // send moveOut notifications to tiles
+                _(this._board.getAllTilesFor(tileIndex)).each(function(tilesAndLayer) {
+                    var tiles       = tilesAndLayer[0],
+                        layerIndex  = tilesAndLayer[1];
+
+                    _(tiles).each(function(_tileData) {
+                        var tile = zone.getTile(_tileData[0]);                    
+
+                        if (tile) {
+                            tile.moveOut(actor, tileIndex, _tileData, layerIndex, world);
+                        }
+                    })
+                });
+                
+                actor.setTileIndex(null);
+            }
         }
     },
     
@@ -119,47 +135,62 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
             board   = this._board;
                 
         return _(board.getLayers()).all(function(layer) {
-            var tileId      = layer.getTileId(tileIndex),
-                tileData    = layer.getTileData(tileIndex),
-                tile        = zone.getTile(tileId);
-                        
-            return tile ? tile.canMoveInto(actor, tileIndex, tileData, board.getLayerIndexFor(layer)) : true;
+            var tiles = layer.getTiles(tileIndex);
+            
+            return _(layer.getTiles(tileIndex)).all(function(tileData) {
+                var tile = zone.getTile(tileData[0]);
+                return tile ? tile.canMoveInto(actor, tileIndex, tileData, board.getLayerIndexFor(layer)) : true;
+            });
         });
     },
     
     move: function(actor, direction) {
+        if (actor.setOrientation) {
+            actor.setOrientation(direction);
+        }
+        
         var world           = this._world,
             zone            = this,
             layer           = this._board.getLayer(Defs.ACTOR_LAYER),
             prevTileIndex   = actor.getTileIndex(),
             nextTileIndex   = this.indexForDirectionalMove(prevTileIndex, direction),
-            prevTiles       = this._board.getTileIdAndDataFor(prevTileIndex),
-            nextTiles       = this._board.getTileIdAndDataFor(nextTileIndex);
+            prevTiles       = this._board.getAllTilesFor(prevTileIndex),
+            nextTiles       = this._board.getAllTilesFor(nextTileIndex);
         
-        if (actor.setOrientation) {
-            actor.setOrientation(direction);
-        }
-        
-        if (nextTileIndex != -1 && this.isTileIndexPassableBy(nextTileIndex, actor)) {
-            layer.shiftTile(prevTileIndex, nextTileIndex);
+        if (nextTileIndex != -1 && this.isTileIndexPassableBy(nextTileIndex, actor)) {            
+            var actorTiles  = layer.getTiles(prevTileIndex),
+                tileData    = actor.getTileDataFrom(actorTiles);
+            
+            layer.popTile(prevTileIndex, tileData);
+            layer.pushTile(nextTileIndex, tileData);
 
-            _(prevTiles).each(function(tileIdAndData) {
-                var tile = zone.getTile(tileIdAndData[0]);
+            _(prevTiles).each(function(tilesAndLayer) {
+                var tiles       = tilesAndLayer[0],
+                    layerIndex  = tilesAndLayer[1];
                 
-                if (tile) {
-                    tile.moveOut(actor, prevTileIndex, tileIdAndData[1], tileIdAndData[2], world);
-                }
+                _(tiles).each(function(_tileData) {
+                    var tile = zone.getTile(_tileData[0]);                    
+                    
+                    if (tile) {
+                        tile.moveOut(actor, prevTileIndex, _tileData, layerIndex, world);
+                    }
+                })
             });
 
             actor.setTileIndex(nextTileIndex);
 
-            _(nextTiles).each(function(tileIdAndData) {
-                var tile = zone.getTile(tileIdAndData[0]);
+            _(nextTiles).each(function(tilesAndLayer) {
+                var tiles       = tilesAndLayer[0],
+                    layerIndex  = tilesAndLayer[1];
                 
-                if (tile) {
-                    tile.moveInto(actor, nextTileIndex, tileIdAndData[1], tileIdAndData[2], world);
-                }
-            });   
+                _(tiles).each(function(_tileData) {
+                    var tile = zone.getTile(_tileData[0]);                    
+                    
+                    if (tile) {
+                        tile.moveInto(actor, nextTileIndex, _tileData, layerIndex, world);
+                    }
+                })
+            });
         }
         else {
             actor.moveFailed();
@@ -258,8 +289,15 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
     },
     
     setPlayerTileForOrientation: function(player, orientation) {
-        var layer = this._board.getLayer(Defs.ACTOR_LAYER);
-        layer.setTileId(player.getTileIndex(), "PLAYER_" + orientation.toUpperCase());
+        var layer       = this._board.getLayer(Defs.ACTOR_LAYER),
+            tileIndex   = player.getTileIndex(),
+            tiles       = layer.getTiles(tileIndex),
+            tileData    = player.getTileDataFrom(tiles);
+        
+        if (tileData) {
+            layer.popTile(tileIndex, tileData);
+            layer.pushTile(tileIndex, [ "PLAYER_" + orientation.toUpperCase(), tileData[1] ]);            
+        }
     },
     
     getRenderAttributes: function() {

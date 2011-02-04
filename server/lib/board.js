@@ -13,12 +13,8 @@ _(Board.prototype).extend(events.EventEmitter.prototype, {
         var self        = this,
             layerIndex  = this._layers.length;
         
-        layer.on("tileIdChange", function(tileIndex, tileId, prevTileId) {
-            self.emit("layerTileIdChange", layerIndex, tileIndex, tileId, prevTileId);            
-        });
-        
-        layer.on("tileDataChange", function(tileIndex, tileData, prevTileId) {
-            self.emit("layerTileDataChange", layerIndex, tileIndex, tileData, prevTileId);
+        layer.on("tileChange", function(tileIndex, tiles) {
+            self.emit("layerTileChange", layerIndex, tileIndex, tiles);            
         });
         
         this._layers.push(layer);
@@ -38,11 +34,11 @@ _(Board.prototype).extend(events.EventEmitter.prototype, {
         return this._layers;
     },
     
-    getTileIdAndDataFor: function(tileIndex) {
+    getAllTilesFor: function(tileIndex) {
         var self = this;
         
         return _(this._layers).map(function (layer) { 
-            return [ layer.getTileId(tileIndex), layer.getTileData(tileIndex), self.getLayerIndexFor(layer) ]; 
+            return [ layer.getTiles(tileIndex), self.getLayerIndexFor(layer) ]; 
         });
     },
         
