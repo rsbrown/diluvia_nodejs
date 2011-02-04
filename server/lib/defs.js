@@ -11,6 +11,8 @@ var Defs = module.exports = {
     
     COMMAND_INTERVAL:       250,
     CLIENT_INTERVAL:        100,
+    WORLD_FAST_INTERVAL:    25,
+    WORLD_SLOW_INTERVAL:    500,
     GIT_REVISION:           "unresolved",
     POISON_DEATH_DELAY:     15000, /* 15 seconds */
     

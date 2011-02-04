@@ -11,8 +11,6 @@ var _           = require("underscore"),
     Player      = require("player"),
     fs          = require("fs");
 
-var QUEUE_INTERVAL = 25;
-
 var World = module.exports = function() {
     this._accounts      = [];
     this._defaultTiles  = [];
@@ -20,7 +18,8 @@ var World = module.exports = function() {
     this._online        = [];
     this._stateQueue    = [];
 
-    setInterval(_(this._onQueueInterval).bind(this), QUEUE_INTERVAL);
+    setInterval(_(this._onFastInterval).bind(this), Defs.WORLD_FAST_INTERVAL);
+    setInterval(_(this._onSlowInterval).bind(this), Defs.WORLD_SLOW_INTERVAL);
     
     this._loadZones();
 };
@@ -52,7 +51,25 @@ World.prototype = {
         return this._zones[zoneId];
     },
     
-    _onQueueInterval: function() {
+    _onSlowInterval: function() {
+        var world       = this,
+            currentTime = (new Date()).getTime();
+        
+        for (var i = 0, len = this._online.length; i < len; i++) {
+            var account     = this._online[i],
+                player      = account.getPlayer(),
+                poisonedAt  = player.getPoisonedAt();
+            
+            if (poisonedAt) {
+                if (currentTime >= (poisonedAt + Defs.POISON_DEATH_DELAY)) {
+                    account.getClient().sendChat(Defs.CHAT_CRITICAL, "You were poisoned and died!");
+                    world.accountDeath(account);
+                }                
+            }
+        }  
+    },
+    
+    _onFastInterval: function() {
         var world = this;
         
         if (this._stateQueue.length > 0) {
@@ -89,21 +106,6 @@ World.prototype = {
             }
 
             this._stateQueue = [];
-        }
-        
-        var currentTime = (new Date()).getTime();
-        
-        for (var i = 0, len = this._online.length; i < len; i++) {
-            var account     = this._online[i],
-                player      = account.getPlayer(),
-                poisonedAt  = player.getPoisonedAt();
-            
-            if (poisonedAt) {
-                if (currentTime >= (poisonedAt + Defs.POISON_DEATH_DELAY)) {
-                    account.getClient().sendChat(Defs.CHAT_CRITICAL, "You were poisoned and died!");
-                    world.accountDeath(account);
-                }                
-            }
         }
     },
     
