@@ -212,6 +212,7 @@ World.prototype = {
         });
         
         this.accountSpawn(account);
+        client.sendChat(Defs.CHAT_ALERT, "Find the treasure to become the assassin!");
         
         return player;
     },
