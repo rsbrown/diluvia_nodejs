@@ -4,7 +4,8 @@ var _       = require("underscore"),
 
 var Player = module.exports = function(attributes) {
     Actor.call(this, attributes);
-    this._orientation = attributes["orientation"] || "n";
+    
+    this._orientation = attributes["orientation"] || "n";    
     this._score       = 0;
 };
 

@@ -66,6 +66,21 @@ World.prototype = {
                     world.accountDeath(account);
                 }                
             }
+            
+            var goalCounter     = player.getGoalCounter(),
+                lastGoalTime    = player.getLastGoalTime(),
+                tDiff           = Math.floor(currentTime - lastGoalTime);
+            
+            if (tDiff > 0) {
+                if (player.getGoalInventory(account)) {
+                    player.setGoalCounter(goalCounter - tDiff);
+                }
+                else {
+                    player.setGoalCounter(goalCounter + tDiff);
+                }
+            
+                player.touchGoalTime();
+            }
         }  
     },
     
@@ -188,7 +203,16 @@ World.prototype = {
                     "You found the treasure! Press 'e' to drop it and become the assassin!"
                 );
             }
-        })
+        });
+        
+        player.on("changeGoalCounter", function(goalCounter) {
+            if (goalCounter == 0) {
+                world.accountDeath(account);
+                client.sendChat(Defs.CHAT_CRITICAL,
+                    "You held the treasure too long and died from exhaustion!"
+                );
+            }
+        });
         
         player.on("tookDamage", function(damage, hitpoints) {
             client.sendPlaySound("ouch");
@@ -248,6 +272,8 @@ World.prototype = {
         
         zone.playSound("scream");
         player.die();
+        player.setRole(Defs.ROLE_SEEKER);
+        
         this.actorDropGoal(player);
         this.removeAccountFromZone(account, zone);
         this.accountSpawn(account);
@@ -303,7 +329,10 @@ World.prototype = {
             }
         }
         else if (command == "drop") {
-            this.actorDropGoal(player);
+            if (player.getGoalInventory()) {
+                player.setRole(Defs.ROLE_ASSASSIN);
+                this.actorDropGoal(player);
+            }
         }
     },
 
@@ -360,7 +389,7 @@ World.prototype = {
                 );
                 goalPoint++;
             }
-            actor.setRole(Defs.ROLE_ASSASSIN);
+            
             actor.setGoalInventory(null);
         }
     },

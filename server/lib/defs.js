@@ -13,8 +13,9 @@ var Defs = module.exports = {
     CLIENT_INTERVAL:        100,
     WORLD_FAST_INTERVAL:    25,
     WORLD_SLOW_INTERVAL:    500,
+    MAX_GOAL_COUNTER:       30000,
     GIT_REVISION:           "unresolved",
-    POISON_DEATH_DELAY:     15000, /* 15 seconds */
+    POISON_DEATH_DELAY:     7500,
     
     LAYER_COUNT:            3,
     BASE_LAYER:             0,

@@ -13,7 +13,24 @@ var Actor = module.exports = function(attributes) {
 
 Actor.actorIdCounter = 0;
 
-_.extend(Actor.prototype, events.EventEmitter.prototype, {    
+_.extend(Actor.prototype, events.EventEmitter.prototype, {
+    setGoalCounter: function(goalCounter) {
+        var newGoalCounter = Math.max(0, Math.min(goalCounter, Defs.MAX_GOAL_COUNTER));
+        
+        if (newGoalCounter != this._goalCounter) {
+            this._goalCounter = newGoalCounter;
+            this.emit("changeGoalCounter", newGoalCounter);
+        }
+    },
+    
+    getGoalCounter: function() {
+        return this._goalCounter;
+    },
+    
+    getLastGoalTime: function() {
+        return this._lastGoalTime;
+    },
+    
     getStartingHitpoints: function() {
         return 100;
     },
@@ -72,6 +89,9 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
     spawn: function() {
         this._hitpoints     = this.getStartingHitpoints();
         this._poisonedAt    = null;
+        this._goalCounter   = Defs.MAX_GOAL_COUNTER;
+        this._lastGoalTime  = 0;
+        
         this.emit("spawned");
     },
     
@@ -97,11 +117,21 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
         return this._poisonedAt;
     },
     
+    touchGoalTime: function() {
+        this._lastGoalTime = (new Date()).getTime();
+    },
+    
     setGoalInventory: function(item) {
         this._goalInventory = item;
         this.emit("changeGoalInventory", item);
+        
+        this.touchGoalTime();
     },
     
+    getGoalInventory: function() {
+        return this._goalInventory;
+    },
+
     getRole: function() {
         return this._role;
     },
@@ -109,10 +139,6 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
     setRole: function(role) {
         this._role = role;
         this.emit("changeRole", role);
-    },
-    
-    getGoalInventory: function() {
-        return this._goalInventory;
     },
 
     getRenderAttributes: function() {
