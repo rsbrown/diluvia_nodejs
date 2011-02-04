@@ -41,58 +41,65 @@ GameServer.prototype = {
             world   = this._world,
             account;
 
-        account = new Account(this, sessionId);
-        client.sendMessage("ServerInfo", server.getInfo());
-        
-        if (account) {
-            var actor   = world.playerInitialize(account, client),
-                zone    = world.getZone(actor.getZoneId());
-                                
-            client.completeHandshake();
-            client.sendZoneData(zone);
-            client.sendZoneState(world.composeZoneStateFor(actor, zone.getStateAttributes()));
-            
-            actor.on("changeZone", function() {
-                var zoneId = actor.getZoneId();
-                
-                if (zoneId) {
-                    var zone = world.getZone(zoneId);
-                
-                    client.sendZoneData(zone);
-                    client.sendZoneState(world.composeZoneStateFor(actor, zone.getStateAttributes()));
-                }
-            });
-            
-            actor.on("landed", function() {
-                client.sendFlash("black");
-            });
-            
-            client.on("receivedCommand", function(command) {
-                var zoneId  = actor.getZoneId();
-                
-                if (zoneId) {
-                    var zone = world.getZone(zoneId);
-                    
-                    if (command == "n" || command == "s" || command == "e" || command == "w") {
-                        zone.command(actor, command);
-                    }
-                    else {
-                        world.otherCommand(account, zone, command);
-                    }
-                }
-            });
+        Account.initFromSession(sessionId, function(account){
+            console.log("INIT SESSION FOR USER " + account.getUsername());
+            client.sendMessage("ServerInfo", server.getInfo());
+            server.loadGame(world, client, account);
+        });
+    },
+    
+    loadGame: function(world, client, account){
+        var actor   = world.playerInitialize(account, client),
+            zone    = world.getZone(actor.getZoneId());
 
-            client.on("receivedChat", function(text) {
-                var zoneId  = actor.getZoneId();
-                
-                if (zoneId) {
-                    zone = world.getZone(zoneId);
-                    if (text != "") {
-                        zone.chat(account.getUid(), text);
-                    }
+        client.completeHandshake();
+        client.sendZoneData(zone);
+        client.sendZoneState(world.composeZoneStateFor(actor, zone.getStateAttributes()));
+
+        actor.on("changeZone", function() {
+            var zoneId = actor.getZoneId();
+
+            if (zoneId) {
+                var zone = world.getZone(zoneId);
+
+                client.sendZoneData(zone);
+                client.sendZoneState(world.composeZoneStateFor(actor, zone.getStateAttributes()));
+            }
+        });
+
+        actor.on("landed", function() {
+            client.sendFlash("black");
+        });
+
+        client.on("receivedCommand", function(command) {
+            var zoneId  = actor.getZoneId();
+
+            if (zoneId) {
+                var zone = world.getZone(zoneId);
+
+                if (command == "n" || command == "s" || command == "e" || command == "w") {
+                    zone.command(actor, command);
                 }
-            });
-        }
+                else if (command == "StopMusic" || command == "StartMusic") {
+                    account.setSoundOn((command == "StartMusic"));
+                    account.save(function(){});
+                }
+                else {
+                    world.otherCommand(account, zone, command);
+                }
+            }
+        });
+
+        client.on("receivedChat", function(text) {
+            var zoneId  = actor.getZoneId();
+
+            if (zoneId) {
+                zone = world.getZone(zoneId);
+                if (text != "") {
+                    zone.chat(account.getUid(), text);
+                }
+            }
+        });
     },
 
     // Removed the cookie-based fetching of the session key because the Handshake is really

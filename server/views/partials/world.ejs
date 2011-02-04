@@ -1,5 +1,6 @@
 <script type="text/javascript" charset="utf-8">
     DILUVIA_SESSION = "<%= sessionId %>";
+    PLAY_MUSIC = <%=play_music%>;
 </script>
 
 <div id="loading"><img src="images/icons/loading_b.gif" /></div>
@@ -9,15 +10,6 @@
 </div>
 
 <script type="text/javascript" charset="utf-8">
-    var backgroundMusicFiles = [
-                       'dungeon_music.mp3',
-                       'seiomaccorgo.mp3',
-                       'go_from_my_window.mp3'
-                     ];
-    //var musicIdx = Math.floor(Math.random()*backgroundMusicFiles.length);
-    var musicIdx = 0;
-
-    //document.body.style = "height: 100%; width: 100%;";
     document.style      = "height: 100%; width: 100%";
     
     function size_element(element) {
@@ -53,7 +45,7 @@
           "<div id='audio-controls'>                                                                               \
             <div id='help'><a href='#'><img src='/images/icons/help.png'/></a></div>                                                                                      \
             <div id='audio-pause'><a href='#'><img src='/images/icons/pause.png'/></a></div>                       \
-            <div style='display: none;' id='audio-play'><a href='#'><img src='/images/icons/play.png'/></a></div>  \
+            <div id='audio-play'><a href='#'><img src='/images/icons/play.png'/></a></div>  \
           </div>"
         );
         
@@ -76,6 +68,12 @@
           $helpDialog.dialog('open');
           return false;
         });
+        
+        <% if (play_music) {%>
+          $("#audio-play").hide();
+        <% } else { %>
+          $("#audio-pause").hide();
+        <% } %>
         
     });
 </script>

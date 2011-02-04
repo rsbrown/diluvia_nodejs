@@ -1,13 +1,15 @@
 var Routes = module.exports = {
     '/': function(req, res){
-        this.getUsers();
         this.preParseRequest(req, res);
         req.session["store_location"] = '/';
-        res.render('index', { 
-            locals: {
-                username:   req.session["username"],
-                flash:      req.session.flash
-            }
+        this.loadUserSession(req, res, function(){
+            res.render('index', {
+                locals: {
+                    username:     req.session.username,
+                    play_music:   req.session.isMusicOn,
+                    flash:        req.session.flash
+                }
+            });
         });
     },
 
@@ -15,23 +17,19 @@ var Routes = module.exports = {
         res.send('pong');
     },
 
-    // Simple code to set the session and avoid twitter auth
-    '/setSession/:user': function(req, res) {
-        //setUser(req, res, req.params.user);
-        this.preParseRequest(req, res, req.params.user);
-        res.render('index', {locals: {username: username, flash: req.session.flash}});
-    },
-
     '/play': function(req, res){
         // console.log(JSON.stringify(req.session));
         this.preParseRequest(req, res);
         req.session["store_location"] = '/play';
-        res.render('world', { 
-            locals: { 
-                sessionId:  req.session.id,
-                flash:      req.session.flash,
-                username:   req.session.username
-            }
+        this.loadUserSession(req, res, function(){
+            res.render('world', { 
+                locals: { 
+                    sessionId:  req.session.id,
+                    play_music: req.session.isMusicOn,
+                    flash:      req.session.flash,
+                    username:   req.session.username
+                }
+            });
         });
     },
 
@@ -42,7 +40,7 @@ var Routes = module.exports = {
     },
     
     '/logout': function(req, res) {
-        req.session.username = null;
+        req.session.destroy();
         this.redirectBackOrRoot(req, res);
     },
 
@@ -51,10 +49,10 @@ var Routes = module.exports = {
       this.preParseRequest(req, res);
       req.authenticate(['facebook'], function(error, authenticated) { 
          if(authenticated ) {
-            req.session.username = req.getAuthDetails()["user"]["name"];
-            // console.log(JSON.stringify(req.session));
-            // console.log(req.session.username);
-            self.redirectBackOrRoot(req, res);
+            var account = self.getAccountFromFacebookAuth(req.getAuthDetails(), function(account){
+                req.session.accountId = account.getId();
+                self.redirectBackOrRoot(req, res);
+            });
           }
           else {
             req.session.flash.error = "Facebook authentication failed";

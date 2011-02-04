@@ -118,10 +118,12 @@ DiluviaController.prototype = {
     
     startMusic: function() {
         this._sound.startMusic(this._protocol.getZoneData().music);
+        this._protocol.send({ "type": "Command", "command": "StartMusic" });
     },
     
     stopMusic: function() {
         this._sound.stopMusic();
+        this._protocol.send({ "type": "Command", "command": "StopMusic" });
     },
     
     changeMusic: function(music) {

@@ -2,35 +2,87 @@ var Persistence = require("persistence");
 
 var START_HITPOINTS = 100;
 
-var Account = module.exports = function(world, sessionId) {
-    this._uid           = null;
-    this._world         = world;
-    
+var Account = module.exports = function(attributes) {
+    this._id            = attributes["id"];
+    this._username      = attributes["username"];
+    this._         = attributes["  "];
+    console.log("\n\n\n\n\n="+attributes);
     this._zones         = {};
     this._backpack      = [];
     this._awards        = [];
     
     this._client        = null;
     this._player        = null;
-    
-    this.initSession(sessionId);
+};
+
+Account.initFromSession = function(sessionId, callback) {
+    var redis = Persistence.getRedis();
+    redis.get(sessionId, function(err, data) {
+        var sessionData = JSON.parse(data);
+        if (sessionData.accountId) {
+            account = Account.findById(sessionData.accountId, callback);
+        } else {
+            var guestUsername = "guest_" + (sessionId+"").substring(0,3);
+            account = new Account({
+                "username": guestUsername
+            });
+            callback(account);
+        }
+    });
+};
+
+Account.create = function(attributes) {
+    var account = null
+        redis = Persistence.getRedis();
+    redis.incr( 'pkid' , function( err, newUserId ) {
+        account = new Account({
+            "id"       : newUserId,
+            "  "  : true,
+            "username" : attributes["username"]
+        });
+        account.save(function(){
+            redis.set( 'facebookUser:'+attributes["facebookUserId"], account.getId(), function() {
+                console.log("SAVED NEW USER AND MAPPED FB ID " + attributes["facebookUserId"] + "TO USER ID " + account.getId());
+            });
+        });
+    });
+    return account;
+};
+
+Account.findByFacebookId = function(facebookUserId, callback){
+    var redis = Persistence.getRedis();
+    redis.get("facebookUser:" + facebookUserId, function(err, data) {
+       if (data) {
+          Account.findById(data, function(account){
+              callback(account);
+          });
+       }
+    });
+};
+
+Account.findById = function(id, callback) {
+    var redis = Persistence.getRedis();
+    redis.get("account:" + id, function(err, data) {
+        var account = null;
+        if (data) {
+            account = new Account(JSON.parse(data));
+        }
+        callback(account);
+    });
 };
 
 Account.prototype = {
-
-    initSession: function(sessionId) {
-      var self = this,
-          redis = Persistence.getRedis();
-        
-      redis.get(sessionId, function(err, data) {
-         var sessionData = JSON.parse(data);
-         if (sessionData.username) {
-             self._uid = sessionData.username;
-         } else {
-             self._uid = "guest_" + (sessionId+"").substring(0,3);
-         }
-        console.log("INIT SESSION FOR USER " + self._uid);
-      });
+    
+    save: function(callback){
+        Persistence.getRedis().set('account:'+this._id, this.serialize(), callback);
+    },
+    
+    serialize: function() {
+        return JSON.stringify({
+            "id"       : this._id,
+            "  "  : this._  ,
+            "username" : this._username
+        });
     },
 
     getPlayer: function() {
@@ -49,8 +101,12 @@ Account.prototype = {
         this._client = client;
     },
     
-    getUid: function() {
-        return this._uid;
+    getId: function() {
+        return this._id;
+    },
+    
+    getUsername: function() {
+        return this._username;
     },
     
     addZone: function(key, zone) {
@@ -59,6 +115,18 @@ Account.prototype = {
     
     removeZone: function(key) {
         delete this._zones[key];
+    },
+    
+    setSoundOn: function(bool) {
+        this._   = bool;
+    },
+    
+    isMusicOn: function() {
+        return this._  ;
+    },
+    
+    persist: function() {
+        
     }
 };
 

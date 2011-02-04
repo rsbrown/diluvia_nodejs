@@ -1,5 +1,5 @@
 var _           = require("underscore"),
-    Persistence = require("persistence"),
+    Account     = require("account"),
     Routes      = require("routes");
 
 var Web = module.exports = function(app) {
@@ -11,6 +11,7 @@ var Web = module.exports = function(app) {
     });
 };
 
+
 Web.prototype = {
     redirectBackOrRoot: function(req, res) {
         if (global["store_location"]) {
@@ -19,8 +20,21 @@ Web.prototype = {
             res.redirect("/");
           }
     },
+    
+    loadUserSession: function(req, res, callback) {
+        if (req.session.accountId) {
+            Account.findById(req.session.accountId, function(account){
+                req.session.username = account.getUsername();
+                req.session.isMusicOn = account.isMusicOn();
+                callback();
+            });
+        } else {
+            req.session.isMusicOn = true;
+            callback();
+        }
+    },
 
-    preParseRequest: function(req, res, uname) {
+    preParseRequest: function(req, res) {
         if (!req.session.flash) {
             req.session.flash = {};
         }
@@ -28,66 +42,22 @@ Web.prototype = {
         if (!req.session.flash.warning) {req.session.flash.warning = false;}
         if (!req.session.flash.info) {req.session.flash.info = false;}
     },
-    setUser: function(req, res, user) {
-        var redis = Persistence.getRedis();
-        if (user) {
-            username = req.session["username"] = user;
-        }
-        else if (req.query) {
-            username = req.session["username"] = req.query["un"];
-        }
-        else {
-            username = req.session["username"] = null;
-        }
 
-        if (username) {
-            var uKey = "users:" + username;
-            redis.get(uKey, function(err, data) {
-                if (!data) {
-                    redis.set(uKey, "{}");
-                }
-                else {
-                    userData = data;
-                }
-            });
-
-            redis.llen("users", function(err, user_count) {
-                var self        =  this,
-                    userKnown   = false,
-                    q;
-
-                if (user_count && user_count > 0) {
-                    for (i = 0; i < data; i++) {
-                        redis.lindex("users", i, function(err, name) {
-                            if (name.toString() == username) {
-                                self.userKnown = true;
-                            }
-                        });
-                        if (self.userKnown) {
-                            break;
-                        }
-                    }
-                    if (!self.userKnown) {
-                        redis.rpush("users", username);
-                    }
-                }
-                else {
-                  redis.rpush("users", username);
-                }
-            });
-        }
-    },
-    getUsers: function() {
-        var redis = Persistence.getRedis();
-    
-        redis.get("users", function(err, data) {
-            if (!data) {
-                return [];
-            }
-            else {
-                return data;
+    getAccountFromFacebookAuth: function(authInfo, callback) {
+        var facebookUserId = authInfo["user"]["id"];
+        Account.findByFacebookId(facebookUserId, function(foundAccount){
+            console.log("FOUND THIS USER:" + JSON.stringify(foundAccount));
+            if (foundAccount) {
+                callback(foundAccount);
+            } else {
+                console.log("CERATING A NEW USER");
+                Account.create({
+                    "facebookUserId": facebookUserId,
+                    "username": authInfo["user"]["name"]
+                }, function(newAccount){
+                    callback(newAccount);
+                });
             }
         });
     }
-    
 };

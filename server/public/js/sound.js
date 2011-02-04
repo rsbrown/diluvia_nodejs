@@ -6,7 +6,7 @@ soundManager.useFlashBlock = false; // optionally, enable when you're ready to d
 
 var Sound = function() {
     var self = this;
-    this._musicOn       = true;
+    this._musicOn       = PLAY_MUSIC;
     this._audios        = {};
     this._loops         = {};
     
