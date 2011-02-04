@@ -4,13 +4,21 @@ var events          = require("events"),
 
 var Actor = module.exports = function() {
     events.EventEmitter.call(this);
-    this._gameAttributes  = {};
-    this._role            = Defs.ROLE_SEEKER;
+
+    this._gameAttributes    = {};
+    this._role              = Defs.ROLE_SEEKER;
+    this._actorId           = Actor.actorIdCounter++;
 };
+
+Actor.actorIdCounter = 0;
 
 _.extend(Actor.prototype, events.EventEmitter.prototype, {    
     getStartingHitpoints: function() {
         return 100;
+    },
+    
+    getActorId: function() {
+        return this._actorId;
     },
     
     getZoneId: function() {
@@ -115,5 +123,18 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
             hitpoints:  this.getHitpoints(),
             label:      this.getLabel()
         };
+    },
+    
+    getTileDataFrom: function(tiles) {
+        var actorId = this.getActorId();
+                
+        return _(tiles).detect(function(tileData) {
+            try {
+                return (tileData[1].actorId == actorId);
+            }
+            catch (e) {
+                return false;
+            }
+        });
     }
 });

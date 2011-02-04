@@ -63,7 +63,7 @@ World.prototype = {
                     zone        = item[0],
                     layerIndex  = item[1],
                     tileIndex   = item[2],
-                    tileId      = item[3],
+                    tiles       = item[3],
                     zoneId      = zone.getZoneId();
             
                 if (!(zoneId in zoneStates)) {
@@ -74,7 +74,7 @@ World.prototype = {
                     zoneStates[zoneId][layerIndex] = {};
                 }
             
-                zoneStates[zoneId][layerIndex][tileIndex] = tileId;
+                zoneStates[zoneId][layerIndex][tileIndex] = tiles;
             }
         
             for (var zoneId in zoneStates) {
@@ -119,12 +119,12 @@ World.prototype = {
             self._onZoneSound(zone, sound);
         });
         
-        board.on("layerTileIdChange", function(layerIndex, tileIndex, tileId, prevTileId) {
+        board.on("layerTileChange", function(layerIndex, tileIndex, tiles) {
             var layers = board.getLayers();
             
             // we push all of them so client gets a full state stack to redraw the tile
             for (var i = 0, len = layers.length; i < len; i++) {
-                self._stateQueue.push([zone, i, tileIndex, layers[i].getTileId(tileIndex)]);
+                self._stateQueue.push([zone, i, tileIndex, layers[i].getTiles(tileIndex)]);
             }
         });
     },
@@ -255,22 +255,25 @@ World.prototype = {
             otherIndex  = zone.indexForDirectionalMove(tileIndex, orientation),
             actors      = zone.getActors();
 
-        if (command == "attack") {
-            var successfullyAttacked = false;
-            if (player.getRole() == Defs.ROLE_ASSASSIN) {
-                var otherActor;
-                for (var i = 0, len = actors.length; i < len; i++) {
-                    var actor = actors[i];
-                
-                    if (actor.getTileIndex() == otherIndex) {
-                        otherActor = actor;
-                    }
-                }
+        if (command == "attack" && player.getRole() == Defs.ROLE_ASSASSIN) {
+            var successfullyAttacked = false,
+                otherActors          = [];
             
-                if (otherActor) {
-                    otherActor.becomesPoisoned();
-                    client.sendFlash("purple");
+            for (var i = 0, len = actors.length; i < len; i++) {
+                var actor           = actors[i],
+                    actorTileIndex  = actor.getTileIndex();
+            
+                if (actor != player && (actorTileIndex == otherIndex || actorTileIndex == tileIndex)) {
+                    otherActors.push(actor);
                 }
+            }
+        
+            _(otherActors).each(function(otherActor) {
+                otherActor.becomesPoisoned();
+            });
+            
+            if (otherActors.length > 0) {
+                client.sendFlash("purple");
             }
         }
         else if (command == "drop") {
@@ -299,8 +302,9 @@ World.prototype = {
             oldAssassin,
             actors       = zone.getActors();
         
-        layer.setTileId(tileIndex, null);
-        actor.setGoalInventory({ tileId: tileId, tileData: tileData });
+        layer.popTile(tileIndex, tileData);
+        actor.setGoalInventory(tileData);
+        
         for (var i = 0, len = actors.length; i < len; i++) {
             var actor = actors[i];
         
@@ -312,14 +316,16 @@ World.prototype = {
     
         if (oldAssassin) {
             oldAssassin.setRole(Defs.ROLE_SEEKER);
-        }        
+        }
     },
     
     actorDropGoal: function(actor) {
         var goal = actor.getGoalInventory();
+        
         if (goal) {
             var successfullyDropped = false;
             var goalPoint = parseInt(actor.getTileIndex());
+            
             // *****************************************
             // TODO: FIXME: VERY NAIVE ALGORITHM 
             // IF YOU'RE ON A BAD TILE, IT JUST KEEPS MOVING RGHT
@@ -329,8 +335,7 @@ World.prototype = {
                 successfullyDropped = this.placeGoal(
                     this.getZone(actor.getZoneId()),
                     goalPoint,
-                    goal.tileId,
-                    goal.tileData
+                    goal
                 );
                 goalPoint++;
             }
@@ -339,17 +344,15 @@ World.prototype = {
         }
     },
     
-    placeGoal: function(zone, tileIndex, tileId, tileData) {
+    placeGoal: function(zone, tileIndex, tileData) {
         var layer   = zone.getBoard().getLayer(Defs.OBJECT_LAYER),
-            exist   = layer.getTileId(tileIndex);
+            exist   = layer.getTiles(tileIndex);
         
-        if (exist) {
+        if (exist && exist.length > 0) {
             return false;
         }
         else {
-            layer.setTileId(tileIndex, tileId);
-            layer.setTileData(tileIndex, tileData);
-            
+            layer.pushTile(tileIndex, tileData);
             return true;
         }
     },
@@ -418,7 +421,7 @@ World.prototype = {
                         tileId = zone.addTile(tile);
                     }
             
-                    layer.setTileId(i, tileId);
+                    layer.pushTile(i, [ tileId ]);
                 }
             }
         }
