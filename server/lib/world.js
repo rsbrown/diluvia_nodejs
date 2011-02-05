@@ -345,6 +345,15 @@ World.prototype = {
                 this.actorDropGoal(player);
             }
         }
+        else if (command == "scoreboard") {
+            var scoreData = {};
+            
+            _(this._online).each(function(account) {
+                scoreData[account.getUsername()] = account.getScore(); 
+            });
+            
+            client.sendScoreData(scoreData);
+        }
     },
 
     teleport: function(actor, zoneId, coords) {
@@ -496,5 +505,13 @@ World.prototype = {
         }
         
         this.setZone(conf.zoneId, zone);
-    }
+    },
+    
+    broadcastChat: function(username, text) {
+        if (!text.match(/^\s*$/)) {
+            _(this._online).each(function(account) {
+                account.getClient().sendChat(Defs.CHAT_PLAYER, username + " proclaims, \"" + text + "\"!!!");
+            });
+        }
+    },
 };

@@ -114,6 +114,9 @@ Protocol.prototype = {
             else if (msg.type == "ScoreUpdate") {
                 self._controller.setScore(msg.attrs);
             }
+            else if (msg.type == "ScoreData") {
+                self._controller.updateScoreboard(msg.attrs);
+            }
         }
     },
     

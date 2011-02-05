@@ -94,14 +94,7 @@ GameServer.prototype = {
         });
 
         client.on("receivedChat", function(text) {
-            var zoneId  = actor.getZoneId();
-
-            if (zoneId) {
-                zone = world.getZone(zoneId);
-                if (text != "") {
-                    zone.chat(account.getUsername(), text);
-                }
-            }
+            world.broadcastChat(account.getUsername(), text);
         });
     },
 

@@ -14,7 +14,7 @@ var Client = module.exports = function(conn) {
 _.extend(Client.prototype, events.EventEmitter.prototype, {
     onMessage: function(msg) {
         if (msg) {
-            // console.log("MESSAGE: " + JSON.stringify(msg));
+            console.log("MESSAGE: " + JSON.stringify(msg));
             
             if (this._handshake) {
                 if (msg.type == "Command") {
@@ -57,6 +57,10 @@ _.extend(Client.prototype, events.EventEmitter.prototype, {
     
     sendScoreUpdate: function(score) {
         this.sendMessage("ScoreUpdate", score);
+    },
+    
+    sendScoreData: function(scoreData) {
+        this.sendMessage("ScoreData", scoreData);
     },
     
     sendPlaySound: function(sound) {
