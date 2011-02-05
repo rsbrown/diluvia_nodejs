@@ -45,7 +45,8 @@
         
         "Y":    { "class": "PortalTile", "options": { "zone": "zones:2", "image": "sprites.png:4,0", "dropAt": [ 3, 5 ] } },
         "Z":    { "class": "PortalTile", "options": { "zone": "zones:3", "image": "sprites.png:4,0", "dropAt": [ 3, 5 ] } },
-        "o":    { "class": "PortalTile", "options": { "zone": "zones:4", "image": "sprites.png:7,1", "dropAt": [ 29, 9 ] } },
+        "o":    { "class": "PortalTile", "options": { "zone": "zones:4", "image": "sprites.png:7,1", "dropAt": [ 52, 9 ] } },
+        "r":    { "class": "PortalTile", "options": { "zone": "zones:5", "image": "sprites.png:6,0", "dropAt": [ 1, 15 ] } },
 		"9":    { "class": "PortalTile", "options": { "zone": "zones:0", "image": "sprites.png:8,1", "dropAt": [ 18, 9 ] } }
 
 		
@@ -89,7 +90,7 @@
                     "811111111111111111111111111112",
                     "7                            3",   
                     "7 LLLLLLLLLLLLL *55555@   NQ 3",   
-                    "o LLLLLLLLLLLLL 3000007   OR 3",   
+                    "o LLLLLLLLLLLLL 3000007   OR r",   
                     "7 LLLLLLLLLLLLL 3000007   PS 3",   
                     "7               3000007      3",   
                     "65555555555555@ 30000065555554",   

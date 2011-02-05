@@ -21,7 +21,7 @@
         "X":    "RABBIT",
 
         "F":    { "class": "PortalTile", "options": { "zone": "zones:1", "image": "sprites.png:5,1", "dropAt": [ 11, 16 ] } },
-        "o":    { "class": "PortalTile", "options": { "zone": "zones:4", "image": "sprites.png:4,0", "dropAt": [ 30, 18 ] } }
+        "o":    { "class": "PortalTile", "options": { "zone": "zones:4", "image": "sprites.png:4,0", "dropAt": [ 30, 20 ] } }
     },
     
     "baseMap":  [   
