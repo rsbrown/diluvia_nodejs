@@ -2,12 +2,13 @@ var events          = require("events"),
     _               = require("underscore"),
     Defs            = require("defs");
 
-var Actor = module.exports = function() {
+var Actor = module.exports = function(attributes) {
     events.EventEmitter.call(this);
-
     this._gameAttributes    = {};
     this._role              = Defs.ROLE_SEEKER;
     this._actorId           = Actor.actorIdCounter++;
+    this._zoneId            = attributes["zoneIdx"];
+    this._tileIndex         = attributes["tileIdx"];
 };
 
 Actor.actorIdCounter = 0;
@@ -31,7 +32,6 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
     
     setZoneId: function(zoneId) {
         this._zoneId = zoneId;
-        
         this.emit("changeZone", zoneId);
         this.emit("change");
     },

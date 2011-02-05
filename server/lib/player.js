@@ -2,9 +2,9 @@ var _       = require("underscore"),
     Actor   = require("actor"),
     events  = require("events");
 
-var Player = module.exports = function() {
-    Actor.call(this);
-    this._orientation = "n";
+var Player = module.exports = function(attributes) {
+    Actor.call(this, attributes);
+    this._orientation = attributes["orientation"] || "n";
     this._score       = 0;
 };
 

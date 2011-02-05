@@ -1,17 +1,14 @@
-var Persistence = require("persistence");
+var Player = require("player");
+    Persistence = require("persistence");
 
 var START_HITPOINTS = 100;
 
 var Account = module.exports = function(attributes) {
-    this._id            = attributes["id"];
-    this._username      = attributes["username"];
-    this._         = attributes["  "];
-    this._zones         = {};
-    this._backpack      = [];
-    this._awards        = [];
-    
-    this._client        = null;
-    this._player        = null;
+    this._id               = attributes["id"];
+    this._username         = attributes["username"];
+    this._musicOn          = attributes["musicOn"];
+    this._client           = null;
+    this._player           = new Player(attributes);
 };
 
 Account.initFromSession = function(sessionId, callback) {
@@ -35,7 +32,7 @@ Account.create = function(attributes, callback) {
     redis.incr( 'pkid' , function( err, newUserId ) {
         var account = new Account({
             "id"       : newUserId,
-            "  "  : true,
+            "musicOn"  : true,
             "username" : attributes["username"]
         });
         account.save(function(){
@@ -72,16 +69,20 @@ Account.findById = function(id, callback) {
 };
 
 Account.prototype = {
-    
     save: function(callback){
+        if (callback === undefined ) { callback = function(){}; }
         Persistence.getRedis().set('account:'+this._id, this.serialize(), callback);
     },
     
     serialize: function() {
+        var player = this.getPlayer();
         return JSON.stringify({
-            "id"       : this._id,
-            "  "  : this._  ,
-            "username" : this._username
+            "id"           : this._id,
+            "musicOn"      : this._musicOn,
+            "username"     : this._username,
+            "zoneIdx"      : player ? player.getZoneId() : null,
+            "tileIdx"      : player ? player.getTileIndex() : null,
+            "orientation"  : player ? player.getOrientation() : null
         });
     },
 
@@ -109,20 +110,12 @@ Account.prototype = {
         return this._username;
     },
     
-    addZone: function(key, zone) {
-        this._zones[key] = zone;
-    },
-    
-    removeZone: function(key) {
-        delete this._zones[key];
-    },
-    
     setSoundOn: function(bool) {
-        this._   = bool;
+        this._musicOn = bool;
     },
     
     isMusicOn: function() {
-        return this._  ;
+        return this._musicOn;
     },
     
     persist: function() {

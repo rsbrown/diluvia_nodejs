@@ -58,10 +58,8 @@ GameServer.prototype = {
 
         actor.on("changeZone", function() {
             var zoneId = actor.getZoneId();
-
             if (zoneId) {
                 var zone = world.getZone(zoneId);
-
                 client.sendZoneData(zone);
                 client.sendZoneState(world.composeZoneStateFor(actor, zone.getStateAttributes()));
             }
@@ -82,7 +80,7 @@ GameServer.prototype = {
                 }
                 else if (command == "StopMusic" || command == "StartMusic") {
                     account.setSoundOn((command == "StartMusic"));
-                    account.save(function(){});
+                    account.save();
                 }
                 else {
                     world.otherCommand(account, zone, command);
@@ -96,7 +94,7 @@ GameServer.prototype = {
             if (zoneId) {
                 zone = world.getZone(zoneId);
                 if (text != "") {
-                    zone.chat(account.getUid(), text);
+                    zone.chat(account.getUsername(), text);
                 }
             }
         });

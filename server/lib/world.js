@@ -152,12 +152,10 @@ World.prototype = {
     },
 
     playerInitialize: function(account, client) {
-        var player  = new Player(),
-            world   = this;
-        
+        var world   = this,
+            player  = account.getPlayer();
+
         account.setClient(client);
-        account.setPlayer(player);
-        
         this._online.push(account);
         
         // switch the player's tile when they change orientations
@@ -204,27 +202,29 @@ World.prototype = {
         player.on("died", function() {
             _(world._online).each(function(otherAccount) {
                 otherAccount.getClient().sendChat(Defs.CHAT_INFO,
-                    account.getUid() + " died!"
+                    account.getUsername() + " died!"
                 )
             });
         });
     
         client.on("disconnect", function() {
+            account.save();
             world.accountRemove(account);
         });
         
-        this.accountSpawn(account);
+        var zone = this.getZone(account.getPlayer().getZoneId());
+        this.accountSpawn(account, zone, account.getPlayer().getTileIndex());
         client.sendChat(Defs.CHAT_ALERT, "Find the treasure to become the assassin!");
         
         return player;
     },
     
-    accountSpawn: function(account) {
-        var zone    = this.getDefaultZone(),
-            player  = account.getPlayer();
-            
-        this.placeAccountInZone(account, zone, zone.getDefaultSpawnPointIndex());
-        
+    accountSpawn: function(account, zone, tileIdx) {
+        var player  = account.getPlayer();
+        if (zone === undefined) {zone = this.getDefaultZone();}
+        if (tileIdx === undefined) {tileIdx = zone.getDefaultSpawnPointIndex();}
+        this.placeAccountInZone(account, zone, tileIdx);
+        zone.setPlayerTileForOrientation(player, player.getOrientation());
         player.spawn();
     },
     
@@ -256,8 +256,7 @@ World.prototype = {
     placeAccountInZone: function(account, zone, tileIndex) {
         var client  = account.getClient(),
             player  = account.getPlayer();
-        
-        zone.addActor(player, "PLAYER", tileIndex);    
+        zone.addActor(player, "PLAYER", tileIndex);
     },
     
     removeAccountFromZone: function(account, zone) {
@@ -316,7 +315,8 @@ World.prototype = {
                 
         if (newZone) {
             oldZone.removeActor(actor);
-            newZone.addActor(actor, "PLAYER", tileIndex);            
+            newZone.addActor(actor, "PLAYER", tileIndex);
+            newZone.setPlayerTileForOrientation(actor, actor.getOrientation());
         }
         else {
             console.log("Tried to teleport to " + zoneId + ", which doesn't exist!");
