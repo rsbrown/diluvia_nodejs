@@ -357,15 +357,15 @@ World.prototype = {
             tileId       = zone.getTileId(tile);
         
         // TODO: make this more generic (work with multiple goals)        
-        var oldAssassin = _(zone.getActors()).detect(function(otherActor) { 
-            return otherActor.getRole() == Defs.ROLE_ASSASSIN;
+        var oldAssassinAccount = _(this._online).detect(function (account) {
+            return account.getPlayer().getRole() == Defs.ROLE_ASSASSIN;
         });
         
         layer.popTile(tileIndex, tileData);
         actor.setGoalInventory(tileData);
         
-        if (oldAssassin) {
-            oldAssassin.setRole(Defs.ROLE_SEEKER);
+        if (oldAssassinAccount) {
+            oldAssassinAccount.getPlayer().setRole(Defs.ROLE_SEEKER);
         }
     },
     
