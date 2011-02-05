@@ -108,10 +108,10 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
         this.emit("moveFailed");
     },
     
-    becomesPoisonedByPlayer: function(player) {
+    becomesPoisonedByAccount: function(account) {
         if (!this._poisonedAt) {
             this._poisonedAt    = (new Date()).getTime();
-            this._poisonedBy    = player;
+            this._poisonedBy    = account;
         }
     },
     

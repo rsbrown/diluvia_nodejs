@@ -69,10 +69,14 @@ World.prototype = {
             if (poisonedAt) {
                 if (currentTime >= (poisonedAt + Defs.POISON_DEATH_DELAY)) {
                     var poisonedBy  = player.getPoisonedBy(),
-                        poisoner    = this._getAccountFromPlayer(poisonedBy);
+                        poisonerCli = poisonedBy.getClient();
+                                        
+                    poisonedBy.addScore(Defs.REWARD_POISONER);
                     
-                    poisoner.addScore(Defs.REWARD_POISONER);
-                    poisoner.getClient().sendChat(Defs.CHAT_ALERT, "You killed " + account.getUsername() + " with POISON!");
+                    if (poisonerCli) {
+                        poisonerCli.sendChat(Defs.CHAT_ALERT, "You killed " + account.getUsername() + " with POISON!");
+                    }
+                    
                     account.getClient().sendChat(Defs.CHAT_CRITICAL, "You were POISONed and died!");
                     world.accountDeath(account);
                 }
@@ -256,8 +260,15 @@ World.prototype = {
     
     accountSpawn: function(account, zone, tileIdx) {
         var player  = account.getPlayer();
-        if (zone === undefined) {zone = this.getDefaultZone();}
-        if (tileIdx === undefined) {tileIdx = zone.getDefaultSpawnPointIndex();}
+        
+        if (zone === undefined) {
+            zone = this.getDefaultZone();
+        }
+        
+        if (tileIdx === undefined || tileIdx == null) {
+            tileIdx = zone.getDefaultSpawnPointIndex();
+        }
+        
         this.placeAccountInZone(account, zone, tileIdx);
         zone.setPlayerTileForOrientation(player, player.getOrientation());
         player.spawn();
@@ -332,7 +343,7 @@ World.prototype = {
             }
         
             _(otherActors).each(function(otherActor) {
-                otherActor.becomesPoisonedByPlayer(player);
+                otherActor.becomesPoisonedByAccount(account);
             });
             
             if (otherActors.length > 0) {

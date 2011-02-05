@@ -14,7 +14,7 @@ var Client = module.exports = function(conn) {
 _.extend(Client.prototype, events.EventEmitter.prototype, {
     onMessage: function(msg) {
         if (msg) {
-            console.log("MESSAGE: " + JSON.stringify(msg));
+            // console.log("MESSAGE: " + JSON.stringify(msg));
             
             if (this._handshake) {
                 if (msg.type == "Command") {
