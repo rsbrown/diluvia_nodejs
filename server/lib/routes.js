@@ -46,25 +46,24 @@ var Routes = module.exports = {
 
     '/auth/facebook': function(req, res) {
         var self = this;
-      this.preParseRequest(req, res);
-      req.authenticate(['facebook'], function(error, authenticated) { 
-         if(authenticated ) {
-            var account = self.getAccountFromFacebookAuth(req.getAuthDetails(), function(account){
-                req.session.accountId = account.getId();
-                self.redirectBackOrRoot(req, res);
-            });
-          }
-          else {
-            req.session.flash.error = "Facebook authentication failed";
-            res.render('index', {locals: {flash: req.session.flash, username: null}});
-          }
-       });
+        this.preParseRequest(req, res);
+        req.authenticate(['facebook'], function(error, authenticated) { 
+            if(authenticated ) {
+                var account = self.getAccountFromFacebookAuth(req.getAuthDetails(), function(account){
+                    req.session.accountId = account.getId();
+                    self.redirectBackOrRoot(req, res);
+                });
+            }
+            else {
+                req.session.flash.error = "Facebook authentication failed";
+                res.render('index', {locals: {flash: req.session.flash, username: null}});
+            }
+        });
     },
 
     '/auth/twitter': function(req, res, params) {
         this.preParseRequest(req, res);
         req.authenticate(['twitter'], function(error, authenticated) {
-                // console.log("authenticated: " + authenticated);
                 if( authenticated ) {
                     // CONGRATS, DO SOME STUFF
                 } else {

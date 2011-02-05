@@ -46,11 +46,9 @@ Web.prototype = {
     getAccountFromFacebookAuth: function(authInfo, callback) {
         var facebookUserId = authInfo["user"]["id"];
         Account.findByFacebookId(facebookUserId, function(foundAccount){
-            console.log("FOUND THIS USER:" + JSON.stringify(foundAccount));
             if (foundAccount) {
                 callback(foundAccount);
             } else {
-                console.log("CERATING A NEW USER");
                 Account.create({
                     "facebookUserId": facebookUserId,
                     "username": authInfo["user"]["name"]

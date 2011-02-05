@@ -6,7 +6,6 @@ var Account = module.exports = function(attributes) {
     this._id            = attributes["id"];
     this._username      = attributes["username"];
     this._         = attributes["  "];
-    console.log("\n\n\n\n\n="+attributes);
     this._zones         = {};
     this._backpack      = [];
     this._awards        = [];
@@ -31,11 +30,10 @@ Account.initFromSession = function(sessionId, callback) {
     });
 };
 
-Account.create = function(attributes) {
-    var account = null
-        redis = Persistence.getRedis();
+Account.create = function(attributes, callback) {
+    var redis = Persistence.getRedis();
     redis.incr( 'pkid' , function( err, newUserId ) {
-        account = new Account({
+        var account = new Account({
             "id"       : newUserId,
             "  "  : true,
             "username" : attributes["username"]
@@ -43,10 +41,10 @@ Account.create = function(attributes) {
         account.save(function(){
             redis.set( 'facebookUser:'+attributes["facebookUserId"], account.getId(), function() {
                 console.log("SAVED NEW USER AND MAPPED FB ID " + attributes["facebookUserId"] + "TO USER ID " + account.getId());
+                callback(account);
             });
         });
     });
-    return account;
 };
 
 Account.findByFacebookId = function(facebookUserId, callback){
@@ -56,6 +54,8 @@ Account.findByFacebookId = function(facebookUserId, callback){
           Account.findById(data, function(account){
               callback(account);
           });
+       } else {
+           callback(null);
        }
     });
 };
