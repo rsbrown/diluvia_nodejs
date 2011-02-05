@@ -55,6 +55,10 @@ _.extend(Client.prototype, events.EventEmitter.prototype, {
         this.sendMessage("ZoneState", zoneState);
     },
     
+    sendScoreUpdate: function(score) {
+        this.sendMessage("ScoreUpdate", score);
+    },
+    
     sendPlaySound: function(sound) {
         this.sendMessage("PlaySound", sound);
     },

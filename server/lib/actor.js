@@ -89,6 +89,7 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
     spawn: function() {
         this._hitpoints     = this.getStartingHitpoints();
         this._poisonedAt    = null;
+        this._poisonedBy    = null;
         this._goalCounter   = Defs.MAX_GOAL_COUNTER;
         this._lastGoalTime  = 0;
         
@@ -107,14 +108,19 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
         this.emit("moveFailed");
     },
     
-    becomesPoisoned: function() {
+    becomesPoisonedByPlayer: function(player) {
         if (!this._poisonedAt) {
-            this._poisonedAt = (new Date()).getTime();
+            this._poisonedAt    = (new Date()).getTime();
+            this._poisonedBy    = player;
         }
     },
     
     getPoisonedAt: function() {
         return this._poisonedAt;
+    },
+    
+    getPoisonedBy: function() {
+        return this._poisonedBy;
     },
     
     touchGoalTime: function() {

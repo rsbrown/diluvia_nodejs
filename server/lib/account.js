@@ -1,14 +1,19 @@
-var Player = require("player");
-    Persistence = require("persistence");
+var _           = require("underscore"),
+    Player      = require("player"),
+    Persistence = require("persistence"),
+    events      = require("events");
 
 var START_HITPOINTS = 100;
 
 var Account = module.exports = function(attributes) {
-    this._id               = attributes["id"];
-    this._username         = attributes["username"];
-    this._musicOn          = attributes["musicOn"];
-    this._client           = null;
-    this._player           = new Player(attributes);
+    events.EventEmitter.call(this);
+    
+    this._id        = attributes["id"];
+    this._username  = attributes["username"];
+    this._musicOn   = attributes["musicOn"];
+    this._score     = attributes["score"] || 0;
+    this._client    = null;
+    this._player    = new Player(attributes);
 };
 
 Account.initFromSession = function(sessionId, callback) {
@@ -18,7 +23,7 @@ Account.initFromSession = function(sessionId, callback) {
         if (sessionData.accountId) {
             account = Account.findById(sessionData.accountId, callback);
         } else {
-            var guestUsername = "guest_" + (sessionId+"").substring(0,3);
+            var guestUsername = "guest_" + sessionId.toString().substring(0,3);
             account = new Account({
                 "username": guestUsername
             });
@@ -68,7 +73,7 @@ Account.findById = function(id, callback) {
     });
 };
 
-Account.prototype = {
+_.extend(Account.prototype, events.EventEmitter.prototype, {
     save: function(callback){
         if (callback === undefined ) { callback = function(){}; }
         Persistence.getRedis().set('account:'+this._id, this.serialize(), callback);
@@ -77,12 +82,13 @@ Account.prototype = {
     serialize: function() {
         var player = this.getPlayer();
         return JSON.stringify({
-            "id"           : this._id,
-            "musicOn"      : this._musicOn,
-            "username"     : this._username,
-            "zoneIdx"      : player ? player.getZoneId() : null,
-            "tileIdx"      : player ? player.getTileIndex() : null,
-            "orientation"  : player ? player.getOrientation() : null
+            "id"            : this._id,
+            "musicOn"       : this._musicOn,
+            "username"      : this._username,
+            "zoneIdx"       : player ? player.getZoneId() : null,
+            "tileIdx"       : player ? player.getTileIndex() : null,
+            "orientation"   : player ? player.getOrientation() : null,
+            "score"         : this._score
         });
     },
 
@@ -118,9 +124,18 @@ Account.prototype = {
         return this._musicOn;
     },
     
-    persist: function() {
+    getScore: function() {
+        return this._score;
+    },
+    
+    addScore: function(amount) {
+        this._score += amount;
         
+        this.save();
+        this.emit("changeScore", this._score);
+        
+        return this._score;
     }
-};
+});
 
 

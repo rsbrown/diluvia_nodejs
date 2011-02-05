@@ -196,3 +196,11 @@ a.logout {
     font-size: 11px;
     color: #DD3333;
 }
+
+#score {
+    position:   absolute;
+    top:        10px;
+    left:       250px;
+    z-Index:    95;
+    color:      white;
+}

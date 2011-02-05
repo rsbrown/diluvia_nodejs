@@ -51,6 +51,12 @@ World.prototype = {
         return this._zones[zoneId];
     },
     
+    _getAccountFromPlayer: function(player) {
+        return _(this._online).detect(function (account) {
+            return account.getPlayer() == player;
+        });
+    },
+    
     _onSlowInterval: function() {
         var world       = this,
             currentTime = (new Date()).getTime();
@@ -59,12 +65,17 @@ World.prototype = {
             var account     = this._online[i],
                 player      = account.getPlayer(),
                 poisonedAt  = player.getPoisonedAt();
-            
+                                    
             if (poisonedAt) {
                 if (currentTime >= (poisonedAt + Defs.POISON_DEATH_DELAY)) {
-                    account.getClient().sendChat(Defs.CHAT_CRITICAL, "You were poisoned and died!");
+                    var poisonedBy  = player.getPoisonedBy(),
+                        poisoner    = this._getAccountFromPlayer(poisonedBy);
+                    
+                    poisoner.addScore(Defs.REWARD_POISONER);
+                    poisoner.getClient().sendChat(Defs.CHAT_ALERT, "You killed " + account.getUsername() + " with POISON!");
+                    account.getClient().sendChat(Defs.CHAT_CRITICAL, "You were POISONed and died!");
                     world.accountDeath(account);
-                }                
+                }
             }
             
             var goalCounter     = player.getGoalCounter(),
@@ -321,7 +332,7 @@ World.prototype = {
             }
         
             _(otherActors).each(function(otherActor) {
-                otherActor.becomesPoisoned();
+                otherActor.becomesPoisonedByPlayer(player);
             });
             
             if (otherActors.length > 0) {

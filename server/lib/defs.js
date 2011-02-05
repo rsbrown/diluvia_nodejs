@@ -17,6 +17,8 @@ var Defs = module.exports = {
     GIT_REVISION:           "unresolved",
     POISON_DEATH_DELAY:     7500,
     
+    REWARD_POISONER:        5,
+    
     LAYER_COUNT:            3,
     BASE_LAYER:             0,
     OBJECT_LAYER:           1,

@@ -55,6 +55,11 @@ GameServer.prototype = {
         client.completeHandshake();
         client.sendZoneData(zone);
         client.sendZoneState(world.composeZoneStateFor(actor, zone.getStateAttributes()));
+        client.sendScoreUpdate(account.getScore());
+
+        account.on("changeScore", function(score) {
+            client.sendScoreUpdate(score);
+        });
 
         actor.on("changeZone", function() {
             var zoneId = actor.getZoneId();

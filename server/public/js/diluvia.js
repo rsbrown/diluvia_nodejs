@@ -31,9 +31,14 @@ var DiluviaController = function(server, options) {
     this._chat              = new Chat(document.body);
     this._serverInfo        = {};
     this._infoElement       = $('<div id="info_area"></div>');
+    this._scoreElement      = $('<div id="score_number">0</div>');
+    this._scoreContainer    = $('<div id="score">Score: </div>');
+    
+    this._scoreContainer.append(this._scoreElement);
     
     $(document).ready(function() {
         $(document.body).append(self._chatBoxElement); 
+        $(document.body).append(self._scoreContainer);
         $(document.getElementById(Diluvia.CANVAS_ID).parentNode).append(self._infoElement);
         self._chatBoxElement.hide();
         $(document.body).css({ overflow: "hidden" });
@@ -180,5 +185,9 @@ DiluviaController.prototype = {
             this._infoElement.html("Diluvia Server Revision " + serverInfo.revision);
         }
     },
-    getServerInfo: function(serverInfo) { return this._serverInfo; }
+    getServerInfo: function(serverInfo) { return this._serverInfo; },
+    
+    setScore: function(score) {
+        this._scoreElement.html(score);
+    }
 };
