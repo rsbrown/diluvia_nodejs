@@ -534,7 +534,7 @@ World.prototype = {
     
     broadcastChat: function(username, text) {
         if (!text.match(/^\s*$/)) {
-            this.broadcastMessage(Defs.CHAT_PLAYER, username + " proclaims, \"" + text + "\"!!!");
+            this.broadcastMessage(Defs.CHAT_PLAYER, username + "> " + text);
         }
     }
 };

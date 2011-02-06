@@ -41,11 +41,11 @@ GameServer.prototype = {
 
         Account.initFromSession(sessionId, function(account){
             console.log("INIT SESSION FOR USER " + account.getUsername());
-            var alreadyLoggedInAccount = world.getAccountById(account.getId());
-            console.log(alreadyLoggedInAccount);
-            if (alreadyLoggedInAccount) {
-                alreadyLoggedInAccount.kick();
-            }
+            // var alreadyLoggedInAccount = world.getAccountById(account.getId());
+            // console.log(alreadyLoggedInAccount);
+            // if (alreadyLoggedInAccount) {
+            //     alreadyLoggedInAccount.kick();
+            // }
             client.sendMessage("ServerInfo", server.getInfo());
             server.loadGame(client, account);
         });
