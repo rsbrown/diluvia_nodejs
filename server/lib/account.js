@@ -128,6 +128,10 @@ _.extend(Account.prototype, events.EventEmitter.prototype, {
         return this._score;
     },
     
+    kick: function() {
+      this._client.onDisconnect();
+    },
+    
     addScore: function(amount) {
         this._score += amount;
         

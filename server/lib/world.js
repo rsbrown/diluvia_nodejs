@@ -192,6 +192,12 @@ World.prototype = {
         });
     },
 
+    getAccountById: function(accountId) {
+        return _(this._online).select(function(account) {
+            return account.getId() == accountId;
+        })[0];
+    },
+
     playerInitialize: function(account, client) {
         var world   = this,
             player  = account.getPlayer();
@@ -644,7 +650,7 @@ World.prototype = {
     
     broadcastChat: function(username, text) {
         if (!text.match(/^\s*$/)) {
-            this.broadcastMessage(Defs.CHAT_PLAYER, username + " proclaims, \"" + text + "\"!!!");
+            this.broadcastMessage(Defs.CHAT_PLAYER, username + "> " + text);
         }
     }
 };
