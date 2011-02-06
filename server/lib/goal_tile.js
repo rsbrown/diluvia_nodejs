@@ -5,6 +5,7 @@ var _       = require("underscore"),
 var GoalTile = module.exports = function(options) {
     Tile.apply(this, arguments);
     
+    this.goalType = options.goalType;
     this.goalTile = true;
 }
 
