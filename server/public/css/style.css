@@ -204,3 +204,18 @@ a.logout {
     z-Index:    95;
     color:      white;
 }
+
+#scoreboard {
+    position:   absolute;
+    z-Index:    95;
+    top:        100px;
+    left:       100px;
+    background: black;
+    padding:    10px;
+    border:     2px solid white;
+    color:      white;
+}
+
+#scoreboard table td, #scoreboard table th { 
+    padding:    3px;
+}

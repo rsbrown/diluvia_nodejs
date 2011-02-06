@@ -69,10 +69,14 @@ World.prototype = {
             if (poisonedAt) {
                 if (currentTime >= (poisonedAt + Defs.POISON_DEATH_DELAY)) {
                     var poisonedBy  = player.getPoisonedBy(),
-                        poisoner    = this._getAccountFromPlayer(poisonedBy);
+                        poisonerCli = poisonedBy.getClient();
+                                        
+                    poisonedBy.addScore(Defs.REWARD_POISONER);
                     
-                    poisoner.addScore(Defs.REWARD_POISONER);
-                    poisoner.getClient().sendChat(Defs.CHAT_ALERT, "You killed " + account.getUsername() + " with POISON!");
+                    if (poisonerCli) {
+                        poisonerCli.sendChat(Defs.CHAT_ALERT, "You killed " + account.getUsername() + " with POISON!");
+                    }
+                    
                     account.getClient().sendChat(Defs.CHAT_CRITICAL, "You were POISONed and died!");
                     world.accountDeath(account);
                 }
@@ -241,14 +245,12 @@ World.prototype = {
         });
         
         player.on("died", function() {
-            _(world._online).each(function(otherAccount) {
-                otherAccount.getClient().sendChat(Defs.CHAT_INFO,
-                    account.getUsername() + " died!"
-                )
-            });
+            world.broadcastMessage(Defs.CHAT_INFO, account.getUsername() + " died!");
         });
     
         client.on("disconnect", function() {
+            world.broadcastMessage(Defs.CHAT_SYSTEM, account.getUsername() + " disconnected.");
+            
             account.save();
             world.accountRemove(account);
         });
@@ -262,8 +264,15 @@ World.prototype = {
     
     accountSpawn: function(account, zone, tileIdx) {
         var player  = account.getPlayer();
-        if (zone === undefined) {zone = this.getDefaultZone();}
-        if (tileIdx === undefined) {tileIdx = zone.getDefaultSpawnPointIndex();}
+        
+        if (zone === undefined) {
+            zone = this.getDefaultZone();
+        }
+        
+        if (tileIdx === undefined || tileIdx == null) {
+            tileIdx = zone.getDefaultSpawnPointIndex();
+        }
+        
         this.placeAccountInZone(account, zone, tileIdx);
         zone.setPlayerTileForOrientation(player, player.getOrientation());
         player.spawn();
@@ -299,6 +308,7 @@ World.prototype = {
     placeAccountInZone: function(account, zone, tileIndex) {
         var client  = account.getClient(),
             player  = account.getPlayer();
+        
         zone.addActor(player, "PLAYER", tileIndex);
     },
     
@@ -325,8 +335,9 @@ World.prototype = {
             actors      = zone.getActors();
 
         if (command == "attack" && player.getRole() == Defs.ROLE_ASSASSIN) {
-            var successfullyAttacked = false,
-                otherActors          = [];
+            var successfullyAttacked    = false,
+                otherActors             = [],
+                poisonedActors          = [];
             
             for (var i = 0, len = actors.length; i < len; i++) {
                 var actor           = actors[i],
@@ -338,10 +349,12 @@ World.prototype = {
             }
         
             _(otherActors).each(function(otherActor) {
-                otherActor.becomesPoisonedByPlayer(player);
+                if (otherActor.becomesPoisonedByAccount(account)) {
+                    poisonedActors.push(otherActor);
+                }
             });
             
-            if (otherActors.length > 0) {
+            if (poisonedActors.length > 0) {
                 client.sendFlash("purple");
             }
         }
@@ -350,6 +363,15 @@ World.prototype = {
                 player.setRole(Defs.ROLE_ASSASSIN);
                 this.actorDropGoal(player);
             }
+        }
+        else if (command == "scoreboard") {
+            var scoreData = {};
+            
+            _(this._online).each(function(account) {
+                scoreData[account.getUsername()] = account.getScore(); 
+            });
+            
+            client.sendScoreData(scoreData);
         }
     },
 
@@ -502,5 +524,17 @@ World.prototype = {
         }
         
         this.setZone(conf.zoneId, zone);
+    },
+    
+    broadcastMessage: function(color, text) {
+        _(this._online).each(function(account) {
+            account.getClient().sendChat(color, text);
+        });        
+    },
+    
+    broadcastChat: function(username, text) {
+        if (!text.match(/^\s*$/)) {
+            this.broadcastMessage(Defs.CHAT_PLAYER, username + " proclaims, \"" + text + "\"!!!");
+        }
     }
 };

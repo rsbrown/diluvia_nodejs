@@ -83,10 +83,13 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
     
     addActor: function(actor, tileId, tileIndex) {
         actor.setZoneId(this._zoneId);
-        actor.setTileIndex(tileIndex);        
+        actor.setTileIndex(tileIndex);
+        
         this._actors.push(actor);
         this._board.getLayer(Defs.ACTOR_LAYER).pushTile(tileIndex, [ tileId, { actorId: actor.getActorId() } ]);
+        
         this.playSound("portal");
+        
         actor.land();
     },
     

@@ -37,9 +37,7 @@ GameServer.prototype = {
     },
     
     initAccount: function(client, sessionId) {
-        var server  = this,
-            world   = this._world,
-            account;
+        var server = this;
 
         Account.initFromSession(sessionId, function(account){
             console.log("INIT SESSION FOR USER " + account.getUsername());
@@ -49,13 +47,16 @@ GameServer.prototype = {
                 alreadyLoggedInAccount.kick();
             }
             client.sendMessage("ServerInfo", server.getInfo());
-            server.loadGame(world, client, account);
+            server.loadGame(client, account);
         });
     },
     
-    loadGame: function(world, client, account){
-        var actor   = world.playerInitialize(account, client),
+    loadGame: function(client, account){
+        var world   = this._world,
+            actor   = world.playerInitialize(account, client),
             zone    = world.getZone(actor.getZoneId());
+
+        world.broadcastMessage(Defs.CHAT_SYSTEM, account.getUsername() + " connected.");
 
         client.completeHandshake();
         client.sendZoneData(zone);
@@ -73,6 +74,10 @@ GameServer.prototype = {
                 client.sendZoneData(zone);
                 client.sendZoneState(world.composeZoneStateFor(actor, zone.getStateAttributes()));
             }
+        });
+        
+        actor.on("changeRole", function() {
+            client.sendFlash("yellow");
         });
 
         actor.on("landed", function() {
@@ -99,14 +104,7 @@ GameServer.prototype = {
         });
 
         client.on("receivedChat", function(text) {
-            var zoneId  = actor.getZoneId();
-
-            if (zoneId) {
-                zone = world.getZone(zoneId);
-                if (text != "") {
-                    zone.chat(account.getUsername(), text);
-                }
-            }
+            world.broadcastChat(account.getUsername(), text);
         });
     },
 

@@ -33,12 +33,21 @@ var DiluviaController = function(server, options) {
     this._infoElement       = $('<div id="info_area"></div>');
     this._scoreElement      = $('<div id="score_number">0</div>');
     this._scoreContainer    = $('<div id="score">Score: </div>');
+    this._scoreBoard        = $('<div id="scoreboard"></div>');
+    this._scoreTable        = $('<table cellspacing="0" cellpadding="0" border="0"></table>');
     
     this._scoreContainer.append(this._scoreElement);
+    this._scoreBoard.append(this._scoreTable);
+    
+    this._scoreTable.append("<thead><th>User</th><th>Score</th><tbody></tbody>");
     
     $(document).ready(function() {
         $(document.body).append(self._chatBoxElement); 
         $(document.body).append(self._scoreContainer);
+        $(document.body).append(self._scoreBoard);
+        
+        self._scoreBoard.hide();
+        
         $(document.getElementById(Diluvia.CANVAS_ID).parentNode).append(self._infoElement);
         self._chatBoxElement.hide();
         $(document.body).css({ overflow: "hidden" });
@@ -189,5 +198,32 @@ DiluviaController.prototype = {
     
     setScore: function(score) {
         this._scoreElement.html(score);
+    },
+    
+    updateScoreboard: function(scoreData) {
+        var el = this._scoreBoard.find("tbody");
+        
+        el.html("");
+        
+        for (var key in scoreData) {
+            var score = scoreData[key];
+            
+            el.append(
+                "<tr>" +
+                    "<td>" + key    + "</td>" +
+                    "<td>" + score  + "</td>" + 
+                "</tr>"
+            );
+        }
+        
+        this.showScoreboard();
+    },
+    
+    showScoreboard: function() {
+        this._scoreBoard.show();
+    },
+    
+    hideScoreboard: function() {
+        this._scoreBoard.hide();
     }
 };
