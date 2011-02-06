@@ -302,6 +302,7 @@ World.prototype = {
     placeAccountInZone: function(account, zone, tileIndex) {
         var client  = account.getClient(),
             player  = account.getPlayer();
+        
         zone.addActor(player, "PLAYER", tileIndex);
     },
     
@@ -328,8 +329,9 @@ World.prototype = {
             actors      = zone.getActors();
 
         if (command == "attack" && player.getRole() == Defs.ROLE_ASSASSIN) {
-            var successfullyAttacked = false,
-                otherActors          = [];
+            var successfullyAttacked    = false,
+                otherActors             = [],
+                poisonedActors          = [];
             
             for (var i = 0, len = actors.length; i < len; i++) {
                 var actor           = actors[i],
@@ -341,10 +343,12 @@ World.prototype = {
             }
         
             _(otherActors).each(function(otherActor) {
-                otherActor.becomesPoisonedByAccount(account);
+                if (otherActor.becomesPoisonedByAccount(account)) {
+                    poisonedActors.push(otherActor);
+                }
             });
             
-            if (otherActors.length > 0) {
+            if (poisonedActors.length > 0) {
                 client.sendFlash("purple");
             }
         }

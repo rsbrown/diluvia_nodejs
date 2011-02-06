@@ -9,6 +9,7 @@ var Actor = module.exports = function(attributes) {
     this._actorId           = Actor.actorIdCounter++;
     this._zoneId            = attributes["zoneIdx"];
     this._tileIndex         = attributes["tileIdx"];
+    this._invulnTs          = 0;
 };
 
 Actor.actorIdCounter = 0;
@@ -97,6 +98,7 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
     },
     
     land: function() {
+        this.setInvulnerabilityTimestamp((new Date()).getTime() + Defs.PORTAL_INVULN_DELAY);
         this.emit("landed");
     },
     
@@ -108,11 +110,24 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
         this.emit("moveFailed");
     },
     
+    setInvulnerabilityTimestamp: function(ts) {
+        this._invulnTs = ts;
+    },
+    
     becomesPoisonedByAccount: function(account) {
+        var currentTime = (new Date()).getTime();
+        
         if (!this._poisonedAt) {
-            this._poisonedAt    = (new Date()).getTime();
-            this._poisonedBy    = account;
+            if (currentTime > this._invulnTs) {
+                this._poisonedAt    = currentTime;
+                this._poisonedBy    = account;
+            }
+            else {
+                return false;
+            }
         }
+        
+        return true;
     },
     
     getPoisonedAt: function() {
