@@ -70,6 +70,10 @@ GameServer.prototype = {
                 client.sendZoneState(world.composeZoneStateFor(actor, zone.getStateAttributes()));
             }
         });
+        
+        actor.on("changeRole", function() {
+            client.sendFlash("yellow");
+        });
 
         actor.on("landed", function() {
             client.sendFlash("black");
