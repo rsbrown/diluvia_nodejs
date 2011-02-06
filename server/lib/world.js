@@ -177,6 +177,12 @@ World.prototype = {
         });
     },
 
+    getAccountById: function(accountId) {
+        return _(this._online).select(function(account) {
+            return account.getId() == accountId;
+        })[0];
+    },
+
     playerInitialize: function(account, client) {
         var world   = this,
             player  = account.getPlayer();
