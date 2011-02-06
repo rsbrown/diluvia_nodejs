@@ -239,14 +239,12 @@ World.prototype = {
         });
         
         player.on("died", function() {
-            _(world._online).each(function(otherAccount) {
-                otherAccount.getClient().sendChat(Defs.CHAT_INFO,
-                    account.getUsername() + " died!"
-                )
-            });
+            world.broadcastMessage(Defs.CHAT_INFO, account.getUsername() + " died!");
         });
     
         client.on("disconnect", function() {
+            world.broadcastMessage(Defs.CHAT_SYSTEM, account.getUsername() + " disconnected.");
+            
             account.save();
             world.accountRemove(account);
         });
@@ -518,11 +516,15 @@ World.prototype = {
         this.setZone(conf.zoneId, zone);
     },
     
+    broadcastMessage: function(color, text) {
+        _(this._online).each(function(account) {
+            account.getClient().sendChat(color, text);
+        });        
+    },
+    
     broadcastChat: function(username, text) {
         if (!text.match(/^\s*$/)) {
-            _(this._online).each(function(account) {
-                account.getClient().sendChat(Defs.CHAT_PLAYER, username + " proclaims, \"" + text + "\"!!!");
-            });
+            this.broadcastMessage(Defs.CHAT_PLAYER, username + " proclaims, \"" + text + "\"!!!");
         }
-    },
+    }
 };

@@ -43,6 +43,7 @@ _.extend(Client.prototype, events.EventEmitter.prototype, {
             start_time: this._startTime,
             length:  (new Date().getTime() - this._startTime.getTime())/1000
         });
+        
         redis.rpush("sessions", sessionData);
         this.emit("disconnect");
     },
