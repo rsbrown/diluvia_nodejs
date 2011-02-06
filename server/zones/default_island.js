@@ -26,7 +26,7 @@
         "3":    "TREE_3",
         "4":    "TREE_4",
         "Z":    "ROCK",
-        "o":    { "class": "PortalTile", "options": { "zone": "zones:4", "image": "sprites.png:3,5", "dropAt": [ 1, 1 ] } },
+        "o":    { "class": "PortalTile", "options": { "zone": "zones:4", "image": "sprites.png:3,6", "dropAt": [ 1, 1 ] } },
         "W":    "WATER",
         
         "N":    "FUZZY_1",
@@ -36,7 +36,7 @@
         "R":    "FUZZY_5",
         "S":    "FUZZY_6",
         
-        "V":    "TREASURE"
+        "V":    "SKULL"
     },
     
     "baseMap":  [   

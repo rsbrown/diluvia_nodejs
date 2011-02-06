@@ -209,7 +209,7 @@ World.prototype = {
                 client.sendChat(Defs.CHAT_ALERT,
                     "You are now the assassin! \
                      You may poison other players by approaching them and pressing 'a'. \
-                     Don't let them find your precious treasure!"
+                     Don't let them find your skull!"
                 );
             } else {
                 client.sendChat(Defs.CHAT_ALERT,
@@ -221,7 +221,7 @@ World.prototype = {
         player.on("changeGoalInventory", function(goalInventory) {
             if (goalInventory != null) { 
                 client.sendChat(Defs.CHAT_ALERT,
-                    "You found the treasure! Press 'e' to drop it and become the assassin!"
+                    "You found the skull! You have 30 secons to hide ('e') it and become the assassin!"
                 );
             }
         });
@@ -230,7 +230,7 @@ World.prototype = {
             if (goalCounter == 0) {
                 world.accountDeath(account);
                 client.sendChat(Defs.CHAT_CRITICAL,
-                    "You held the treasure too long and died from exhaustion!"
+                    "You held the skull too long and died from exhaustion!"
                 );
             }
         });
@@ -257,7 +257,7 @@ World.prototype = {
         
         var zone = this.getZone(account.getPlayer().getZoneId());
         this.accountSpawn(account, zone, account.getPlayer().getTileIndex());
-        client.sendChat(Defs.CHAT_ALERT, "Find the treasure to become the assassin!");
+        client.sendChat(Defs.CHAT_ALERT, "Find the skull to become the assassin!");
         
         return player;
     },
