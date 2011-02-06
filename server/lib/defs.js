@@ -16,6 +16,7 @@ var Defs = module.exports = {
     MAX_GOAL_COUNTER:       30000,
     GIT_REVISION:           "unresolved",
     POISON_DEATH_DELAY:     7500,
+    SPAWN_SWORD:            true,
     
     REWARD_POISONER:        5,
     
@@ -112,6 +113,7 @@ var Defs = module.exports = {
 		WATER:              { class: "WallTile",    image: "sprites.png:0,7" },
 		LAVA:               { class: "PainTile",    image: "sprites.png:8,7" },
 		
-		SKULL:           { class: "GoalTile",    image: "sprites.png:5,5" }
+		SKULL:           { class: "GoalTile",    image: "sprites.png:5,5", goalType: "skull" },
+		SWORD:           { class: "GoalTile",    image: "sprites.png:3,5", goalType: "sword" }
     }
 };
