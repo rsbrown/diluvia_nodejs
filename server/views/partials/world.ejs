@@ -24,11 +24,25 @@
         
         var $helpDialog = $('<div></div>')
           .html(
-            '<div>to move: arrow keys</div> \
+            '<div>rules of the game:<br/><br/> \
+               <p> \
+                hidden somewhere on the map is a skull that grants the assassin ability. \
+                once you find it, pick it up and move it to a safe hiding place. \
+                but be quick! you only have 30 seconds to hide the skull or its evil nature will strike you down. \
+                once you\'ve hidden the skull, you can poison other players by approaching them and pressing \"a\". \
+                you get 5 points for each successful assassination -- until someone else finds the source of your power! \
+                it is rumored that there exist powerful artifacts that can even strike down the assassin, but surely that is only a myth. \
+               </p> \
+             </div> \
+             <div>move: arrow keys</div> \
+             <div>drop item: e</div> \
+             <div>poison other player: a</div> \
+             <div>show score: tab</div> \
              <div>to chat: enter</div>'
           )
           .dialog({
           autoOpen: false,
+          width: 500,
           title: 'Diluvia'
         });
         
