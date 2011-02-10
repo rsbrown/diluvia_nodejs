@@ -162,8 +162,10 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, SpellCaster.prototype, 
     },
     
     setRole: function(role) {
-        this._role = role;
-        this.emit("changeRole", role);
+        if (this._role != role) {
+            this._role = role;
+            this.emit("changeRole", role);
+        }
     },
 
     getRenderAttributes: function() {
