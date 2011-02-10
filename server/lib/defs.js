@@ -17,7 +17,6 @@ var Defs = module.exports = {
     WORLD_SLOW_INTERVAL:    500,
     MAX_GOAL_COUNTER:       30000,
     GIT_REVISION:           "unresolved",
-    POISON_DEATH_DELAY:     7500,
     SPAWN_SWORD:            true,
     
     REWARD_POISONER:        5,
@@ -121,10 +120,10 @@ var Defs = module.exports = {
 
     SPELLS: {
         ASSASSIN_POISON: new Spell({
-            name:               'ASSASIN_POISON',
+            name:               'ASSASSIN_POISON',
             type:               'malicious',
             duration:           {
-                period:         1500,
+                period:         5000,
                 tics:           3,
                 triggerOnLand:  false,
                 triggerOnFade:  false,
@@ -136,13 +135,13 @@ var Defs = module.exports = {
             display: {
                 cast: {
                     caster: {
-                        screenFlash: 'purple',
+                        flash: 'purple',
                         message: 'You have POISONed %t!!'
                     }
                 },
                 periodic: {
                     target: {
-                        screenFlash: 'green',
+                        flash: 'green',
                         message: 'POISON courses through your veins!'
                     }
                 },
@@ -157,6 +156,7 @@ var Defs = module.exports = {
                     },
                     target: {
                         message: 'You have died from POISON!'
+
                     }
                 }
             }

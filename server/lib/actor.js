@@ -69,10 +69,29 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, SpellCaster.prototype, 
         return this._label;
     },
     
-    takeDamage: function(amount, flash, msg) {
+    takeDamage: function(amount) {
         this._hitpoints = Math.max(0, this._hitpoints - amount);
         
-        this.emit("tookDamage", amount, this._hitpoints, flash, msg);
+        this.emit("tookDamage", amount, this._hitpoints);
+        this.emit("changeHitpoints", this._hitpoints);
+        this.emit("change");        
+    },
+
+    takeSpellDamage: function(spellName, amount, caster, deathMsg) {                         
+        this._hitpoints = Math.max(0, this._hitpoints - amount);
+
+        if (this._hitpoints <= 0) {
+
+            if (deathMsg.caster) {
+                caster.emit('spell_message', deathMsg.caster.message, deathMsg.caster.flash, Defs.CHAT_CRITICAL);
+            }
+            if (deathMsg.target) {
+                this.emit('spell_message', deathMsg.target.message, deathMsg.target.flash, Defs.CHAT_CRITICAL);
+            }
+
+            this.emit('deathBySpell', spellName, caster);            
+        }
+        
         this.emit("changeHitpoints", this._hitpoints);
         this.emit("change");        
     },
@@ -88,14 +107,12 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, SpellCaster.prototype, 
         this.emit("change");
     },
     
-    die: function() {
+    die: function() {             
         this.emit("died");
     },
     
     spawn: function() {
         this._hitpoints     = this.getStartingHitpoints();
-        this._poisonedAt    = null;
-        this._poisonedBy    = null;
         this._goalCounter   = Defs.MAX_GOAL_COUNTER;
         this._lastGoalTime  = 0;
         
@@ -118,29 +135,11 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, SpellCaster.prototype, 
     setInvulnerabilityTimestamp: function(ts) {
         this._invulnTs = ts;
     },
-    
-    becomesPoisonedByAccount: function(account) {
+
+    isInvulnerable: function() {
         var currentTime = (new Date()).getTime();
-        
-        if (!this._poisonedAt) {
-            if (currentTime > this._invulnTs) {
-                this._poisonedAt    = currentTime;
-                this._poisonedBy    = account;
-            }
-            else {
-                return false;
-            }
-        }
-        
-        return true;
-    },
-    
-    getPoisonedAt: function() {
-        return this._poisonedAt;
-    },
-    
-    getPoisonedBy: function() {
-        return this._poisonedBy;
+
+        return (currentTime <= this._invulnTs);
     },
     
     touchGoalTime: function() {

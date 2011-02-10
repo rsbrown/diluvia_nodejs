@@ -50,13 +50,26 @@ SpellAffect.prototype = {
         this._display = display;
     },
 
-    _sendSpellMessages: function(type) {
+    _getSpellMessages: function(type) {
+        var msgs = {};
+
         if (this._display[type]) {
-            var c = this._display[type].caster;
+            msgs.caster = this._display[type].caster;
+            msgs.target = this._display[type].target;
+        }
+
+        return msgs;
+    },
+
+    _sendSpellMessages: function(type) {
+        var msgs = this._getSpellMessages(type);
+
+        if (msgs) {
+            var c = msgs.caster;
             if (c) {
                 this._caster.emit('spell_message', c.message, c.flash); 
             }
-            var t = this._display[type].target;
+            var t = msgs.target;
             if (t) {
                 this._target.emit('spell_message', t.message, t.flash);
             }
@@ -114,7 +127,7 @@ SpellAffect.prototype = {
             if (key == "hitpoints") {
                 if (val < 0) {
                     //damage
-                    self._target.takeDamage(Math.abs(val));
+                    self._target.takeSpellDamage(self._spell.getName(), Math.abs(val), self._caster, self._getSpellMessages('death'));
                 } else {
                     //heal
 
