@@ -67,24 +67,7 @@ World.prototype = {
         for (var i = 0, len = this._online.length; i < len; i++) {
             var account     = this._online[i],
                 player      = account.getPlayer(),
-                poisonedAt  = player.getPoisonedAt(),
                 zone        = world.getZone(player.getZoneId());
-                                    
-            if (poisonedAt) {
-                if (currentTime >= (poisonedAt + Defs.POISON_DEATH_DELAY)) {
-                    var poisonedBy  = player.getPoisonedBy(),
-                        poisonerCli = poisonedBy.getClient();
-                                        
-                    poisonedBy.addScore(Defs.REWARD_POISONER);
-                    
-                    if (poisonerCli) {
-                        poisonerCli.sendChat(Defs.CHAT_ALERT, "You killed " + account.getUsername() + " with POISON!");
-                    }
-                    
-                    account.getClient().sendChat(Defs.CHAT_CRITICAL, "You were POISONed and died!");
-                    world.accountDeath(account);
-                }
-            }
             
             var goalCounter     = player.getGoalCounter(),
                 lastGoalTime    = player.getLastGoalTime(),
@@ -208,6 +191,8 @@ World.prototype = {
 
         account.setClient(client);
         this._online.push(account);
+
+
         
         // switch the player's tile when they change orientations
         player.on("changeOrientation", function(orientation) {
@@ -273,6 +258,26 @@ World.prototype = {
                 world.accountDeath(account);
             }
         });
+
+
+        player.on('spell_message', function(message, flash, importance) {
+            client.sendChat(importance || Defs.CHAT_ALERT, message);
+            if (flash) {
+                client.sendFlash(flash);
+            }
+        });
+        player.on('deathBySpell', function(spellName, caster, deathMsg) {
+            var casterAccount = world._getAccountFromPlayer(caster);
+            if (casterAccount) {
+                if (spellName == "ASSASSIN_POISON") {
+                    casterAccount.addScore(Defs.REWARD_POISONER);
+                }
+            }
+
+            world.accountDeath(account);                
+
+        });
+
         
         player.on("died", function() {
             world.broadcastMessage(Defs.CHAT_INFO, account.getUsername() + " died!");
@@ -329,6 +334,7 @@ World.prototype = {
         zone.playSound("scream");
         player.die();
         player.setRole(Defs.ROLE_SEEKER);
+        player.clearSpellAffects();
         
         this.actorDropGoal(player);
         this.removeAccountFromZone(account, zone);
@@ -381,17 +387,9 @@ World.prototype = {
             
             if (otherActors.length > 0) {
                 if (player.getRole() == Defs.ROLE_ASSASSIN) {
-                    var poisonedActors = [];
-                    
                     _(otherActors).each(function(otherActor) {
-                        if (otherActor.becomesPoisonedByAccount(account)) {
-                            poisonedActors.push(otherActor);
-                        }
+                        player.castSpell(Defs.SPELLS.ASSASSIN_POISON, otherActor);                            
                     });
-            
-                    if (poisonedActors.length > 0) {
-                        client.sendFlash("purple");
-                    }
                 }
                 else if (goalInv) {                    
                     var tile = zone.getTile(goalInv[0]);
