@@ -111,6 +111,10 @@ World.prototype = {
     },
     
     _onFastInterval: function() {
+        this._processStateQueue();
+    },
+    
+    _processStateQueue: function() {
         var world = this;
         
         if (this._stateQueue.length > 0) {
