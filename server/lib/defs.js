@@ -1,3 +1,5 @@
+var Spell = require('spell');
+
 var Tile            = require("tile"),
     WallTile        = require("wall_tile"),
     ActorTile       = require("actor_tile"),
@@ -115,5 +117,50 @@ var Defs = module.exports = {
 		
 		SKULL:           { class: "GoalTile",    image: "sprites.png:5,5", goalType: "skull" },
 		SWORD:           { class: "GoalTile",    image: "sprites.png:3,5", goalType: "sword" }
+    },
+
+    SPELLS: {
+        ASSASSIN_POISON: new Spell({
+            name:               'ASSASIN_POISON',
+            type:               'malicious',
+            duration:           {
+                period:         1500,
+                tics:           3,
+                triggerOnLand:  false,
+                triggerOnFade:  false,
+                refreshable:    false
+            },
+            affects: {
+                hitpoints: -34
+            },
+            display: {
+                cast: {
+                    caster: {
+                        screenFlash: 'purple',
+                        message: 'You have POISONed %t!!'
+                    }
+                },
+                periodic: {
+                    target: {
+                        screenFlash: 'green',
+                        message: 'POISON courses through your veins!'
+                    }
+                },
+                fade: {
+                    target: {
+                        message: 'The POISON seems to have faded.'
+                    }
+                },
+                death: {
+                    caster: {
+                        message: '%t has died from your POISON!'
+                    },
+                    target: {
+                        message: 'You have died from POISON!'
+                    }
+                }
+            }
+        })
     }
+
 };

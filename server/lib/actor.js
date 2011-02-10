@@ -1,20 +1,25 @@
 var events          = require("events"),
     _               = require("underscore"),
-    Defs            = require("defs");
+    Defs            = require("defs"),
+    SpellCaster     = require('spell_caster'),
+    SpellTarget     = require('spell_target');
 
 var Actor = module.exports = function(attributes) {
     events.EventEmitter.call(this);
+    SpellCaster.call(this);
+    SpellTarget.call(this);
+
     this._gameAttributes    = {};
     this._role              = Defs.ROLE_SEEKER;
     this._actorId           = Actor.actorIdCounter++;
     this._zoneId            = attributes["zoneIdx"];
     this._tileIndex         = attributes["tileIdx"];
-    this._invulnTs          = 0;
+    this._invulnTs          = 0;    
 };
 
 Actor.actorIdCounter = 0;
 
-_.extend(Actor.prototype, events.EventEmitter.prototype, {
+_.extend(Actor.prototype, events.EventEmitter.prototype, SpellCaster.prototype, SpellTarget.prototype,  {
     setGoalCounter: function(goalCounter) {
         var newGoalCounter = Math.max(0, Math.min(goalCounter, Defs.MAX_GOAL_COUNTER));
         
@@ -64,10 +69,10 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
         return this._label;
     },
     
-    takeDamage: function(amount) {
+    takeDamage: function(amount, flash, msg) {
         this._hitpoints = Math.max(0, this._hitpoints - amount);
         
-        this.emit("tookDamage", amount, this._hitpoints);
+        this.emit("tookDamage", amount, this._hitpoints, flash, msg);
         this.emit("changeHitpoints", this._hitpoints);
         this.emit("change");        
     },

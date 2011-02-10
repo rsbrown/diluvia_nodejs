@@ -1,11 +1,12 @@
-var _       = require("underscore"),
-    Actor   = require("actor"),
-    events  = require("events");
+var _           = require("underscore"),
+    Actor       = require("actor"),
+    events      = require("events");
 
 var Player = module.exports = function(attributes) {
     Actor.call(this, attributes);
     
     this._orientation = attributes["orientation"] || "n";    
+    this._name        = attributes['username'];
     this._score       = 0;
 };
 
@@ -17,5 +18,9 @@ _.extend(Player.prototype, Actor.prototype, events.EventEmitter.prototype, {
     
     getOrientation: function() {
         return this._orientation;
+    },
+
+    getName: function() {
+        return this._name;
     }
 });

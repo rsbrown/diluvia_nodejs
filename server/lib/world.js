@@ -204,6 +204,12 @@ World.prototype = {
 
         account.setClient(client);
         this._online.push(account);
+
+        player.on('spell_message', function(message, flash) {
+            client.sendChat(Defs.CHAT_ALERT, message);
+            client.sendFlash(flash);
+        });
+
         
         // switch the player's tile when they change orientations
         player.on("changeOrientation", function(orientation) {
@@ -380,9 +386,12 @@ World.prototype = {
                     var poisonedActors = [];
                     
                     _(otherActors).each(function(otherActor) {
-                        if (otherActor.becomesPoisonedByAccount(account)) {
-                            poisonedActors.push(otherActor);
-                        }
+
+                        player.castSpell(Defs.SPELLS.ASSASSIN_POISON, otherActor);                            
+
+//                        if (otherActor.becomesPoisonedByAccount(account)) {
+//                            poisonedActors.push(otherActor);
+//                        }
                     });
             
                     if (poisonedActors.length > 0) {
