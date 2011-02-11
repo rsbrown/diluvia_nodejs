@@ -285,6 +285,10 @@ World.prototype = {
     
         client.on("disconnect", function() {
             world.broadcastMessage(Defs.CHAT_SYSTEM, account.getUsername() + " disconnected.");
+
+            //need to figure out the best way to handle someone disconnecting while poisoned -- instakill them?
+            //for now just clear spells so the server doesn't crash
+            player.clearSpellAffects();
             
             account.save();
             world.accountRemove(account);
