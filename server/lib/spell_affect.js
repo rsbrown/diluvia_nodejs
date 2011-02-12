@@ -134,6 +134,10 @@ SpellAffect.prototype = {
                 }
             }
         });                
-    }                       
+    },
+              
+    getCaster: function() {
+        return this._caster;
+    }
 };
 
