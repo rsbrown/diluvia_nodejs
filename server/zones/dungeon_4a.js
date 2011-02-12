@@ -35,8 +35,8 @@
         "K":    { "class": "PortalTile", "options": { "zone": "zones:7", "image": "sprites.png:4,0", "dropAt": [ 4, 2 ] } },
         "L":    { "class": "PortalTile", "options": { "zone": "zones:7", "image": "sprites.png:4,0", "dropAt": [ 4, 2 ] } },
         
-        "Q":    { "class": "PortalTile", "options": { "zone": "zones:5", "image": "sprites.png:6,0", "dropAt": [ 4, 2 ] } },
-        "R":    { "class": "PortalTile", "options": { "zone": "zones:5", "image": "sprites.png:6,0", "dropAt": [ 4, 2 ] } }
+        "Q":    { "class": "PortalTile", "options": { "zone": "zones:5", "image": "sprites.png:6,0", "dropAt": [ 2, 9 ] } },
+        "R":    { "class": "PortalTile", "options": { "zone": "zones:5", "image": "sprites.png:6,0", "dropAt": [ 2, 14 ] } }
     },
     
     "baseMap":  [   
