@@ -17,6 +17,8 @@ var World = module.exports = function() {
     this._zones         = {};
     this._online        = [];
     this._stateQueue    = [];
+    
+    this._loadZones(function(){});
 
     setInterval(_(this._onFastInterval).bind(this), Defs.WORLD_FAST_INTERVAL);
     setInterval(_(this._onSlowInterval).bind(this), Defs.WORLD_SLOW_INTERVAL);
@@ -182,10 +184,10 @@ World.prototype = {
 
     connectPlayer: function(account, server, callback) {
         var self = this;
-        this._loadZones(function(){
+        // this._loadZones(function(){
             self.initializePlayer(account);
             callback.call(server, account);
-        });
+        // });
     },
     
     initializePlayer: function(account) {
@@ -635,13 +637,14 @@ World.prototype = {
             }
             else {
                 for (var i = 0, len = files.length; i < len; i++) {
+                    var triggerCallback = (i == len-1);
                     fs.readFile("zones/" + files[i], function(err, data) {
                         var obj = JSON.parse(data);
                         self.createZoneFromConfig(obj);
+                        if (triggerCallback) {callback();}
                     });
                 }
             }
-            setTimeout(_(callback).bind(self), 2000);
         });
     }
 };

@@ -21,7 +21,7 @@ var Defs = module.exports = {
     
     REWARD_POISONER:        5,
     
-    PORTAL_INVULN_DELAY:    2000,
+    PORTAL_INVULN_DELAY:    1000,
     
     LAYER_COUNT:            3,
     BASE_LAYER:             0,
