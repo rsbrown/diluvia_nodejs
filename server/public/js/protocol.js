@@ -69,6 +69,8 @@ Protocol.prototype = {
         var self = this;
         
         if (msg) {
+            console.log(msg);
+            
             if (msg.type == "ZoneData") {
                 var zoneData = this._zoneData = msg.attrs,
                     tileData = zoneData.tiles;                
@@ -108,6 +110,12 @@ Protocol.prototype = {
             }
             else if (msg.type == "ServerInfo") {
                 self._controller.setServerInfo(msg.attrs);
+            }
+            else if (msg.type == "ScoreUpdate") {
+                self._controller.setScore(msg.attrs);
+            }
+            else if (msg.type == "ScoreData") {
+                self._controller.updateScoreboard(msg.attrs);
             }
         }
     },

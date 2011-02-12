@@ -43,6 +43,7 @@ _.extend(Client.prototype, events.EventEmitter.prototype, {
             start_time: this._startTime,
             length:  (new Date().getTime() - this._startTime.getTime())/1000
         });
+        
         redis.rpush("sessions", sessionData);
         this.emit("disconnect");
     },
@@ -53,6 +54,14 @@ _.extend(Client.prototype, events.EventEmitter.prototype, {
     
     sendZoneState: function(zoneState) {
         this.sendMessage("ZoneState", zoneState);
+    },
+    
+    sendScoreUpdate: function(score) {
+        this.sendMessage("ScoreUpdate", score);
+    },
+    
+    sendScoreData: function(scoreData) {
+        this.sendMessage("ScoreData", scoreData);
     },
     
     sendPlaySound: function(sound) {

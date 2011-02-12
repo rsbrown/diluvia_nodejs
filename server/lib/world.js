@@ -22,6 +22,9 @@ var World = module.exports = function() {
     setInterval(_(this._onSlowInterval).bind(this), Defs.WORLD_SLOW_INTERVAL);
     
     this._loadZones();
+    
+    // delaying this to let zone files finish reading (TODO: kind of a hack)
+    setTimeout(_(this.spawnSword).bind(this), 2000);
 };
 
 World.DEFAULT_ZONE_ID   = "zones:0";
@@ -51,6 +54,12 @@ World.prototype = {
         return this._zones[zoneId];
     },
     
+    _getAccountFromPlayer: function(player) {
+        return _(this._online).detect(function (account) {
+            return account.getPlayer() == player;
+        });
+    },
+    
     _onSlowInterval: function() {
         var world       = this,
             currentTime = (new Date()).getTime();
@@ -58,33 +67,37 @@ World.prototype = {
         for (var i = 0, len = this._online.length; i < len; i++) {
             var account     = this._online[i],
                 player      = account.getPlayer(),
-                poisonedAt  = player.getPoisonedAt();
-            
-            if (poisonedAt) {
-                if (currentTime >= (poisonedAt + Defs.POISON_DEATH_DELAY)) {
-                    account.getClient().sendChat(Defs.CHAT_CRITICAL, "You were poisoned and died!");
-                    world.accountDeath(account);
-                }                
-            }
+                zone        = world.getZone(player.getZoneId());
             
             var goalCounter     = player.getGoalCounter(),
                 lastGoalTime    = player.getLastGoalTime(),
-                tDiff           = Math.floor(currentTime - lastGoalTime);
+                tDiff           = Math.floor(currentTime - lastGoalTime),
+                goalInventory   = player.getGoalInventory(),
+                incCounter      = true;
             
-            if (tDiff > 0) {
-                if (player.getGoalInventory(account)) {
+            if (goalInventory) {
+                var goalTileId  = goalInventory[0],
+                    tile        = zone.getTile(goalTileId);
+                
+                if (tile && tDiff > 0 && tile.goalType == "skull") {
                     player.setGoalCounter(goalCounter - tDiff);
+                    incCounter = false;
                 }
-                else {
-                    player.setGoalCounter(goalCounter + tDiff);
-                }
-            
-                player.touchGoalTime();
             }
+            
+            if (incCounter) {
+                player.setGoalCounter(goalCounter + tDiff);
+            }
+
+            player.touchGoalTime();
         }  
     },
     
     _onFastInterval: function() {
+        this._processStateQueue();
+    },
+    
+    _processStateQueue: function() {
         var world = this;
         
         if (this._stateQueue.length > 0) {
@@ -166,12 +179,20 @@ World.prototype = {
         });
     },
 
+    getAccountById: function(accountId) {
+        return _(this._online).select(function(account) {
+            return account.getId() == accountId;
+        })[0];
+    },
+
     playerInitialize: function(account, client) {
         var world   = this,
             player  = account.getPlayer();
 
         account.setClient(client);
         this._online.push(account);
+
+
         
         // switch the player's tile when they change orientations
         player.on("changeOrientation", function(orientation) {
@@ -188,7 +209,7 @@ World.prototype = {
                 client.sendChat(Defs.CHAT_ALERT,
                     "You are now the assassin! \
                      You may poison other players by approaching them and pressing 'a'. \
-                     Don't let them find your precious treasure!"
+                     Don't let them find your skull!"
                 );
             } else {
                 client.sendChat(Defs.CHAT_ALERT,
@@ -198,10 +219,25 @@ World.prototype = {
         });
         
         player.on("changeGoalInventory", function(goalInventory) {
-            if (goalInventory != null) { 
-                client.sendChat(Defs.CHAT_ALERT,
-                    "You found the treasure! Press 'e' to drop it and become the assassin!"
-                );
+            if (goalInventory != null) {
+                var goalTileId  = goalInventory[0],
+                    currentZone = world.getZone(player.getZoneId()),
+                    goalTile    = currentZone.getTile(goalTileId);
+                
+                if (goalTile) {
+                    if (goalTile.goalType == "skull") { 
+                        client.sendChat(Defs.CHAT_ALERT,
+                            "You found the skull! Quickly find a hiding place and press 'e' to drop it to become the assassin!"
+                        );
+                    }
+                    else if (goalTile.goalType == "sword") {
+                        client.sendChat(Defs.CHAT_ALERT,
+                            "You picked up the Sword of Righteousness! You may strike down the assassin in a single blow by using the 'a' key!"
+                        );
+                        client.sendPlaySound("sword");
+                    }
+                }
+
             }
         });
         
@@ -209,7 +245,7 @@ World.prototype = {
             if (goalCounter == 0) {
                 world.accountDeath(account);
                 client.sendChat(Defs.CHAT_CRITICAL,
-                    "You held the treasure too long and died from exhaustion!"
+                    "You held the skull too long and died from exhaustion!"
                 );
             }
         });
@@ -222,31 +258,60 @@ World.prototype = {
                 world.accountDeath(account);
             }
         });
+
+
+        player.on('spell_message', function(message, flash, importance) {
+            client.sendChat(importance || Defs.CHAT_ALERT, message);
+            if (flash) {
+                client.sendFlash(flash);
+            }
+        });
+        player.on('deathBySpell', function(spellName, caster, deathMsg) {
+            var casterAccount = world._getAccountFromPlayer(caster);
+            if (casterAccount) {
+                if (spellName == "ASSASSIN_POISON") {
+                    casterAccount.addScore(Defs.REWARD_POISONER);
+                }
+            }
+
+            world.accountDeath(account);                
+
+        });
+
         
         player.on("died", function() {
-            _(world._online).each(function(otherAccount) {
-                otherAccount.getClient().sendChat(Defs.CHAT_INFO,
-                    account.getUsername() + " died!"
-                )
-            });
+            world.broadcastMessage(Defs.CHAT_INFO, account.getUsername() + " died!");
         });
     
         client.on("disconnect", function() {
+            world.broadcastMessage(Defs.CHAT_SYSTEM, account.getUsername() + " disconnected.");
+
+            //need to figure out the best way to handle someone disconnecting while poisoned -- instakill them?
+            //for now just clear spells so the server doesn't crash
+            player.clearSpellAffects();
+            
             account.save();
             world.accountRemove(account);
         });
         
         var zone = this.getZone(account.getPlayer().getZoneId());
         this.accountSpawn(account, zone, account.getPlayer().getTileIndex());
-        client.sendChat(Defs.CHAT_ALERT, "Find the treasure to become the assassin!");
+        client.sendChat(Defs.CHAT_ALERT, "Find the skull to become the assassin!");
         
         return player;
     },
     
     accountSpawn: function(account, zone, tileIdx) {
         var player  = account.getPlayer();
-        if (zone === undefined) {zone = this.getDefaultZone();}
-        if (tileIdx === undefined) {tileIdx = zone.getDefaultSpawnPointIndex();}
+        
+        if (zone === undefined) {
+            zone = this.getDefaultZone();
+        }
+        
+        if (tileIdx === undefined || tileIdx == null) {
+            tileIdx = zone.getDefaultSpawnPointIndex();
+        }
+        
         this.placeAccountInZone(account, zone, tileIdx);
         zone.setPlayerTileForOrientation(player, player.getOrientation());
         player.spawn();
@@ -273,6 +338,7 @@ World.prototype = {
         zone.playSound("scream");
         player.die();
         player.setRole(Defs.ROLE_SEEKER);
+        player.clearSpellAffects();
         
         this.actorDropGoal(player);
         this.removeAccountFromZone(account, zone);
@@ -282,6 +348,7 @@ World.prototype = {
     placeAccountInZone: function(account, zone, tileIndex) {
         var client  = account.getClient(),
             player  = account.getPlayer();
+        
         zone.addActor(player, "PLAYER", tileIndex);
     },
     
@@ -299,18 +366,20 @@ World.prototype = {
         };
     },
     
+    // TODO: this method is _WAY_ too big now
     otherCommand: function(account, zone, command) {
         var client      = account.getClient(),
             player      = account.getPlayer(),
             tileIndex   = player.getTileIndex(),
             orientation = player.getOrientation(),
             otherIndex  = zone.indexForDirectionalMove(tileIndex, orientation),
-            actors      = zone.getActors();
+            actors      = zone.getActors(),
+            goalInv     = player.getGoalInventory();
 
-        if (command == "attack" && player.getRole() == Defs.ROLE_ASSASSIN) {
-            var successfullyAttacked = false,
-                otherActors          = [];
+        if (command == "attack") {
+            var otherActors = [];
             
+            // first, look for players that we would be attacking
             for (var i = 0, len = actors.length; i < len; i++) {
                 var actor           = actors[i],
                     actorTileIndex  = actor.getTileIndex();
@@ -319,20 +388,93 @@ World.prototype = {
                     otherActors.push(actor);
                 }
             }
-        
-            _(otherActors).each(function(otherActor) {
-                otherActor.becomesPoisoned();
-            });
             
             if (otherActors.length > 0) {
-                client.sendFlash("purple");
+                if (player.getRole() == Defs.ROLE_ASSASSIN) {
+                    _(otherActors).each(function(otherActor) {
+                        player.castSpell(Defs.SPELLS.ASSASSIN_POISON, otherActor);                            
+                    });
+                }
+                else if (goalInv) {                    
+                    var tile = zone.getTile(goalInv[0]);
+                    
+                    if (tile && tile.goalType == "sword") {
+                        // TODO: this account search is going to be costly to do on each swing
+                        var assassinAccount = _(this._online).detect(function (account) {
+                            return account.getPlayer().getRole() == Defs.ROLE_ASSASSIN;
+                        });
+                        
+                        if (assassinAccount) {
+                            var assassinPlayer = assassinAccount.getPlayer();
+
+                            if (otherActors.indexOf(assassinPlayer) != -1) {
+                                this.accountDeath(assassinAccount);
+                                assassinAccount.getClient().sendChat(Defs.CHAT_CRITICAL, "You died by the sword!");
+                                player.setGoalInventory(null);
+                                this.spawnSword();
+                            }
+                        }
+                    }
+                }
             }
         }
-        else if (command == "drop") {
-            if (player.getGoalInventory()) {
-                player.setRole(Defs.ROLE_ASSASSIN);
+        else if (command == "drop") {            
+            if (goalInv) {
+                var goalTile = zone.getTile(goalInv[0]);
+                
+                if (goalTile.goalType == "skull") {
+                    player.setRole(Defs.ROLE_ASSASSIN);                    
+                }
+                
                 this.actorDropGoal(player);
             }
+
+        }
+        else if (command == "scoreboard") {
+            var scoreData = {};
+            
+            _(this._online).each(function(account) {
+                scoreData[account.getUsername()] = account.getScore(); 
+            });
+            
+            client.sendScoreData(scoreData);
+        }
+    },
+
+    randomSpawnGoal: function(tileId) {
+        var zoneKeys    = _.keys(this._zones),
+            zoneCount   = zoneKeys.length - 1;
+        
+        for (var i = 0; i < 255; i++) {
+            var randZoneKey = zoneKeys[Math.floor(Math.random() * zoneCount)],
+                zone        = this._zones[randZoneKey],
+                dims        = zone.getDimensions(),
+                maxTile     = dims[0] * dims[1],
+                randTile    = Math.floor(Math.random() * maxTile);
+                board       = zone.getBoard(),
+                baseLayer   = board.getLayer(Defs.BASE_LAYER),
+                objLayer    = board.getLayer(Defs.OBJECT_LAYER);
+            
+            var objTiles    = objLayer.getTiles(randTile),
+                baseTiles   = baseLayer.getTiles(randTile);
+            
+            if (baseTiles.length == 0 || (objTiles && objTiles.length > 0)) {
+                continue;
+            }
+
+            // TODO: PASSING NULL HERE WILL EVENTUALLY BREAK SOMETHING
+            if (!zone.isTileIndexPassableBy(randTile, null)) {
+                continue;
+            }
+            
+            objLayer.pushTile(randTile, [ tileId ]);
+            break;
+        }
+    },
+    
+    spawnSword: function() {
+        if (Defs.SPAWN_SWORD) {
+            this.randomSpawnGoal("SWORD");
         }
     },
 
@@ -353,20 +495,40 @@ World.prototype = {
     },
     
     actorIntersectsGoal: function(actor, tile, zone, tileIndex, tileData, layerIndex) {
-        var layer        = zone.getBoard().getLayer(layerIndex),
-            tileId       = zone.getTileId(tile);
+        var layer       = zone.getBoard().getLayer(layerIndex),
+            tileId      = zone.getTileId(tile),
+            oldGoal     = actor.getGoalInventory();
         
-        // TODO: make this more generic (work with multiple goals)        
-        var oldAssassinAccount = _(this._online).detect(function (account) {
-            return account.getPlayer().getRole() == Defs.ROLE_ASSASSIN;
-        });
+        if (!oldGoal) {            
+            if (tile.goalType == "skull") {
+                // TODO: make this more generic (work with multiple goals)        
+                var oldAssassinAccount = _(this._online).detect(function (account) {
+                    return account.getPlayer().getRole() == Defs.ROLE_ASSASSIN;
+                });
         
-        layer.popTile(tileIndex, tileData);
-        actor.setGoalInventory(tileData);
+                if (oldAssassinAccount) {
+                    oldAssassinAccount.getPlayer().setRole(Defs.ROLE_SEEKER);
+                }        
+            }
+            else if (tile.goalType == "sword") {
+                if (actor.getRole() == Defs.ROLE_ASSASSIN) {
+                    // Assassin can't pick up sword!
+                    return;
+                }
+                
+                // Something we need to do?
+            }
+            else {
+                return; // shouldn't be able to pick up things that aren't spec'd right
+            }
         
-        if (oldAssassinAccount) {
-            oldAssassinAccount.getPlayer().setRole(Defs.ROLE_SEEKER);
+            layer.popTile(tileIndex, tileData);
+            actor.setGoalInventory(tileData);
         }
+        else {
+            // TODO: send message back to actor?
+        }
+        
     },
     
     actorDropGoal: function(actor) {
@@ -486,5 +648,17 @@ World.prototype = {
         }
         
         this.setZone(conf.zoneId, zone);
+    },
+    
+    broadcastMessage: function(color, text) {
+        _(this._online).each(function(account) {
+            account.getClient().sendChat(color, text);
+        });        
+    },
+    
+    broadcastChat: function(username, text) {
+        if (!text.match(/^\s*$/)) {
+            this.broadcastMessage(Defs.CHAT_PLAYER, username + "> " + text);
+        }
     }
 };

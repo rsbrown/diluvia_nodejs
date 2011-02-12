@@ -35,8 +35,8 @@ Tile.prototype = {
         return this._zone;
     },
     
-    onPlace: function(layer, tileIndex, placeData) {
-        
+    onPlace: function(layer, tileIndex, tileData) {
+
     },
     
     getImage:       function() { return this._image },

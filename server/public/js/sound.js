@@ -16,6 +16,7 @@ var Sound = function() {
         self.addAudio("portal", "/media/sounds/button-43.mp3");
         self.addAudio("chat",   "/media/sounds/button-22.mp3");
         self.addAudio("ouch",   "/media/sounds/grunt.mp3");
+        self.addAudio("sword",  "/media/sounds/sword.mp3");
     });
 };
 

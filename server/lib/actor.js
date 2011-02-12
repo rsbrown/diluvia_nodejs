@@ -1,19 +1,25 @@
 var events          = require("events"),
     _               = require("underscore"),
-    Defs            = require("defs");
+    Defs            = require("defs"),
+    SpellCaster     = require('spell_caster'),
+    SpellTarget     = require('spell_target');
 
 var Actor = module.exports = function(attributes) {
     events.EventEmitter.call(this);
+    SpellCaster.call(this);
+    SpellTarget.call(this);
+
     this._gameAttributes    = {};
     this._role              = Defs.ROLE_SEEKER;
     this._actorId           = Actor.actorIdCounter++;
     this._zoneId            = attributes["zoneIdx"];
     this._tileIndex         = attributes["tileIdx"];
+    this._invulnTs          = 0;    
 };
 
 Actor.actorIdCounter = 0;
 
-_.extend(Actor.prototype, events.EventEmitter.prototype, {
+_.extend(Actor.prototype, events.EventEmitter.prototype, SpellCaster.prototype, SpellTarget.prototype,  {
     setGoalCounter: function(goalCounter) {
         var newGoalCounter = Math.max(0, Math.min(goalCounter, Defs.MAX_GOAL_COUNTER));
         
@@ -70,6 +76,25 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
         this.emit("changeHitpoints", this._hitpoints);
         this.emit("change");        
     },
+
+    takeSpellDamage: function(spellName, amount, caster, deathMsg) {                         
+        this._hitpoints = Math.max(0, this._hitpoints - amount);
+
+        if (this._hitpoints <= 0) {
+
+            if (deathMsg.caster) {
+                caster.emit('spell_message', deathMsg.caster.message, deathMsg.caster.flash, Defs.CHAT_CRITICAL);
+            }
+            if (deathMsg.target) {
+                this.emit('spell_message', deathMsg.target.message, deathMsg.target.flash, Defs.CHAT_CRITICAL);
+            }
+
+            this.emit('deathBySpell', spellName, caster);            
+        }
+        
+        this.emit("changeHitpoints", this._hitpoints);
+        this.emit("change");        
+    },
     
     getLabel: function() {
         return this._label;
@@ -82,13 +107,12 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
         this.emit("change");
     },
     
-    die: function() {
+    die: function() {             
         this.emit("died");
     },
     
     spawn: function() {
         this._hitpoints     = this.getStartingHitpoints();
-        this._poisonedAt    = null;
         this._goalCounter   = Defs.MAX_GOAL_COUNTER;
         this._lastGoalTime  = 0;
         
@@ -96,6 +120,7 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
     },
     
     land: function() {
+        this.setInvulnerabilityTimestamp((new Date()).getTime() + Defs.PORTAL_INVULN_DELAY);
         this.emit("landed");
     },
     
@@ -107,14 +132,14 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
         this.emit("moveFailed");
     },
     
-    becomesPoisoned: function() {
-        if (!this._poisonedAt) {
-            this._poisonedAt = (new Date()).getTime();
-        }
+    setInvulnerabilityTimestamp: function(ts) {
+        this._invulnTs = ts;
     },
-    
-    getPoisonedAt: function() {
-        return this._poisonedAt;
+
+    isInvulnerable: function() {
+        var currentTime = (new Date()).getTime();
+
+        return (currentTime <= this._invulnTs);
     },
     
     touchGoalTime: function() {
@@ -137,8 +162,10 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, {
     },
     
     setRole: function(role) {
-        this._role = role;
-        this.emit("changeRole", role);
+        if (this._role != role) {
+            this._role = role;
+            this.emit("changeRole", role);
+        }
     },
 
     getRenderAttributes: function() {

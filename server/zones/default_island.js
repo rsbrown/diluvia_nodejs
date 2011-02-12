@@ -26,6 +26,7 @@
         "3":    "TREE_3",
         "4":    "TREE_4",
         "Z":    "ROCK",
+        
         "W":    "WATER",
         
         "N":    "FUZZY_1",
@@ -35,7 +36,7 @@
         "R":    "FUZZY_5",
         "S":    "FUZZY_6",
         
-        "V":    "TREASURE"
+        "V":    "SKULL"
     },
     
     "baseMap":  [   
