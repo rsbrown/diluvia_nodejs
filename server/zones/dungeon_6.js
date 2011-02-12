@@ -1,6 +1,6 @@
 {
-    "zoneId":       "zones:5",
-    "dimensions":   [ 9, 19 ],
+    "zoneId":       "zones:6",
+    "dimensions":   [ 9, 9 ],
     "music":        "/media/music/dungeon_music.mp3",
     
     "tiles": {
@@ -28,25 +28,11 @@
 		"C":    "DUNGEON_DOOR_B",
         "D":    "DUNGEON_OPEN_B",
 
-        "G":    { "class": "PortalTile", "options": { "zone": "zones:4a", "image": "sprites.png:7,1", "dropAt": [ 16, 9 ] } },
-        "H":    { "class": "PortalTile", "options": { "zone": "zones:4a", "image": "sprites.png:7,1", "dropAt": [ 16, 14 ] } },
-        
-        "Q":    { "class": "PortalTile", "options": { "zone": "zones:7", "image": "sprites.png:4,0", "dropAt": [ 4, 2 ] } },
-        "R":    { "class": "PortalTile", "options": { "zone": "zones:6", "image": "sprites.png:3,1", "dropAt": [ 2, 3 ] } }
+        "H":    { "class": "PortalTile", "options": { "zone": "zones:5", "image": "sprites.png:7,1", "dropAt": [ 6, 14 ] } }
+
     },
     
     "baseMap":  [   
-                    ".........",
-                    ".........",
-                    ".........",
-                    ".........",
-                    ".........",
-                    ".........",
-                    ".........",
-                    ".........",
-                    ".........",
-                    ".........",
-                    ".........",
                     ".........",
                     ".........",
                     ".........",
@@ -60,24 +46,13 @@
                      
      "objectMap": [  
                     "000000000",
-                    "0811Q1120",
-                    "07     30",
-                    "07     30",
-                    "07     30",
-                    "07     30",
-                    "07     30",
-                    "07     30",
-                    "07     30",
-                    "0G     30",
-                    "07     30",
-                    "065555540",
                     "081111120",
                     "07     30",
-                    "0H     R0",
+                    "0H     30",
                     "07     30",
                     "07     30",
                     "07     30",
-                    "0655C5540",
+                    "065555540",
                     "000000000"
                 ]
 }
