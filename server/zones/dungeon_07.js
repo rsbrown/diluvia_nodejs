@@ -29,7 +29,7 @@
         "D":    "DUNGEON_OPEN_B",
         "E":    "DUNGEON_DOOR_L",
 
-        "G":    { "class": "PortalTile", "options": { "zone": "zones:4a", "image": "sprites.png:5,1", "dropAt": [ 16, 8 ] } },
+        "G":    { "class": "PortalTile", "options": { "zone": "zones:4a", "image": "sprites.png:5,1", "dropAt": [ 4, 2 ] } },
         
         "Q":    { "class": "PortalTile", "options": { "zone": "zones:8", "image": "sprites.png:7,1", "dropAt": [ 16, 5 ] } },
         "R":    { "class": "PortalTile", "options": { "zone": "zones:8", "image": "sprites.png:7,1", "dropAt": [ 16, 9 ] } },
