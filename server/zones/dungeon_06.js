@@ -28,7 +28,7 @@
 		"C":    "DUNGEON_DOOR_B",
         "D":    "DUNGEON_OPEN_B",
 
-        "H":    { "class": "PortalTile", "options": { "zone": "zones:5", "image": "sprites.png:7,1", "dropAt": [ 6, 14 ] } }
+        "H":    { "class": "PortalTile", "options": { "zone": "zones:5", "image": "sprites.png:7,1", "dropAt": [ 6, 13 ] } }
 
     },
     

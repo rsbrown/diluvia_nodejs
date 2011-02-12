@@ -35,12 +35,11 @@
         "K":    { "class": "PortalTile", "options": { "zone": "zones:7", "image": "sprites.png:4,0", "dropAt": [ 4, 16 ] } },
         "L":    { "class": "PortalTile", "options": { "zone": "zones:7", "image": "sprites.png:4,0", "dropAt": [ 4, 2 ] } },
         
-        "Q":    { "class": "PortalTile", "options": { "zone": "zones:5", "image": "sprites.png:6,0", "dropAt": [ 2, 9 ] } },
-        "R":    { "class": "PortalTile", "options": { "zone": "zones:5", "image": "sprites.png:6,0", "dropAt": [ 2, 14 ] } }
+        "Q":    { "class": "PortalTile", "options": { "zone": "zones:5", "image": "sprites.png:6,0", "dropAt": [ 2, 8 ] } },
+        "R":    { "class": "PortalTile", "options": { "zone": "zones:5", "image": "sprites.png:6,0", "dropAt": [ 2, 13 ] } }
     },
     
     "baseMap":  [   
-                    "...................",
                     "...................",
                     "...................",
                     "...................",
@@ -71,9 +70,8 @@
                     "07XXXXXXXXXXXX XX30",
                     "07  XXXXXXXXXX XX30",
                     "07 XX        X XX30",
-                    "07 XXX       X XX30",
                     "07 XXX           Q0",
-                    "07 X         XXXX30",
+                    "07 XXX       XXXX30",
                     "07 X         XXXX30",
                     "07 X XXXXXXXXXXXX30",
                     "07 X XXXXXXXXX XX30",

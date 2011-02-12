@@ -30,12 +30,11 @@
 
         "F":    { "class": "PortalTile", "options": { "zone": "zones:2", "image": "sprites.png:5,1", "dropAt": [ 9, 2 ] } },
         "J":    { "class": "PortalTile", "options": { "zone": "zones:4b", "image": "sprites.png:4,0", "dropAt": [ 2, 3 ] } },
-        "K":    { "class": "PortalTile", "options": { "zone": "zones:4a", "image": "sprites.png:4,0", "dropAt": [ 4, 17 ] } },
-        "L":    { "class": "PortalTile", "options": { "zone": "zones:4a", "image": "sprites.png:4,0", "dropAt": [ 14, 17 ] } }
+        "K":    { "class": "PortalTile", "options": { "zone": "zones:4a", "image": "sprites.png:4,0", "dropAt": [ 4, 16 ] } },
+        "L":    { "class": "PortalTile", "options": { "zone": "zones:4a", "image": "sprites.png:4,0", "dropAt": [ 14, 16 ] } }
     },
     
     "baseMap":  [   
-                    "...................",
                     "...................",
                     "...................",
                     "...................",
@@ -72,7 +71,6 @@
                     "07               30",
                     "07               30",
                     "0655555@   *5555540",
-                    "00000007   30000000",
                     "00000007   30000000",
                     "00000007   30000000",
                     "00000007   30000000",
