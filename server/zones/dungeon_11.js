@@ -1,6 +1,6 @@
 {
-    "zoneId":       "zones:5",
-    "dimensions":   [ 9, 19 ],
+    "zoneId":       "zones:11",
+    "dimensions":   [ 9, 9 ],
     "music":        "/media/music/dungeon_music.mp3",
     
     "tiles": {
@@ -28,24 +28,14 @@
 		"C":    "DUNGEON_DOOR_B",
         "D":    "DUNGEON_OPEN_B",
 
-        "G":    { "class": "PortalTile", "options": { "zone": "zones:4a", "image": "sprites.png:7,1", "dropAt": [ 16, 8 ] } },
-        "H":    { "class": "PortalTile", "options": { "zone": "zones:4a", "image": "sprites.png:7,1", "dropAt": [ 16, 13 ] } },
+        "G":    { "class": "PortalTile", "options": { "zone": "zones:5", "image": "sprites.png:5,1", "dropAt": [ 4, 2 ] } },
         
-        "Q":    { "class": "PortalTile", "options": { "zone": "zones:11", "image": "sprites.png:4,0", "dropAt": [ 4, 6 ] } },
-        "R":    { "class": "PortalTile", "options": { "zone": "zones:6", "image": "sprites.png:3,1", "dropAt": [ 2, 3 ] } }
+        "Q":    { "class": "PortalTile", "options": { "zone": "zones:12", "image": "sprites.png:4,0", "dropAt": [ 4, 6 ] } }
+        
+
     },
     
     "baseMap":  [   
-                    ".........",
-                    ".........",
-                    ".........",
-                    ".........",
-                    ".........",
-                    ".........",
-                    ".........",
-                    ".........",
-                    ".........",
-                    ".........",
                     ".........",
                     ".........",
                     ".........",
@@ -65,17 +55,7 @@
                     "07     30",
                     "07     30",
                     "07     30",
-                    "07     30",
-                    "0G     30",
-                    "07     30",
-                    "065555540",
-                    "081111120",
-                    "07     30",
-                    "0H     R0",
-                    "07     30",
-                    "07     30",
-                    "07     30",
-                    "0655C5540",
+                    "0655G5540",
                     "000000000"
                 ]
 }
