@@ -5,6 +5,6 @@ var EditController = module.exports = function(app) {
 
 _.extend(EditController.prototype, {
     getZones: function(){
-        this._zones = ;
+        this._zones = [];
     }
 });

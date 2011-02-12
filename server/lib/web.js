@@ -7,10 +7,10 @@ var Web = module.exports = function(app) {
     
     // Bind all the routes
     _(Routes).each(function(val, key) { 
-        app.get(key, _(val).bind(self));
+        if (val.get) {app.get(key, _(val.get).bind(self))};
+        if (val.post) {app.get(key, _(val.post).bind(self))};
     });
 };
-
 
 Web.prototype = {
     redirectBackOrRoot: function(req, res) {
@@ -26,21 +26,12 @@ Web.prototype = {
             Account.findById(req.session.accountId, function(account){
                 req.session.username = account.getUsername();
                 req.session.isMusicOn = account.isMusicOn();
-                callback();
+                callback(true);
             });
         } else {
             req.session.isMusicOn = true;
-            callback();
+            callback(false);
         }
-    },
-
-    preParseRequest: function(req, res) {
-        if (!req.session.flash) {
-            req.session.flash = {};
-        }
-        if (!req.session.flash.error) {req.session.flash.error = false;}
-        if (!req.session.flash.warning) {req.session.flash.warning = false;}
-        if (!req.session.flash.info) {req.session.flash.info = false;}
     },
 
     getAccountFromFacebookAuth: function(authInfo, callback) {

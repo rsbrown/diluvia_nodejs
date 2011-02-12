@@ -27,6 +27,11 @@ header {
 	border-bottom: 1px solid #303030;
 	height: 60px;
 }
+.flash {
+    position: absolute;
+    background-color: #FFF;
+    color: #FF3333;
+}
 #logo {
 	font-size: 27px;
 	line-height: 60px;
@@ -85,8 +90,15 @@ header {
 #main {
 	position: relative;
 }
-#dungeon_editor {
+
+#dungeon_editor .editzone {
+    background-color: #AAAAAA;
 }
+
+#dungeon_editor .editzone textarea {
+    font-family: courier;
+}
+
 #tile_drawer {
 	width: 200px;
 	position: absolute;
