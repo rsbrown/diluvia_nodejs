@@ -480,10 +480,10 @@ World.prototype = {
     teleport: function(actor, zoneId, coords) {
         var oldZoneId   = actor.getZoneId(),
             oldZone     = this.getZone(oldZoneId),
-            newZone     = this.getZone(zoneId),
-            tileIndex   = (coords ? newZone.xyToIndex(coords[0], coords[1]) : newZone.getDefaultSpawnPointIndex());
-                
+            newZone     = this.getZone(zoneId);
+        
         if (newZone) {
+            var tileIndex = (coords ? newZone.xyToIndex(coords[0], coords[1]) : newZone.getDefaultSpawnPointIndex());
             oldZone.removeActor(actor);
             newZone.addActor(actor, "PLAYER", tileIndex);
             newZone.setPlayerTileForOrientation(actor, actor.getOrientation());

@@ -122,7 +122,7 @@ var Defs = module.exports = {
 
         PORTAL:             { class: "PortalTile",  image: "sprites.png:2,8" },
 		WATER:              { class: "WallTile",    image: "sprites.png:0,7" },
-		LAVA:               { class: "PainTile",    image: "sprites.png:8,7" },
+		LAVA:               { class: "PainTile",    image: "sprites.png:8,7" , damage: 10, interval: 200 },
 		
 		HOLE:               { class: "PainTile",    image: "sprites.png:12,8", damage: 999, interval: 50 },
 		
