@@ -435,6 +435,7 @@ World.prototype = {
             }
             else {
                 for (var i = 0, len = files.length; i < len; i++) {
+                    console.log("Loading zone: " + files[i] + "...");
                     fs.readFile("zones/" + files[i], function(err, data) {
                         var obj = JSON.parse(data);
                         self.createZoneFromConfig(obj);
