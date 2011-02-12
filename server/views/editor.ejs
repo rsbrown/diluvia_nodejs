@@ -1,32 +1,12 @@
-<script type="text/javascript" charset="utf-8">
-  $(document).ready(function() {
-      function resize_editor() {
-          $("#dungeon_editor").height('100%');
-          $("#tile_drawer").height('100%');
-          $("#drawer_button_box").height('100%');
-      }
-    
-      resize_editor();
-      $(window).resize(function() {
-        resize_editor();
-      });
-      
-      $('#drawer_button').click(function() {
-          if ($('#tile_drawer').hasClass('closed')) {
-              $('#tile_drawer').removeClass('closed').addClass('open');
-          } else {
-              $('#tile_drawer').removeClass('open').addClass('closed');
-          }
-      });
-      
-  });
-</script>
 <div id="dungeon_editor">
-  <div id="tile_drawer" class="closed">
-    
-    <div id="drawer_button_box">
-      <a id="drawer_button"></a>
-    </div>
-  </div>
-  <%- partial('world') %>
+  <button>Add new zone</button>
+  <select>
+    <option value="volvo">Volvo</option>
+    <option value="saab">Saab</option>
+    <option value="mercedes">Mercedes</option>
+    <option value="audi">Audi</option>
+  </select>
+  <textarea rows="2" cols="20">
+  At W3Schools you will find all the Web-building tutorials you need, from basic HTML to advanced XML, SQL, ASP, and PHP. 
+  </textarea>
 </div>

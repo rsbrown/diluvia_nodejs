@@ -1,10 +1,8 @@
-
 {
     "zoneId":       "zones:2",
     "dimensions":   [ 7, 7 ],
     
     "tiles": {
-        "_":    "BASE_GRASS",
         ".":    "BASE_STONE",
         "S":    "SPAWN_STONE",
 

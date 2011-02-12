@@ -47,17 +47,23 @@ GameServer.prototype = {
             //     alreadyLoggedInAccount.kick();
             // }
             client.sendMessage("ServerInfo", server.getInfo());
-            server.loadGame(client, account);
+            account.setClient(client);
+            server.loadGame(account);
         });
     },
     
-    loadGame: function(client, account){
+    loadGame: function(account){
+        this._world.connectPlayer(account, this, this.bindActorEvents);
+    },
+    
+    bindActorEvents: function(account){
         var world   = this._world,
-            actor   = world.playerInitialize(account, client),
+            client  = account.getClient(),
+            actor   = account.getPlayer(),
             zone    = world.getZone(actor.getZoneId());
 
         world.broadcastMessage(Defs.CHAT_SYSTEM, account.getUsername() + " connected.");
-
+        
         client.completeHandshake();
         client.sendZoneData(zone);
         client.sendZoneState(world.composeZoneStateFor(actor, zone.getStateAttributes()));

@@ -134,12 +134,10 @@ _.extend(Account.prototype, events.EventEmitter.prototype, {
     
     addScore: function(amount) {
         this._score += amount;
-        
         this.save();
         this.emit("changeScore", this._score);
-        
         return this._score;
-    }
+    }    
 });
 
 
