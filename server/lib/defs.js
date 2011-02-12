@@ -48,6 +48,7 @@ var Defs = module.exports = {
 		SPAWN_STONE:        { class: "SpawnTile",   image: "sprites.png:4,7" },
 		SPAWN_GRASS:        { class: "SpawnTile",   image: "sprites.png:2,7" },
 		EMPTY_WALL:         { class: "WallTile",    image: "sprites.png:0,6" },
+		EMPTY_SPACE:        { class: "Tile",        image: "sprites.png:12,8" },
 
 		TREE_1: 			{ class: "WallTile",    image: "sprites.png:3,2" },
 		TREE_2: 			{ class: "WallTile",    image: "sprites.png:4,2" },
@@ -100,12 +101,21 @@ var Defs = module.exports = {
         
 		DUNGEON_DOOR_T:     { class: "WallTile",    image: "sprites.png:5,0" },
 		DUNGEON_OPEN_T:     { class: "WallTile",    image: "sprites.png:4,0" },
-		DUNGEON_DOOR_R:     { class: "WallTile",    image: "sprites.png:4,1" },
-		DUNGEON_OPEN_R:     { class: "WallTile",    image: "sprites.png:5,1" },
-		DUNGEON_DOOR_B:     { class: "WallTile",    image: "sprites.png:6,0" },
+		DUNGEON_DOOR_R:     { class: "WallTile",    image: "sprites.png:6,1" },
+		DUNGEON_OPEN_R:     { class: "WallTile",    image: "sprites.png:6,0" },
+		DUNGEON_DOOR_B:     { class: "WallTile",    image: "sprites.png:4,1" },
 		DUNGEON_OPEN_B:     { class: "WallTile",    image: "sprites.png:5,1" },
 		DUNGEON_DOOR_L:     { class: "WallTile",    image: "sprites.png:7,0" },
 		DUNGEON_OPEN_L:     { class: "WallTile",    image: "sprites.png:7,1" },
+		
+		BORDER_T:           { class: "WallTile",    image: "sprites.png:13,7" },
+		BORDER_B:           { class: "WallTile",    image: "sprites.png:13,8" },
+		BORDER_R:           { class: "WallTile",    image: "sprites.png:14,7" },
+		BORDER_L:           { class: "WallTile",    image: "sprites.png:14,8" },
+		BORDER_TL:          { class: "WallTile",    image: "sprites.png:15,7" },
+		BORDER_BL:          { class: "WallTile",    image: "sprites.png:15,8" },
+		BORDER_TR:          { class: "WallTile",    image: "sprites.png:16,7" },
+		BORDER_BR:          { class: "WallTile",    image: "sprites.png:16,8" },
 		
 		
 		DUNGEON_CEILING:    { class: "WallTile",    image: "sprites.png:12,7" },
@@ -114,8 +124,12 @@ var Defs = module.exports = {
 		WATER:              { class: "WallTile",    image: "sprites.png:0,7" },
 		LAVA:               { class: "PainTile",    image: "sprites.png:8,7" },
 		
-		SKULL:           { class: "GoalTile",    image: "sprites.png:5,5", goalType: "skull" },
-		SWORD:           { class: "GoalTile",    image: "sprites.png:3,5", goalType: "sword" }
+		HOLE:               { class: "PainTile",    image: "sprites.png:12,8", damage: 999, interval: 50 },
+		
+		TREASURE:           { class: "GoalTile",    image: "sprites.png:5,5" },
+
+		SKULL:              { class: "GoalTile",    image: "sprites.png:5,5", goalType: "skull" },
+		SWORD:              { class: "GoalTile",    image: "sprites.png:3,5", goalType: "sword" }
     },
 
     SPELLS: {
