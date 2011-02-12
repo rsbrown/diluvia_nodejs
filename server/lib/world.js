@@ -269,6 +269,7 @@ World.prototype = {
                 client.sendFlash(flash);
             }
         });
+
         player.on('deathBySpell', function(spellName, caster, deathMsg) {
             var casterAccount = world._getAccountFromPlayer(caster);
             if (casterAccount) {
@@ -281,18 +282,29 @@ World.prototype = {
 
         });
 
+
         
         player.on("died", function() {
+            player.clearSpellAffects();
             world.broadcastMessage(Defs.CHAT_INFO, account.getUsername() + " died!");
         });
     
         client.on("disconnect", function() {
             world.broadcastMessage(Defs.CHAT_SYSTEM, account.getUsername() + " disconnected.");
 
-            //need to figure out the best way to handle someone disconnecting while poisoned -- instakill them?
-            //for now just clear spells so the server doesn't crash
+            var assassinPoison = Defs.SPELLS.ASSASSIN_POISON.getName();
+            var poison = player.isAffectedBySpell(assassinPoison);
+            if (poison) {
+                var caster = poison.getCaster();
+                if (caster) {
+                    var casterAccount = world._getAccountFromPlayer(caster);
+                    if (casterAccount) {
+                        casterAccount.addScore(Defs.REWARD_POISONER);
+                    }
+                }
+            } 
             player.clearSpellAffects();
-            
+
             account.save();
             world.accountRemove(account);
         });
