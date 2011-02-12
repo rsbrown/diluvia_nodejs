@@ -20,11 +20,6 @@ var World = module.exports = function() {
 
     setInterval(_(this._onFastInterval).bind(this), Defs.WORLD_FAST_INTERVAL);
     setInterval(_(this._onSlowInterval).bind(this), Defs.WORLD_SLOW_INTERVAL);
-    
-    this._loadZones();
-    
-    // delaying this to let zone files finish reading (TODO: kind of a hack)
-    setTimeout(_(this.spawnSword).bind(this), 2000);
 };
 
 World.DEFAULT_ZONE_ID   = "zones:0";
@@ -185,14 +180,20 @@ World.prototype = {
         })[0];
     },
 
-    playerInitialize: function(account, client) {
+    connectPlayer: function(account, server, callback) {
+        var self = this;
+        this._loadZones(function(){
+            self.initializePlayer(account);
+            callback.call(server, account);
+        });
+    },
+    
+    initializePlayer: function(account) {
         var world   = this,
+            client  = account.getClient(),
             player  = account.getPlayer();
 
-        account.setClient(client);
-        this._online.push(account);
-
-
+        world._online.push(account);
         
         // switch the player's tile when they change orientations
         player.on("changeOrientation", function(orientation) {
@@ -294,11 +295,9 @@ World.prototype = {
             world.accountRemove(account);
         });
         
-        var zone = this.getZone(account.getPlayer().getZoneId());
-        this.accountSpawn(account, zone, account.getPlayer().getTileIndex());
+        var zone = world.getZone(account.getPlayer().getZoneId());
+        world.accountSpawn(account, zone, account.getPlayer().getTileIndex());
         client.sendChat(Defs.CHAT_ALERT, "Find the skull to become the assassin!");
-        
-        return player;
     },
     
     accountSpawn: function(account, zone, tileIdx) {
@@ -573,40 +572,6 @@ World.prototype = {
         return new Zone(this, null, {width: width || 64, height: height || 64});
     },
     
-    generateDefaultZone: function(options) {
-        var options = options || {},
-            zone    = this.emptyZone(options.width, options.height),
-            dims    = zone.getDimensions(),
-            tileCnt = dims[0] * dims[1];
-
-        for (var i = 0; i < tileCnt; i++) {
-            zone.setLayerTile(0, i, options.baseTile || "BASE_GRASS");
-        }
-
-        zone.setLayerTile(1, 64, "SPAWN");
-
-        return zone;
-    },
-    
-    _loadZones: function(options) {
-        var self = this;
-        
-        fs.readdir("zones", function(err, files) {
-            if (err) {
-                console.log("Could not find zone config directory!");
-            }
-            else {
-                for (var i = 0, len = files.length; i < len; i++) {
-                    console.log("Loading zone: " + files[i] + "...");
-                    fs.readFile("zones/" + files[i], function(err, data) {
-                        var obj = JSON.parse(data);
-                        self.createZoneFromConfig(obj);
-                    });
-                }
-            }
-        });
-    },
-    
     createZoneFromConfig: function(conf) {
         var zone    = this.emptyZone(conf.dimensions[0], conf.dimensions[1]),
             board   = zone.getBoard();
@@ -660,5 +625,23 @@ World.prototype = {
         if (!text.match(/^\s*$/)) {
             this.broadcastMessage(Defs.CHAT_PLAYER, username + "> " + text);
         }
+    },
+    
+    _loadZones: function(callback) {
+        var self = this;
+        fs.readdir("zones", function(err, files) {
+            if (err) {
+                console.log("Could not find zone config directory!");
+            }
+            else {
+                for (var i = 0, len = files.length; i < len; i++) {
+                    fs.readFile("zones/" + files[i], function(err, data) {
+                        var obj = JSON.parse(data);
+                        self.createZoneFromConfig(obj);
+                    });
+                }
+            }
+            setTimeout(_(callback).bind(self), 2000);
+        });
     }
 };

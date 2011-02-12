@@ -17,7 +17,7 @@ var Defs = module.exports = {
     WORLD_SLOW_INTERVAL:    500,
     MAX_GOAL_COUNTER:       30000,
     GIT_REVISION:           "unresolved",
-    SPAWN_SWORD:            true,
+    SPAWN_SWORD:            false,
     
     REWARD_POISONER:        5,
     

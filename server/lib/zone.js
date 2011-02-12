@@ -1,5 +1,6 @@
 var _               = require("underscore"),
     events          = require("events"),
+    Persistence = require("persistence"),
     Defs            = require("defs"),
     Tile            = require("tile"),
     ActorTile       = require("actor_tile"),
@@ -35,7 +36,36 @@ var Zone = module.exports = function(world, zoneId, options) {
     }
 };
 
+Zone.findById = function(id, callback) {
+    var redis = Persistence.getRedis();
+    redis.get("zone:" + id, function(err, data) {
+        var account = null;
+        if (data) {
+            account = new Account(JSON.parse(data));
+        }
+        callback(account);
+    });
+};
+
 _.extend(Zone.prototype, events.EventEmitter.prototype, {
+    save: function(callback){
+        if (callback === undefined ) { callback = function(){}; }
+        Persistence.getRedis().set('account:'+this._id, this.serialize(), callback);
+    },
+    
+    serialize: function() {
+        var player = this.getPlayer();
+        return JSON.stringify({
+            "id"            : this._id,
+            "musicOn"       : this._musicOn,
+            "username"      : this._username,
+            "zoneIdx"       : player ? player.getZoneId() : null,
+            "tileIdx"       : player ? player.getTileIndex() : null,
+            "orientation"   : player ? player.getOrientation() : null,
+            "score"         : this._score
+        });
+    },
+
     getNextTileId: function() {
         return this._tileUid++;
     },
