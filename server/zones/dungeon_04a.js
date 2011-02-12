@@ -32,7 +32,7 @@
         "G":    { "class": "PortalTile", "options": { "zone": "zones:3", "image": "sprites.png:5,1", "dropAt": [ 4, 2 ] } },
         "H":    { "class": "PortalTile", "options": { "zone": "zones:3", "image": "sprites.png:5,1", "dropAt": [ 14, 2 ] } },
         
-        "K":    { "class": "PortalTile", "options": { "zone": "zones:7", "image": "sprites.png:4,0", "dropAt": [ 4, 2 ] } },
+        "K":    { "class": "PortalTile", "options": { "zone": "zones:7", "image": "sprites.png:4,0", "dropAt": [ 4, 16 ] } },
         "L":    { "class": "PortalTile", "options": { "zone": "zones:7", "image": "sprites.png:4,0", "dropAt": [ 4, 2 ] } },
         
         "Q":    { "class": "PortalTile", "options": { "zone": "zones:5", "image": "sprites.png:6,0", "dropAt": [ 2, 9 ] } },
