@@ -24,7 +24,7 @@
         "D":    "DUNGEON_OPEN_B",
 
         "F":    { "class": "PortalTile", "options": { "zone": "zones:1", "image": "sprites.png:5,1", "dropAt": [ 9, 2 ] } },
-        "G":    { "class": "PortalTile", "options": { "zone": "zones:3", "image": "sprites.png:4,0", "dropAt": [ 9, 17 ] } }
+        "G":    { "class": "PortalTile", "options": { "zone": "zones:3", "image": "sprites.png:4,0", "dropAt": [ 9, 16 ] } }
     },
     
     "baseMap":  [   

@@ -31,9 +31,9 @@
 
         "G":    { "class": "PortalTile", "options": { "zone": "zones:4a", "image": "sprites.png:5,1", "dropAt": [ 4, 2 ] } },
         
-        "Q":    { "class": "PortalTile", "options": { "zone": "zones:8", "image": "sprites.png:7,1", "dropAt": [ 16, 5 ] } },
+        "Q":    { "class": "PortalTile", "options": { "zone": "zones:8", "image": "sprites.png:7,1", "dropAt": [ 16, 4 ] } },
         "R":    { "class": "PortalTile", "options": { "zone": "zones:8", "image": "sprites.png:7,1", "dropAt": [ 16, 9 ] } },
-        "S":    { "class": "PortalTile", "options": { "zone": "zones:9", "image": "sprites.png:6,0", "dropAt": [ 2, 3 ] } }
+        "S":    { "class": "PortalTile", "options": { "zone": "zones:10", "image": "sprites.png:6,0", "dropAt": [ 2, 4 ] } }
     },
     
     "baseMap":  [   
@@ -63,8 +63,8 @@
                     "081111120",
                     "07     30",
                     "07 X X 30",
-                    "07 X X 30",
                     "0Q X X S0",
+                    "07XX XX30",
                     "07XX XX30",
                     "07XX XX30",
                     "07XX XX30",
