@@ -40,13 +40,14 @@ SpellEffect.prototype = {
 
     _prepDisplay: function() {
         var self = this;
-        var display = _.clone(this._spell.getDisplay());
+        var display = JSON.parse(JSON.stringify(this._spell.getDisplay())); // deep clone
+        
         _.each(display, function(val, key, list) {
             _.each(val, function(v, k) {
                 v.message = v.message.replace("%c", self._caster.getName()).replace("%t", self._target.getName());
             });
-            
         });
+        
         this._display = display;
     },
 
