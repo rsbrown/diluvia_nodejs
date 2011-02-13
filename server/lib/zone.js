@@ -1,6 +1,6 @@
 var _               = require("underscore"),
     events          = require("events"),
-    Persistence = require("persistence"),
+    Persistence     = require("persistence"),
     Defs            = require("defs"),
     Tile            = require("tile"),
     ActorTile       = require("actor_tile"),
@@ -197,7 +197,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
             nextTileIndex   = this.indexForDirectionalMove(prevTileIndex, direction),
             prevTiles       = this._board.getAllTilesFor(prevTileIndex),
             nextTiles       = this._board.getAllTilesFor(nextTileIndex);
-        
+                
         if (nextTileIndex != -1 && this.isTileIndexPassableBy(nextTileIndex, actor)) {            
             var actorTiles  = layer.getTiles(prevTileIndex),
                 tileData    = actor.getTileDataFrom(actorTiles);
@@ -363,5 +363,9 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
     
     getActors: function() {
         return this._actors;
+    },
+    
+    getMaxIndex: function() {
+        return this.xyToIndex(this._dimensions[0] - 1, this._dimensions[1] - 1);
     }
 });

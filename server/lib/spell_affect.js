@@ -1,37 +1,89 @@
-var _ = require('underscore');
+var _       = require("underscore"),
+    events  = require("events");
 
-var SpellAffect = module.exports = function(spell, caster, target) {    
+var SpellAffect = module.exports = function(spell, caster, target) {
+    events.EventEmitter.call(this);
+
     this._spell     = spell;
     this._caster    = caster;
     this._target    = target;
-    this._duration  = this._spell.getDuration();
 
     this._initialize();
 };
 
-SpellAffect.prototype = {
+_.extend(SpellAffect.prototype, events.EventEmitter.prototype, {    
+    getSpell:  function() { return this._spell; },
+    getCaster: function() { return this._caster; },
+    getTarget: function() { return this._target; },
+
+    getCasterEventMessage: function(type) {
+        try {
+            return this._display[type].caster;
+        }
+        catch (ex) {
+            return null;
+        }
+    },
+
+    getTargetEventMessage: function(type) {
+        try {
+            return this._display[type].target;
+        }
+        catch (ex) {
+            return null;
+        }
+    },
+
+    refresh: function() {
+        var duration = this._spell.getDuration();
+
+        if (duration.refreshable) {
+            this.stop();
+            this._startTimeout();
+        }
+    },
+
+    _resetTics: function() {
+        this._ticsPassed = 0;
+    },
+
+    _startTimeout: function() {
+        this._timeout = setTimeout(_(this._onTimeout).bind(this), this._spell.getDuration().period);
+    },
+
+    _startInterval: function() {
+        this._interval = setInterval(_(this._onInterval).bind(this), this._spell.getDuration().period);
+    },
+
     _initialize: function() {
-        var self = this;
+        var duration    = this._spell.getDuration(),
+            spellAffect = this;
 
         this._prepDisplay();
 
-        this._sendSpellMessages('cast');
+        this._caster.spellCasted(this);
+        this._target.spellTargeted(this);
 
-        if (this._duration) {
-            var period          = this._duration.period;
-            var tics            = this._duration.tics;
+        this._target.on("unspawn", function() {
+            spellAffect.complete();
+        });
+        
+        if (duration) {
+            var period  = duration.period,
+                tics    = duration.tics;
+
             if (tics && tics > 0) {
-                if (this._duration.triggerOnLand) {
+                if (duration.triggerOnLand) {
                     this._triggerSpell();
                 }
+
                 this._tics = tics;
-                this._ticsPassed = 0;                
-                this._interval = setInterval(function() {
-                    self._onInterval();                    
-                }, period);
+
+                this._resetTics();
+                this._startInterval();                
 
             } else {
-                this._timeout = setTimeout(self._onTimeout, period);
+                this._startTimeout();
             }
         } else {
             //instant 
@@ -40,56 +92,24 @@ SpellAffect.prototype = {
 
     _prepDisplay: function() {
         var self = this;
-        var display = _.clone(this._spell.getDisplay());
+        var display = JSON.parse(JSON.stringify(this._spell.getDisplay())); // deep clone
+
         _.each(display, function(val, key, list) {
             _.each(val, function(v, k) {
-                v.message = v.message.replace('%c', self._caster.getName()).replace('%t', self._target.getName());
+                v.message = v.message.replace("%c", self._caster.getName()).replace("%t", self._target.getName());
             });
-            
         });
+
         this._display = display;
     },
 
-    _getSpellMessages: function(type) {
-        var msgs = {};
-
-        if (this._display[type]) {
-            msgs.caster = this._display[type].caster;
-            msgs.target = this._display[type].target;
-        }
-
-        return msgs;
-    },
-
-    _sendSpellMessages: function(type) {
-        var msgs = this._getSpellMessages(type);
-
-        if (msgs) {
-            var c = msgs.caster;
-            if (c) {
-                this._caster.emit('spell_message', c.message, c.flash); 
-            }
-            var t = msgs.target;
-            if (t) {
-                this._target.emit('spell_message', t.message, t.flash);
-            }
-        }
-    },                        
-
-    refreshDuration: function() {                          
-        var self            = this;                          
-        this._ticsPassed    = 0;
-
-        if (this._timeout) {
-            this.stop();
-            this._timeout = setTimeout(self._onTimeout, this._duration.period);
-        }    
-    },                          
-
     _onTimeout: function() {
-        if (this._duration.triggerOnFade) {
+        var duration = this._spell.getDuration();
+
+        if (duration.triggerOnFade) {
             this._triggerSpell();
         }
+
         this.clear();
     },                    
 
@@ -101,43 +121,62 @@ SpellAffect.prototype = {
             this.clear();
         }
     },  
-    
+
     stop: function() {
+        this._resetTics();
+
         if (this._timeout) {
-           clearTimeout(this._timeout);
+            clearTimeout(this._timeout);
         }
+
         if (this._interval) {
-           clearInterval(this._interval);
+            clearInterval(this._interval);
         }
     },
 
+    fade: function() {
+        this.emit("faded");
+        this.clear();
+    },
+    
     clear: function() {
-        this._sendSpellMessages('fade');
+        this.emit("removed");
         this.stop();
-        this._target.removeSpellAffect(this._spell.getName());
-    },               
+    },
+
+    complete: function() {
+        this.clear();
+        this.emit("completed");
+        
+        this._destroy();
+    },
+    
+    _destroy: function() {
+        var spellAffect = this;
+        
+        _(["completed", "removed", "faded", "periodic", "damaged"]).each(function(eventName) {
+            spellAffect.removeAllListeners(eventName);
+        });
+    },
 
     _triggerSpell: function() {
-        this._sendSpellMessages('periodic');
+        this.emit("periodic");
 
-        var affects = this._spell.getAffects();
+        var affects     = this._spell.getAffects(),
+            spellAffect = this;
 
-        var self = this;
         _.each(affects, function(val, key, list) {
+
             if (key == "hitpoints") {
                 if (val < 0) {
                     //damage
-                    self._target.takeSpellDamage(self._spell.getName(), Math.abs(val), self._caster, self._getSpellMessages('death'));
+                    spellAffect.emit("damaged", Math.abs(val));
                 } else {
-                    //heal
+                    //heal (TODO)
 
                 }
             }
         });                
-    },
-              
-    getCaster: function() {
-        return this._caster;
     }
-};
+});
 

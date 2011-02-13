@@ -8,23 +8,18 @@ var io          = require("socket.io"),
     Routes      = require("routes");
 
 var GameServer = module.exports = function(app) {
-    this._world   = new World();
-    this._socket  = io.listen(app);
-
-    // I moved the route stuff back into Web because I think the "Server" itself
-    // should be mostly concerned about game world state & events. I renamed it to
-    // signify that assertion --RB
-
-    // actually, the socket connection event is received for each connection,
-    // so we'd need a way to have the function callback for the connection to
-    // determine where that connection was coming from. If we pass in the
-    // account here, it will be static for every connection. --RB
-    
-    this._socket.on("connection", _(this._onConnect).bind(this));
+    this._app   = app;
+    this._world = new World();
+    this._world.on("loaded", _(this._onWorldLoaded).bind(this));
 };
 
-
 GameServer.prototype = {
+    _onWorldLoaded: function() {
+        console.log("world loaded?");
+        this._socket = io.listen(this._app);
+        this._socket.on("connection", _(this._onConnect).bind(this));
+    },
+    
     _onConnect: function(conn) {
         var server  = this,
             client  = new Client(conn);

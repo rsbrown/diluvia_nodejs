@@ -1,5 +1,6 @@
 var _           = require("underscore"),
     events      = require("events"),
+    fs          = require("fs"),
     Defs        = require("defs"),
     Zone        = require("zone"),
     Tile        = require("tile"),
@@ -9,16 +10,22 @@ var _           = require("underscore"),
     PainTile    = require("pain_tile"),
     GoalTile    = require("goal_tile"),
     Player      = require("player"),
-    fs          = require("fs");
+    Fence       = require("fence");
 
 var World = module.exports = function() {
+    events.EventEmitter.call(this);
+    
     this._accounts      = [];
     this._defaultTiles  = [];
     this._zones         = {};
     this._online        = [];
     this._stateQueue    = [];
     
-    this._loadZones(function(){});
+    var world = this;
+    
+    this._loadZones(function() {
+        world.emit("loaded");
+    });
     
     setInterval(_(this._onFastInterval).bind(this), Defs.WORLD_FAST_INTERVAL);
     setInterval(_(this._onSlowInterval).bind(this), Defs.WORLD_SLOW_INTERVAL);
@@ -27,7 +34,7 @@ var World = module.exports = function() {
 World.DEFAULT_ZONE_ID   = "zones:0";
 World.MAP_LAYER_KEYS    = [ "baseMap", "objectMap" ];
 
-World.prototype = {
+_.extend(World.prototype, events.EventEmitter.prototype, {
     setDefaultZone: function(zone) {
         this._zones[World.DEFAULT_ZONE_ID] = zone;
     },
@@ -256,59 +263,58 @@ World.prototype = {
             client.sendFlash("red");
             
             if (hitpoints <= 0) {
-                world.accountDeath(account);
+                // async this account death on purpose
+                setTimeout(function() {
+                    world.accountDeath(account);
+                }, 0);
             }
         });
 
-
-        player.on('spell_message', function(message, flash, importance) {
-            client.sendChat(importance || Defs.CHAT_ALERT, message);
-            if (flash) {
-                client.sendFlash(flash);
-            }
-        });
-
-        player.on('deathBySpell', function(spellName, caster, deathMsg) {
-            var casterAccount = world._getAccountFromPlayer(caster);
-            if (casterAccount) {
-                if (spellName == "ASSASSIN_POISON") {
-                    casterAccount.addScore(Defs.REWARD_POISONER);
-                }
-            }
-
-            world.accountDeath(account);                
-
-        });
-
-
-        
-        player.on("died", function() {
-            player.clearSpellAffects();
-            world.broadcastMessage(Defs.CHAT_INFO, account.getUsername() + " died!");
-        });
-    
-        client.on("disconnect", function() {
-            world.broadcastMessage(Defs.CHAT_SYSTEM, account.getUsername() + " disconnected.");
-
-            var assassinPoison = Defs.SPELLS.ASSASSIN_POISON.getName();
-            var poison = player.isAffectedBySpell(assassinPoison);
-            if (poison) {
-                var caster = poison.getCaster();
-                if (caster) {
-                    var casterAccount = world._getAccountFromPlayer(caster);
-                    if (casterAccount) {
-                        casterAccount.addScore(Defs.REWARD_POISONER);
+        player.on("spellEvent", function(eventName, spellAffect) {
+            function sendSpellEventChat(msg) {
+                if (msg) {
+                    client.sendChat(msg.importance || Defs.CHAT_ALERT, msg.message);
+                
+                    if (msg.flash) {
+                        client.sendFlash(msg.flash);
                     }
                 }
-            } 
-            player.clearSpellAffects();
+            }
+            
+            if (spellAffect.getCaster() == player) {
+                sendSpellEventChat(spellAffect.getCasterEventMessage(eventName));
 
+                if (eventName == "completed" && spellAffect.getSpell() == Defs.SPELLS.ASSASSIN_POISON) {
+                    var account = world._getAccountFromPlayer(player);
+
+                    if (account) {
+                        account.addScore(Defs.REWARD_POISONER);
+                    }
+                }
+            }
+            
+            if (spellAffect.getTarget() == player) {
+                sendSpellEventChat(spellAffect.getTargetEventMessage(eventName));
+            }
+        });
+        
+        player.on("landed", function() {
+            player.suspendSpellTargetabilityFor(Defs.PORTAL_INVULN_DELAY); 
+        });
+
+        player.on("died", function() {
+            world.broadcastMessage(Defs.CHAT_INFO, account.getUsername() + " died!");
+        });
+        
+        client.on("disconnect", function() {
+            world.broadcastMessage(Defs.CHAT_SYSTEM, account.getUsername() + " disconnected.");            
             account.save();
             world.accountRemove(account);
         });
         
         var zone = world.getZone(account.getPlayer().getZoneId());
         world.accountSpawn(account, zone, account.getPlayer().getTileIndex());
+        
         client.sendChat(Defs.CHAT_ALERT, "Find the skull to become the assassin!");
     },
     
@@ -334,8 +340,10 @@ World.prototype = {
             idx         = this._online.indexOf(account);
         
         this.actorDropGoal(player);
-        this._online.splice(idx, 1);
+        player.unspawn();
         
+        this._online.splice(idx, 1);
+
         currentZone.removeActor(player);
         
         account.setClient(null);
@@ -347,9 +355,9 @@ World.prototype = {
             zone    = this.getZone(player.getZoneId());
         
         zone.playSound("scream");
+        
         player.die();
         player.setRole(Defs.ROLE_SEEKER);
-        player.clearSpellAffects();
         
         this.actorDropGoal(player);
         this.removeAccountFromZone(account, zone);
@@ -403,7 +411,7 @@ World.prototype = {
             if (otherActors.length > 0) {
                 if (player.getRole() == Defs.ROLE_ASSASSIN) {
                     _(otherActors).each(function(otherActor) {
-                        player.castSpell(Defs.SPELLS.ASSASSIN_POISON, otherActor);                            
+                        Defs.SPELLS.ASSASSIN_POISON.cast(player, otherActor);
                     });
                 }
                 else if (goalInv) {                    
@@ -546,8 +554,10 @@ World.prototype = {
         var goal = actor.getGoalInventory();
         
         if (goal) {
-            var successfullyDropped = false;
-            var goalPoint = parseInt(actor.getTileIndex());
+            var successfullyDropped = false,
+                goalPoint           = parseInt(actor.getTileIndex()),
+                zone                = this.getZone(actor.getZoneId()),
+                maxIndex            = zone.getMaxIndex();
             
             // *****************************************
             // TODO: FIXME: VERY NAIVE ALGORITHM 
@@ -555,23 +565,22 @@ World.prototype = {
             // UNTIL IT FINDS ONE THAT CAN BE DROPPED INTO.
             // THIS CAN CAUSE AN INFINITE LOOP IF IT NEVER FINDS ONE.
             while (!successfullyDropped) {
-                successfullyDropped = this.placeGoal(
-                    this.getZone(actor.getZoneId()),
-                    goalPoint,
-                    goal
-                );
-                goalPoint++;
+                if (goalPoint > maxIndex) {
+                    goalPoint = 0;
+                }
+                
+                successfullyDropped = this.placeGoal(zone, goalPoint++, goal, actor);
             }
             
             actor.setGoalInventory(null);
         }
     },
     
-    placeGoal: function(zone, tileIndex, tileData) {
+    placeGoal: function(zone, tileIndex, tileData, actor) {
         var layer   = zone.getBoard().getLayer(Defs.OBJECT_LAYER),
             exist   = layer.getTiles(tileIndex);
         
-        if (exist && exist.length > 0) {
+        if ((exist && exist.length > 0) || !zone.isTileIndexPassableBy(tileIndex, actor)) {
             return false;
         }
         else {
@@ -640,22 +649,20 @@ World.prototype = {
     },
     
     _loadZones: function(callback) {
-        var self = this;
+        var world   = this,
+            fence   = new Fence(callback);
+        
         fs.readdir("zones", function(err, files) {
             if (err) {
                 console.log("Could not find zone config directory!");
             }
             else {
-            var filesRead = 0;
-                for (var i = 0, len = files.length; i < len; i++) {
-                    fs.readFile("zones/" + files[i], function(err, data) {
-                        var obj = JSON.parse(data);
-                        self.createZoneFromConfig(obj);
-                        filesRead += 1;
-                        if (filesRead == files.length) {callback();}
-                    });
-                }
+                _(files).each(function(filename) {
+                    fs.readFile("zones/" + filename, fence.tap(function(err, data) {
+                        world.createZoneFromConfig(JSON.parse(data));
+                    }));
+                });
             }
         });
     }
-};
+});
