@@ -1,6 +1,6 @@
 var _               = require("underscore"),
     events          = require("events"),
-    Persistence = require("persistence"),
+    Persistence     = require("persistence"),
     Defs            = require("defs"),
     Tile            = require("tile"),
     ActorTile       = require("actor_tile"),

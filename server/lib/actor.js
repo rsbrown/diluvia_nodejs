@@ -69,7 +69,7 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, SpellCaster.prototype, 
         return this._label;
     },
     
-    takeDamage: function(amount) {
+    takeDamage: function(amount, source) {
         this._hitpoints = Math.max(0, this._hitpoints - amount);
         
         this.emit("tookDamage", amount, this._hitpoints);

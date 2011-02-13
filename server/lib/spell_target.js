@@ -1,6 +1,6 @@
 var _           = require('underscore'),
     events      = require('events'),
-    SpellAffect = require('spell_affect');
+    SpellEffect = require('spell_effect');
 
 var SpellTarget = module.exports = function() {
     events.EventEmitter.call(this);
@@ -8,7 +8,7 @@ var SpellTarget = module.exports = function() {
 };
 
 _.extend(SpellTarget.prototype, events.EventEmitter.prototype, {
-    isAffectedBySpell: function(spellName) {
+    isEffectedBySpell: function(spellName) {
         return this._spellEffects[spellName];
     },
 
@@ -19,14 +19,14 @@ _.extend(SpellTarget.prototype, events.EventEmitter.prototype, {
                 spellDuration   = spell.getDuration();
 
             if (spellDuration && spellDuration.period > 0) {
-                var spellAffect = this.isAffectedBySpell(spellName);
+                var spellEffect = this.isEffectedBySpell(spellName);
     
-                if (!spellAffect) {
-                    this._spellEffects[spellName] = new SpellAffect(spell, caster, this);                
+                if (!spellEffect) {
+                    this._spellEffects[spellName] = new SpellEffect(spell, caster, this);                
                 } else {
                     if (spellDuration.refreshable) {
-                        if (spellAffect.getCaster() == caster) {
-                            spellAffect.refreshDuration()
+                        if (spellEffect.getCaster() == caster) {
+                            spellEffect.refreshDuration()
                         } else {
                             //can others refresh someone else's spell ?
                         }
@@ -36,12 +36,12 @@ _.extend(SpellTarget.prototype, events.EventEmitter.prototype, {
                 }
             } else {
                 //instant spell
-                new SpellAffect(spell, caster, this);
+                new SpellEffect(spell, caster, this);
             }
         }
     },
 
-    removeSpellAffect: function(spellName) {
+    removeSpellEffect: function(spellName) {
         var sa = this._spellEffects[spellName];
         if (sa) {
             sa.stop();                      
@@ -52,7 +52,7 @@ _.extend(SpellTarget.prototype, events.EventEmitter.prototype, {
     clearSpellEffects: function() {                       
         var self = this;
         _.each(this._spellEffects, function(val, key, list) {
-            self.removeSpellAffect(key);            
+            self.removeSpellEffect(key);            
         });                
     }
 });

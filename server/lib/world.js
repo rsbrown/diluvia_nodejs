@@ -290,13 +290,14 @@ World.prototype = {
             world.broadcastMessage(Defs.CHAT_SYSTEM, account.getUsername() + " disconnected.");
 
             var assassinPoison = Defs.SPELLS.ASSASSIN_POISON.getName();
-            var poison = player.isAffectedBySpell(assassinPoison);
+            var poison = player.isEffectedBySpell(assassinPoison);
             
             if (poison) {
                 var caster = poison.getCaster();
                 
                 if (caster) {
                     var casterAccount = world._getAccountFromPlayer(caster);
+                    
                     if (casterAccount) {
                         casterAccount.addScore(Defs.REWARD_POISONER);
                     }
@@ -336,7 +337,7 @@ World.prototype = {
         
         this.actorDropGoal(player);
         this._online.splice(idx, 1);
-        
+
         currentZone.removeActor(player);
         
         account.setClient(null);
@@ -348,6 +349,7 @@ World.prototype = {
             zone    = this.getZone(player.getZoneId());
         
         zone.playSound("scream");
+        
         player.die();
         player.setRole(Defs.ROLE_SEEKER);
         player.clearSpellEffects();
