@@ -1,5 +1,6 @@
 var _           = require("underscore"),
     events      = require("events"),
+    fs          = require("fs"),
     Defs        = require("defs"),
     Zone        = require("zone"),
     Tile        = require("tile"),
@@ -9,16 +10,22 @@ var _           = require("underscore"),
     PainTile    = require("pain_tile"),
     GoalTile    = require("goal_tile"),
     Player      = require("player"),
-    fs          = require("fs");
+    Fence       = require("fence");
 
 var World = module.exports = function() {
+    events.EventEmitter.call(this);
+    
     this._accounts      = [];
     this._defaultTiles  = [];
     this._zones         = {};
     this._online        = [];
     this._stateQueue    = [];
     
-    this._loadZones(function(){});
+    var world = this;
+    
+    this._loadZones(function() {
+        world.emit("loaded");
+    });
     
     setInterval(_(this._onFastInterval).bind(this), Defs.WORLD_FAST_INTERVAL);
     setInterval(_(this._onSlowInterval).bind(this), Defs.WORLD_SLOW_INTERVAL);
@@ -27,7 +34,7 @@ var World = module.exports = function() {
 World.DEFAULT_ZONE_ID   = "zones:0";
 World.MAP_LAYER_KEYS    = [ "baseMap", "objectMap" ];
 
-World.prototype = {
+_.extend(World.prototype, events.EventEmitter.prototype, {
     setDefaultZone: function(zone) {
         this._zones[World.DEFAULT_ZONE_ID] = zone;
     },
@@ -644,22 +651,20 @@ World.prototype = {
     },
     
     _loadZones: function(callback) {
-        var self = this;
+        var world   = this,
+            fence   = new Fence(callback);
+        
         fs.readdir("zones", function(err, files) {
             if (err) {
                 console.log("Could not find zone config directory!");
             }
             else {
-            var filesRead = 0;
-                for (var i = 0, len = files.length; i < len; i++) {
-                    fs.readFile("zones/" + files[i], function(err, data) {
-                        var obj = JSON.parse(data);
-                        self.createZoneFromConfig(obj);
-                        filesRead += 1;
-                        if (filesRead == files.length) {callback();}
-                    });
-                }
+                _(files).each(function(filename) {
+                    fs.readFile("zones/" + filename, fence.tap(function(err, data) {
+                        world.createZoneFromConfig(JSON.parse(data));
+                    }));
+                });
             }
         });
     }
-};
+});

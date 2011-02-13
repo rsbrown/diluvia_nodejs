@@ -2,14 +2,11 @@ var Defs    = require("defs"),
     Tile    = require("tile"),
     _       = require("underscore");
 
-var DEFAULT_DAMAGE              = 25,
-    DEFAULT_DAMAGE_INTERVAL     = 1000;
-
 var PainTile = module.exports = function(options) {
     Tile.apply(this, arguments);
     
-    this._damage    = options.damage    || DEFAULT_DAMAGE;
-    this._interval  = options.interval  || DEFAULT_DAMAGE_INTERVAL;
+    this._damage    = options.damage    || Defs.PAIN_TILE_DAMAGE;
+    this._interval  = options.interval  || Defs.PAIN_TILE_INTERVAL;
     
     this._damaging  = [];
     
@@ -18,10 +15,15 @@ var PainTile = module.exports = function(options) {
 
 _.extend(PainTile.prototype, Tile.prototype, {
     moveInto: function(actor) {
-        var idx = this._damaging.indexOf(actor);
+        if (this._damage == -1) {
+            actor.takeDamage(Defs.MAX_HITPOINTS);
+        }
+        else {
+            var idx = this._damaging.indexOf(actor);
 
-        if (idx == -1) {
-            this._damaging.push(actor);
+            if (idx == -1) {
+                this._damaging.push(actor);
+            }            
         }
     },
     
