@@ -36,6 +36,17 @@ var Zone = module.exports = function(world, zoneId, options) {
     }
 };
 
+Zone.findAll = function(callback) {
+    var redis = Persistence.getRedis();
+    redis.get("zone:" + id, function(err, data) {
+        var account = null;
+        if (data) {
+            account = new Account(JSON.parse(data));
+        }
+        callback(account);
+    });
+},
+
 Zone.findById = function(id, callback) {
     var redis = Persistence.getRedis();
     redis.get("zone:" + id, function(err, data) {

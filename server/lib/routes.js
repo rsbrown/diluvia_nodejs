@@ -81,6 +81,9 @@ var Routes = module.exports = {
         });
       }
     },
+    
+    '/zones/new': {
+    },
 
     '/edit': {
       get: function(req, res){
@@ -89,6 +92,7 @@ var Routes = module.exports = {
             if (loggedIn) {
                 res.render('editor', {
                     locals: {
+                        zones:        Zone.findAllZones(),
                         username:     req.session.username,
                         flash:        req.flash()
                     }
