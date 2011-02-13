@@ -36,7 +36,7 @@ _.extend(SpellTarget.prototype, events.EventEmitter.prototype, {
                 spellTarget.emit("spellEvent", "died", spellAffect);
             }
         });
-        
+                
         spellAffect.on("removed", function() {
             var idx = spellTarget._spellAffects.indexOf(spellAffect);
             

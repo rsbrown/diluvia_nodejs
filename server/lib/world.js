@@ -279,9 +279,6 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
                         client.sendFlash(msg.flash);
                     }
                 }
-                else {
-                    console.log("No spellEvent message for " + eventName);
-                }
             }
             
             if (spellAffect.getCaster() == player) {

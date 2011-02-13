@@ -147,6 +147,16 @@ _.extend(SpellAffect.prototype, events.EventEmitter.prototype, {
     complete: function() {
         this.clear();
         this.emit("completed");
+        
+        this._destroy();
+    },
+    
+    _destroy: function() {
+        var spellAffect = this;
+        
+        _(["completed", "removed", "faded", "periodic", "damaged"]).each(function(eventName) {
+            spellAffect.removeAllListeners(eventName);
+        });
     },
 
     _triggerSpell: function() {

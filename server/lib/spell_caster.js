@@ -10,11 +10,6 @@ _.extend(SpellCaster.prototype, events.EventEmitter.prototype, {
         var spellCaster = this;
         
         this.emit("spellEvent", "casted", spellAffect);
-        
-        spellAffect.on("completed", function() {
-            spellCaster.emit("spellEvent", "completed", spellAffect);
-        });
-        
         this.forwardSpellEvents(spellAffect);
     }
 });

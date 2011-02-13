@@ -170,10 +170,12 @@ Defs.SPELLS = {
                     message: 'The POISON seems to have faded.'
                 }
             },
-            died: {
+            completed: {
                 caster: {
-                    message: '%t has died from your POISON!'
-                },
+                    message: 'You gained points from POISONing %t!'
+                }                
+            },
+            died: {
                 target: {
                     message: 'You have died from POISON!'
                 }
