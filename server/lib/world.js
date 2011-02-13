@@ -289,7 +289,7 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         });
 
         player.on("died", function() {
-            player.clearSpellEffects();
+            player.clearSpellAffects();
             world.broadcastMessage(Defs.CHAT_INFO, account.getUsername() + " died!");
         });
     
@@ -297,7 +297,7 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
             world.broadcastMessage(Defs.CHAT_SYSTEM, account.getUsername() + " disconnected.");
 
             var assassinPoison = Defs.SPELLS.ASSASSIN_POISON.getName();
-            var poison = player.isEffectedBySpell(assassinPoison);
+            var poison = player.isAffectedBySpell(assassinPoison);
             
             if (poison) {
                 var caster = poison.getCaster();
@@ -310,7 +310,7 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
                     }
                 }
             }
-            player.clearSpellEffects();
+            player.clearSpellAffects();
 
             account.save();
             world.accountRemove(account);
@@ -359,7 +359,7 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         
         player.die();
         player.setRole(Defs.ROLE_SEEKER);
-        player.clearSpellEffects();
+        player.clearSpellAffects();
         
         this.actorDropGoal(player);
         this.removeAccountFromZone(account, zone);

@@ -3,7 +3,7 @@ var Spell = module.exports = function(options) {
     this._display           = options.display;
 
     this._duration          = options.duration;
-    this._effects           = options.effects
+    this._affects           = options.affects
 };
 
 Spell.prototype = {
@@ -16,8 +16,8 @@ Spell.prototype = {
     getDuration: function() {
         return this._duration;
     },
-    getEffects: function() {
-        return this._effects;
+    getAffects: function() {
+        return this._affects;
     }
 };
 

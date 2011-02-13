@@ -149,7 +149,7 @@ Defs.SPELLS = {
             triggerOnFade:  false,
             refreshable:    false
         },
-        effects: {
+        affects: {
             hitpoints: -34
         },
         display: {

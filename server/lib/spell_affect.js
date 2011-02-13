@@ -1,6 +1,9 @@
-var _ = require("underscore");
+var _       = require("underscore"),
+    events  = require("events");
 
-var SpellEffect = module.exports = function(spell, caster, target) {    
+var SpellAffect = module.exports = function(spell, caster, target) {
+    events.EventEmitter.call(this);
+    
     this._spell     = spell;
     this._caster    = caster;
     this._target    = target;
@@ -9,13 +12,26 @@ var SpellEffect = module.exports = function(spell, caster, target) {
     this._initialize();
 };
 
-SpellEffect.prototype = {
+_.extend(SpellAffect.prototype, events.EventEmitter.prototype, {    
+     getSpell:  function() { return this._spell; },
+     getCaster: function() { return this._caster; },
+     getTarget: function() { return this._target; },
+     
+     getCasterEventMessage: function(type) {
+         return this._display[type].caster;
+     },
+     
+     getTargetEventMessage: function(type) {
+         return this._display[type].target;
+     },
+     
     _initialize: function() {
         var self = this;
 
         this._prepDisplay();
 
-        this._sendSpellMessages("cast");
+        this._caster.spellCasted(this);
+        this._target.spellTargeted(this);
 
         if (this._duration) {
             var period          = this._duration.period;
@@ -50,35 +66,6 @@ SpellEffect.prototype = {
         
         this._display = display;
     },
-
-    _getSpellMessages: function(type) {
-        var msgs = {};
-
-        if (this._display[type]) {
-            msgs.caster = this._display[type].caster;
-            msgs.target = this._display[type].target;
-        }
-
-        return msgs;
-    },
-
-    _sendSpellMessages: function(type) {
-        var msgs = this._getSpellMessages(type);
-
-        if (msgs) {
-            var c = msgs.caster;
-            
-            if (c) {
-                this._caster.emit("spellMessage", c.message, c.flash); 
-            }
-            
-            var t = msgs.target;
-            
-            if (t) {
-                this._target.emit("spellMessage", t.message, t.flash);
-            }
-        }
-    },                        
 
     refreshDuration: function() {                          
         var self            = this;                          
@@ -116,32 +103,27 @@ SpellEffect.prototype = {
     },
 
     clear: function() {
-        this._sendSpellMessages("fade");
+        this.emit("faded");
         this.stop();
-        this._target.removeSpellEffect(this._spell.getName());
-    },               
+    },    
 
     _triggerSpell: function() {
-        this._sendSpellMessages("periodic");
-
-        var effects = this._spell.getEffects();
-
-        var self = this;
-        _.each(effects, function(val, key, list) {
+        this.emit("periodic");
+        
+        var affects     = this._spell.getAffects(),
+            spellAffect = this;
+        
+        _.each(affects, function(val, key, list) {
             if (key == "hitpoints") {
                 if (val < 0) {
                     //damage
-                    self._target.takeSpellDamage(self._spell.getName(), Math.abs(val), self._caster, self._getSpellMessages("death"));
+                    spellAffect.emit("damaged", Math.abs(val));
                 } else {
-                    //heal
-
+                    //heal (TODO)
+                    
                 }
             }
         });                
-    },
-              
-    getCaster: function() {
-        return this._caster;
     }
-};
+});
 
