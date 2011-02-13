@@ -153,30 +153,29 @@ Defs.SPELLS = {
             hitpoints: -34
         },
         display: {
-            cast: {
+            casted: {
                 caster: {
                     flash: 'purple',
                     message: 'You have POISONed %t!!'
                 }
             },
-            periodic: {
+            damaged: {
                 target: {
                     flash: 'green',
                     message: 'POISON courses through your veins!'
                 }
             },
-            fade: {
+            faded: {
                 target: {
                     message: 'The POISON seems to have faded.'
                 }
             },
-            death: {
+            died: {
                 caster: {
                     message: '%t has died from your POISON!'
                 },
                 target: {
                     message: 'You have died from POISON!'
-
                 }
             }
         }

@@ -263,61 +263,61 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
             client.sendFlash("red");
             
             if (hitpoints <= 0) {
-                world.accountDeath(account);
+                // async this account death on purpose
+                setTimeout(function() {
+                    world.accountDeath(account);
+                }, 0);
             }
         });
 
-
-        player.on("spellMessage", function(message, flash, importance) {
-            client.sendChat(importance || Defs.CHAT_ALERT, message);
-            
-            if (flash) {
-                client.sendFlash(flash);
-            }
-        });
-
-        player.on("deathBySpell", function(spellName, caster, deathMsg) {
-            var casterAccount = world._getAccountFromPlayer(caster);
-            
-            if (casterAccount) {
-                if (spellName == "ASSASSIN_POISON") {
-                    casterAccount.addScore(Defs.REWARD_POISONER);
+        player.on("spellEvent", function(eventName, spellAffect) {
+            function sendSpellEventChat(msg) {
+                if (msg) {
+                    client.sendChat(msg.importance || Defs.CHAT_ALERT, msg.message);
+                
+                    if (msg.flash) {
+                        client.sendFlash(msg.flash);
+                    }
+                }
+                else {
+                    console.log("No spellEvent message for " + eventName);
                 }
             }
-
-            world.accountDeath(account);
-        });
-
-        player.on("died", function() {
-            player.clearSpellAffects();
-            world.broadcastMessage(Defs.CHAT_INFO, account.getUsername() + " died!");
-        });
-    
-        client.on("disconnect", function() {
-            world.broadcastMessage(Defs.CHAT_SYSTEM, account.getUsername() + " disconnected.");
-
-            var assassinPoison = Defs.SPELLS.ASSASSIN_POISON.getName();
-            var poison = player.isAffectedBySpell(assassinPoison);
             
-            if (poison) {
-                var caster = poison.getCaster();
-                
-                if (caster) {
-                    var casterAccount = world._getAccountFromPlayer(caster);
-                    
-                    if (casterAccount) {
-                        casterAccount.addScore(Defs.REWARD_POISONER);
+            if (spellAffect.getCaster() == player) {
+                sendSpellEventChat(spellAffect.getCasterEventMessage(eventName));
+
+                if (eventName == "completed" && spellAffect.getSpell() == Defs.SPELLS.ASSASSIN_POISON) {
+                    var account = world._getAccountFromPlayer(player);
+
+                    if (account) {
+                        account.addScore(Defs.REWARD_POISONER);
                     }
                 }
             }
-            player.clearSpellAffects();
+            
+            if (spellAffect.getTarget() == player) {
+                sendSpellEventChat(spellAffect.getTargetEventMessage(eventName));
+            }
+        });
+        
+        player.on("landed", function() {
+            player.suspendSpellTargetabilityFor(Defs.PORTAL_INVULN_DELAY); 
+        });
 
+        player.on("died", function() {
+            world.broadcastMessage(Defs.CHAT_INFO, account.getUsername() + " died!");
+        });
+        
+        client.on("disconnect", function() {
+            world.broadcastMessage(Defs.CHAT_SYSTEM, account.getUsername() + " disconnected.");            
             account.save();
             world.accountRemove(account);
         });
         
         var zone = world.getZone(account.getPlayer().getZoneId());
         world.accountSpawn(account, zone, account.getPlayer().getTileIndex());
+        
         client.sendChat(Defs.CHAT_ALERT, "Find the skull to become the assassin!");
     },
     
@@ -343,6 +343,8 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
             idx         = this._online.indexOf(account);
         
         this.actorDropGoal(player);
+        player.unspawn();
+        
         this._online.splice(idx, 1);
 
         currentZone.removeActor(player);
@@ -359,7 +361,6 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         
         player.die();
         player.setRole(Defs.ROLE_SEEKER);
-        player.clearSpellAffects();
         
         this.actorDropGoal(player);
         this.removeAccountFromZone(account, zone);
@@ -413,7 +414,7 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
             if (otherActors.length > 0) {
                 if (player.getRole() == Defs.ROLE_ASSASSIN) {
                     _(otherActors).each(function(otherActor) {
-                        player.castSpell(Defs.SPELLS.ASSASSIN_POISON, otherActor);                            
+                        Defs.SPELLS.ASSASSIN_POISON.cast(player, otherActor);
                     });
                 }
                 else if (goalInv) {                    

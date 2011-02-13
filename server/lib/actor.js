@@ -1,8 +1,9 @@
 var events          = require("events"),
     _               = require("underscore"),
     Defs            = require("defs"),
-    SpellCaster     = require('spell_caster'),
-    SpellTarget     = require('spell_target');
+    SpellCaster     = require("spell_caster"),
+    SpellTarget     = require("spell_target"),
+    SpellEvents     = require("spell_events");
 
 var Actor = module.exports = function(attributes) {
     events.EventEmitter.call(this);
@@ -14,12 +15,16 @@ var Actor = module.exports = function(attributes) {
     this._actorId           = Actor.actorIdCounter++;
     this._zoneId            = attributes["zoneIdx"];
     this._tileIndex         = attributes["tileIdx"];
-    this._invulnTs          = 0;    
 };
 
 Actor.actorIdCounter = 0;
 
-_.extend(Actor.prototype, events.EventEmitter.prototype, SpellCaster.prototype, SpellTarget.prototype,  {
+_(Actor.prototype).extend(
+    SpellEvents.prototype, 
+    events.EventEmitter.prototype, 
+    SpellCaster.prototype, 
+    SpellTarget.prototype,
+{
     setGoalCounter: function(goalCounter) {
         var newGoalCounter = Math.max(0, Math.min(goalCounter, Defs.MAX_GOAL_COUNTER));
         
@@ -66,36 +71,17 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, SpellCaster.prototype, 
     },
     
     getHitpoints: function() {
-        return this._label;
+        return this._hitpoints;
     },
     
-    takeDamage: function(amount, source) {
+    takeDamage: function(amount) {
         this._hitpoints = Math.max(0, this._hitpoints - amount);
         
         this.emit("tookDamage", amount, this._hitpoints);
         this.emit("changeHitpoints", this._hitpoints);
-        this.emit("change");        
+        this.emit("change");
     },
-
-    takeSpellDamage: function(spellName, amount, caster, deathMsg) {                         
-        this._hitpoints = Math.max(0, this._hitpoints - amount);
-
-        if (this._hitpoints <= 0) {
-
-            if (deathMsg.caster) {
-                caster.emit("spellMessage", deathMsg.caster.message, deathMsg.caster.flash, Defs.CHAT_CRITICAL);
-            }
-            if (deathMsg.target) {
-                this.emit("spellMessage", deathMsg.target.message, deathMsg.target.flash, Defs.CHAT_CRITICAL);
-            }
-
-            this.emit('deathBySpell', spellName, caster);            
-        }
-        
-        this.emit("changeHitpoints", this._hitpoints);
-        this.emit("change");        
-    },
-    
+            
     getLabel: function() {
         return this._label;
     },
@@ -108,8 +94,14 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, SpellCaster.prototype, 
     },
     
     // called each time the actor dies
-    die: function() {             
+    die: function() {        
         this.emit("died");
+        this.unspawn();
+    },
+    
+    // called when the actor dies or is disconnected
+    unspawn: function() {
+        this.emit("unspawn");
     },
     
     // called each time the actor spawns in the world (after death or connection)
@@ -123,7 +115,6 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, SpellCaster.prototype, 
     
     // called each time the actor appears in a zone
     land: function() {
-        this.setInvulnerabilityTimestamp((new Date()).getTime() + Defs.PORTAL_INVULN_DELAY);
         this.emit("landed");
     },
     
@@ -135,16 +126,6 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, SpellCaster.prototype, 
     // called each time the actor tries and fails to move into a tile
     moveFailed: function() {
         this.emit("moveFailed");
-    },
-    
-    setInvulnerabilityTimestamp: function(ts) {
-        this._invulnTs = ts;
-    },
-
-    isInvulnerable: function() {
-        var currentTime = (new Date()).getTime();
-
-        return (currentTime <= this._invulnTs);
     },
     
     touchGoalTime: function() {
@@ -184,7 +165,7 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, SpellCaster.prototype, 
     
     getTileDataFrom: function(tiles) {
         var actorId = this.getActorId();
-                
+        
         return _(tiles).detect(function(tileData) {
             try {
                 return (tileData[1].actorId == actorId);

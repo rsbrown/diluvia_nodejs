@@ -1,12 +1,32 @@
-var Spell = module.exports = function(options) {
-    this._name              = options.name;
-    this._display           = options.display;
+var SpellAffect = require("spell_affect");
 
-    this._duration          = options.duration;
-    this._affects           = options.affects
+var Spell = module.exports = function(options) {
+    this._name      = options.name;
+    this._display   = options.display;
+
+    this._duration  = options.duration;
+    this._affects   = options.affects;
 };
 
 Spell.prototype = {
+    cast: function(caster, target) {
+        var sa = target.getSpellAffectForSpell(this);
+        
+        if (target.isValidSpellTargetFor(caster)) {
+            if (sa) {
+                if (sa.getCaster() == caster) {
+                    return sa.refresh();
+                }
+            }
+            else {
+                new SpellAffect(this, caster, target);
+                return true;
+            }
+        }
+
+        return false;
+    },
+    
     getName: function() {
         return this._name;
     },
@@ -20,4 +40,3 @@ Spell.prototype = {
         return this._affects;
     }
 };
-

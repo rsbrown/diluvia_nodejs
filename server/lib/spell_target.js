@@ -1,58 +1,54 @@
-var _           = require('underscore'),
-    events      = require('events'),
-    SpellAffect = require('spell_affect');
+var _           = require("underscore"),
+    events      = require("events"),
+    SpellAffect = require("spell_affect"),
+    SpellEvents = require("spell_events");
 
 var SpellTarget = module.exports = function() {
     events.EventEmitter.call(this);
-    this._spellAffects = {};
+    
+    this._spellAffects = [];
+    this._targetableAt = (new Date()).getDate();
 };
 
 _.extend(SpellTarget.prototype, events.EventEmitter.prototype, {
-    isAffectedBySpell: function(spellName) {
-        return this._spellAffects[spellName];
+    suspendSpellTargetabilityFor: function(duration) {
+        this._targetableAt = (new Date()).getDate() + duration;
     },
-
-    applySpell: function(spell, caster) {
-        if (!this.isInvulnerable() ) {//this works for assassin game but prob need to be more generic
-
-            var spellName       = spell.getName(),
-                spellDuration   = spell.getDuration();
-
-            if (spellDuration && spellDuration.period > 0) {
-                var spellAffect = this.isAffectedBySpell(spellName);
     
-                if (!spellAffect) {
-                    this._spellAffects[spellName] = new SpellAffect(spell, caster, this);                
-                } else {
-                    if (spellDuration.refreshable) {
-                        if (spellAffect.getCaster() == caster) {
-                            spellAffect.refreshDuration()
-                        } else {
-                            //can others refresh someone else's spell ?
-                        }
-                    } else {
-                        //spell can't be recast on this target right now
-                    }
-                }
-            } else {
-                //instant spell
-                new SpellAffect(spell, caster, this);
+    isValidSpellTargetFor: function(caster) {
+        return ((new Date()).getTime() >= this._targetableAt);
+    },
+    
+    getSpellAffectForSpell: function(spell) {
+        return _(this._spellAffects).find(function(sa) { return sa.getSpell() == spell; });
+    },
+
+    spellTargeted: function(spellAffect) {
+        var spellTarget = this;
+        
+        this._spellAffects.push(spellAffect);
+        this.emit("spellEvent", "targeted", spellAffect);
+
+        spellAffect.on("damaged", function(amount) {
+            spellTarget.takeDamage(amount);
+            
+            if (spellTarget.getHitpoints() <= 0) {
+                spellTarget.emit("spellEvent", "died", spellAffect);
             }
-        }
+        });
+        
+        spellAffect.on("removed", function() {
+            var idx = spellTarget._spellAffects.indexOf(spellAffect);
+            
+            if (idx != -1) {
+                spellTarget._spellAffects.splice(idx, 1);
+            }            
+        });
+        
+        this.forwardSpellEvents(spellAffect);
     },
-
-    removeSpellAffect: function(spellName) {
-        var sa = this._spellAffects[spellName];
-        if (sa) {
-            sa.stop();                      
-            delete this._spellAffects[spellName];
-        }
-    },
-
-    clearSpellAffects: function() {                       
-        var self = this;
-        _.each(this._spellAffects, function(val, key, list) {
-            self.removeSpellAffect(key);            
-        });                
+    
+    spellAffected: function(spellAffect) {
+        this.emit("spellEvent", "affected", spellAffect);
     }
 });

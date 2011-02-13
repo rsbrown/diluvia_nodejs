@@ -6,7 +6,15 @@ var SpellCaster = module.exports = function() {
 };
 
 _.extend(SpellCaster.prototype, events.EventEmitter.prototype, {
-    castSpell: function(spell, target) {
-        target.applySpell(spell, this);
+    spellCasted: function(spellAffect) {
+        var spellCaster = this;
+        
+        this.emit("spellEvent", "casted", spellAffect);
+        
+        spellAffect.on("completed", function() {
+            spellCaster.emit("spellEvent", "completed", spellAffect);
+        });
+        
+        this.forwardSpellEvents(spellAffect);
     }
 });
