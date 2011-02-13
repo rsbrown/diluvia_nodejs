@@ -1,11 +1,9 @@
-var _ = require('underscore');
-
 var Spell = module.exports = function(options) {
     this._name              = options.name;
     this._display           = options.display;
 
     this._duration          = options.duration;
-    this._affects           = options.affects
+    this._effects           = options.effects
 };
 
 Spell.prototype = {
@@ -18,8 +16,8 @@ Spell.prototype = {
     getDuration: function() {
         return this._duration;
     },
-    getAffects: function() {
-        return this._affects;
+    getEffects: function() {
+        return this._effects;
     }
 };
 

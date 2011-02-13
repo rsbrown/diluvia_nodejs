@@ -1,4 +1,4 @@
-var _ = require('underscore');
+var _ = require("underscore");
 
 var SpellAffect = module.exports = function(spell, caster, target) {    
     this._spell     = spell;
@@ -15,7 +15,7 @@ SpellAffect.prototype = {
 
         this._prepDisplay();
 
-        this._sendSpellMessages('cast');
+        this._sendSpellMessages("cast");
 
         if (this._duration) {
             var period          = this._duration.period;
@@ -43,7 +43,7 @@ SpellAffect.prototype = {
         var display = _.clone(this._spell.getDisplay());
         _.each(display, function(val, key, list) {
             _.each(val, function(v, k) {
-                v.message = v.message.replace('%c', self._caster.getName()).replace('%t', self._target.getName());
+                v.message = v.message.replace("%c", self._caster.getName()).replace("%t", self._target.getName());
             });
             
         });
@@ -66,12 +66,15 @@ SpellAffect.prototype = {
 
         if (msgs) {
             var c = msgs.caster;
+            
             if (c) {
-                this._caster.emit('spell_message', c.message, c.flash); 
+                this._caster.emit("spellMessage", c.message, c.flash); 
             }
+            
             var t = msgs.target;
+            
             if (t) {
-                this._target.emit('spell_message', t.message, t.flash);
+                this._target.emit("spellMessage", t.message, t.flash);
             }
         }
     },                        
@@ -112,22 +115,22 @@ SpellAffect.prototype = {
     },
 
     clear: function() {
-        this._sendSpellMessages('fade');
+        this._sendSpellMessages("fade");
         this.stop();
         this._target.removeSpellAffect(this._spell.getName());
     },               
 
     _triggerSpell: function() {
-        this._sendSpellMessages('periodic');
+        this._sendSpellMessages("periodic");
 
-        var affects = this._spell.getAffects();
+        var effects = this._spell.getEffects();
 
         var self = this;
-        _.each(affects, function(val, key, list) {
+        _.each(effects, function(val, key, list) {
             if (key == "hitpoints") {
                 if (val < 0) {
                     //damage
-                    self._target.takeSpellDamage(self._spell.getName(), Math.abs(val), self._caster, self._getSpellMessages('death'));
+                    self._target.takeSpellDamage(self._spell.getName(), Math.abs(val), self._caster, self._getSpellMessages("death"));
                 } else {
                     //heal
 

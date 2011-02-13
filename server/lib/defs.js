@@ -143,7 +143,7 @@ var Defs = module.exports = {
                 triggerOnFade:  false,
                 refreshable:    false
             },
-            affects: {
+            effects: {
                 hitpoints: -34
             },
             display: {

@@ -83,10 +83,10 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, SpellCaster.prototype, 
         if (this._hitpoints <= 0) {
 
             if (deathMsg.caster) {
-                caster.emit('spell_message', deathMsg.caster.message, deathMsg.caster.flash, Defs.CHAT_CRITICAL);
+                caster.emit("spellMessage", deathMsg.caster.message, deathMsg.caster.flash, Defs.CHAT_CRITICAL);
             }
             if (deathMsg.target) {
-                this.emit('spell_message', deathMsg.target.message, deathMsg.target.flash, Defs.CHAT_CRITICAL);
+                this.emit("spellMessage", deathMsg.target.message, deathMsg.target.flash, Defs.CHAT_CRITICAL);
             }
 
             this.emit('deathBySpell', spellName, caster);            
@@ -107,10 +107,12 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, SpellCaster.prototype, 
         this.emit("change");
     },
     
+    // called each time the actor dies
     die: function() {             
         this.emit("died");
     },
     
+    // called each time the actor spawns in the world (after death or connection)
     spawn: function() {
         this._hitpoints     = this.getStartingHitpoints();
         this._goalCounter   = Defs.MAX_GOAL_COUNTER;
@@ -119,15 +121,18 @@ _.extend(Actor.prototype, events.EventEmitter.prototype, SpellCaster.prototype, 
         this.emit("spawned");
     },
     
+    // called each time the actor appears in a zone
     land: function() {
         this.setInvulnerabilityTimestamp((new Date()).getTime() + Defs.PORTAL_INVULN_DELAY);
         this.emit("landed");
     },
     
+    // called each time the actor disappears from the zone
     leave: function() {
         this.emit("left");
     },
     
+    // called each time the actor tries and fails to move into a tile
     moveFailed: function() {
         this.emit("moveFailed");
     },

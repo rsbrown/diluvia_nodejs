@@ -4,12 +4,12 @@ var _           = require('underscore'),
 
 var SpellTarget = module.exports = function() {
     events.EventEmitter.call(this);
-    this._spellAffects = {};
+    this._spellEffects = {};
 };
 
 _.extend(SpellTarget.prototype, events.EventEmitter.prototype, {
     isAffectedBySpell: function(spellName) {
-        return this._spellAffects[spellName];
+        return this._spellEffects[spellName];
     },
 
     applySpell: function(spell, caster) {
@@ -22,7 +22,7 @@ _.extend(SpellTarget.prototype, events.EventEmitter.prototype, {
                 var spellAffect = this.isAffectedBySpell(spellName);
     
                 if (!spellAffect) {
-                    this._spellAffects[spellName] = new SpellAffect(spell, caster, this);                
+                    this._spellEffects[spellName] = new SpellAffect(spell, caster, this);                
                 } else {
                     if (spellDuration.refreshable) {
                         if (spellAffect.getCaster() == caster) {
@@ -42,16 +42,16 @@ _.extend(SpellTarget.prototype, events.EventEmitter.prototype, {
     },
 
     removeSpellAffect: function(spellName) {
-        var sa = this._spellAffects[spellName];
+        var sa = this._spellEffects[spellName];
         if (sa) {
             sa.stop();                      
-            delete this._spellAffects[spellName];
+            delete this._spellEffects[spellName];
         }
     },
 
-    clearSpellAffects: function() {                       
+    clearSpellEffects: function() {                       
         var self = this;
-        _.each(this._spellAffects, function(val, key, list) {
+        _.each(this._spellEffects, function(val, key, list) {
             self.removeSpellAffect(key);            
         });                
     }

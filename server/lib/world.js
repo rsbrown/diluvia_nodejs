@@ -261,29 +261,28 @@ World.prototype = {
         });
 
 
-        player.on('spell_message', function(message, flash, importance) {
+        player.on("spellMessage", function(message, flash, importance) {
             client.sendChat(importance || Defs.CHAT_ALERT, message);
+            
             if (flash) {
                 client.sendFlash(flash);
             }
         });
 
-        player.on('deathBySpell', function(spellName, caster, deathMsg) {
+        player.on("deathBySpell", function(spellName, caster, deathMsg) {
             var casterAccount = world._getAccountFromPlayer(caster);
+            
             if (casterAccount) {
                 if (spellName == "ASSASSIN_POISON") {
                     casterAccount.addScore(Defs.REWARD_POISONER);
                 }
             }
 
-            world.accountDeath(account);                
-
+            world.accountDeath(account);
         });
 
-
-        
         player.on("died", function() {
-            player.clearSpellAffects();
+            player.clearSpellEffects();
             world.broadcastMessage(Defs.CHAT_INFO, account.getUsername() + " died!");
         });
     
@@ -292,16 +291,18 @@ World.prototype = {
 
             var assassinPoison = Defs.SPELLS.ASSASSIN_POISON.getName();
             var poison = player.isAffectedBySpell(assassinPoison);
+            
             if (poison) {
                 var caster = poison.getCaster();
+                
                 if (caster) {
                     var casterAccount = world._getAccountFromPlayer(caster);
                     if (casterAccount) {
                         casterAccount.addScore(Defs.REWARD_POISONER);
                     }
                 }
-            } 
-            player.clearSpellAffects();
+            }
+            player.clearSpellEffects();
 
             account.save();
             world.accountRemove(account);
@@ -349,7 +350,7 @@ World.prototype = {
         zone.playSound("scream");
         player.die();
         player.setRole(Defs.ROLE_SEEKER);
-        player.clearSpellAffects();
+        player.clearSpellEffects();
         
         this.actorDropGoal(player);
         this.removeAccountFromZone(account, zone);
@@ -546,8 +547,10 @@ World.prototype = {
         var goal = actor.getGoalInventory();
         
         if (goal) {
-            var successfullyDropped = false;
-            var goalPoint = parseInt(actor.getTileIndex());
+            var successfullyDropped = false,
+                goalPoint           = parseInt(actor.getTileIndex()),
+                zone                = this.getZone(actor.getZoneId()),
+                maxIndex            = zone.getMaxIndex();
             
             // *****************************************
             // TODO: FIXME: VERY NAIVE ALGORITHM 
@@ -555,23 +558,22 @@ World.prototype = {
             // UNTIL IT FINDS ONE THAT CAN BE DROPPED INTO.
             // THIS CAN CAUSE AN INFINITE LOOP IF IT NEVER FINDS ONE.
             while (!successfullyDropped) {
-                successfullyDropped = this.placeGoal(
-                    this.getZone(actor.getZoneId()),
-                    goalPoint,
-                    goal
-                );
-                goalPoint++;
+                if (goalPoint > maxIndex) {
+                    goalPoint = 0;
+                }
+                
+                successfullyDropped = this.placeGoal(zone, goalPoint++, goal, actor);
             }
             
             actor.setGoalInventory(null);
         }
     },
     
-    placeGoal: function(zone, tileIndex, tileData) {
+    placeGoal: function(zone, tileIndex, tileData, actor) {
         var layer   = zone.getBoard().getLayer(Defs.OBJECT_LAYER),
             exist   = layer.getTiles(tileIndex);
         
-        if (exist && exist.length > 0) {
+        if ((exist && exist.length > 0) || !zone.isTileIndexPassableBy(tileIndex, actor)) {
             return false;
         }
         else {
