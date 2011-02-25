@@ -73,7 +73,7 @@ Protocol.prototype = {
             
             if (msg.type == "ZoneData") {
                 var zoneData = this._zoneData = msg.attrs,
-                    tileData = zoneData.tiles;                
+                    tileData = zoneData.tiles;
                 
                 if (zoneData.background) {
                     self._controller.preloadImage(zoneData.background);

@@ -22,6 +22,10 @@ Tile.prototype = {
     
     moveOut: function(actor) {
     },
+
+    bumpInto: function(actor) {
+        actor.moveFailed();
+    },
     
     canMoveInto: function(actor, tileIndex, tileData, layerIndex) {
         return true;

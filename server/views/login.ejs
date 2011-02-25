@@ -1,16 +1,8 @@
 <h1>Login</h1>
-<%- message %>
-Try accessing <a href="/restricted">/restricted</a>.
-<form method="post" action="/login">
-  <p>
-    <label>Username:</label>
-    <input type="text" name="username">
-  </p>
-  <p>
-    <label>Password:</label>
-    <input type="text" name="password">
-  </p>
-  <p>
-    <input type="submit" value="Login">
-  </p>
-</form>
+<div class="fb_button" id="fb-login" style="float:left; background-position: left -188px">
+  <a href="/auth/facebook" class="fb_button_medium">
+    <span id="fb_login_text" class="fb_button_text">
+      Connect with Facebook
+    </span>
+  </a>
+</div>

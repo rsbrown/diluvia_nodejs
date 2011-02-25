@@ -1,5 +1,5 @@
 var Diluvia = {
-    IMAGE_BASE_PATH:        "images/",
+    IMAGE_BASE_PATH:        "/images/",
     TILE_DIMS:              [64, 64],
     CANVAS_ID:              "viewport",
     INTERVAL_DELAY:         10,
@@ -61,6 +61,7 @@ DiluviaController.prototype = {
                 self    = this;
         
             image.src = Diluvia.IMAGE_BASE_PATH + path;
+            console.log("here: " + image.src);
         
             this._preload.push(path);
             this._imageCache[path] = image;

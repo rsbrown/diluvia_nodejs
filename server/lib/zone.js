@@ -1,22 +1,26 @@
 var _               = require("underscore"),
+    fs          = require("fs"),
     events          = require("events"),
     Persistence     = require("persistence"),
     Defs            = require("defs"),
-    Tile            = require("tile"),
-    ActorTile       = require("actor_tile"),
-    SpawnTile       = require("spawn_tile"),
+    World           = require("world"),
+    Tile        = require("tile"),
+    SpawnTile   = require("spawn_tile"),
+    PortalTile  = require("portal_tile"),
+    WallTile    = require("wall_tile"),
+    PainTile    = require("pain_tile"),
+    GoalTile    = require("goal_tile"),
     Board           = require("board"),
     BoardLayer      = require("board_layer");
 
-var Zone = module.exports = function(world, zoneId, options) {
+var Zone = module.exports = function(options) {
     events.EventEmitter.call(this);
-    
     var self = this;
-    
     options                 = options || {};
-    
-    this._world             = world;
-    this._zoneId            = zoneId;
+
+    this._id                = options["id"];
+    this._world             = null;
+    this._zoneId            = options["zoneId"];
     this._board             = new Board();
     this._tiles             = {};
     this._dimensions        = [options.width, options.height, Defs.LAYER_COUNT];
@@ -36,44 +40,101 @@ var Zone = module.exports = function(world, zoneId, options) {
     }
 };
 
+Zone.MAP_LAYER_KEYS    = [ "baseMap", "objectMap" ];
+
 Zone.findAll = function(callback) {
     var redis = Persistence.getRedis();
-    redis.get("zone:" + id, function(err, data) {
-        var account = null;
-        if (data) {
-            account = new Account(JSON.parse(data));
-        }
-        callback(account);
+    var zoneList = [];
+    redis.keys("zone:*", function (err, keys) {
+        redis.mget(keys, function (err, zones) {
+            if (zones) {
+                zones.forEach(function (data, index) {
+                    var z = JSON.parse(data);
+                    zoneList[index] = z;
+                });
+            }
+            callback(zoneList);
+        });
     });
-},
+};
 
 Zone.findById = function(id, callback) {
     var redis = Persistence.getRedis();
-    redis.get("zone:" + id, function(err, data) {
-        var account = null;
+    redis.get(id, function(err, data) {
+        var zone = null;
         if (data) {
-            account = new Account(JSON.parse(data));
+            zone = new Zone(JSON.parse(data));
         }
-        callback(account);
+        callback(zone);
     });
+};
+
+Zone.createNewIsland = function(account, callback) {
+    var redis = Persistence.getRedis();
+    redis.incr( 'pkid' , function( err, newZoneId ) {
+        fs.readFile("zones/default_island.js", function(err, data) {
+            var zone = Zone.createFromConfig(JSON.parse(data));
+            zone.save(function(){
+                account.setIslandZoneId(newZoneId);
+                account.save(function(){ callback(account); });
+            });
+        });
+    });
+};
+
+Zone.createFromConfig = function(conf) {
+    var zone    = new Zone({width: conf.dimensions[0] || 64, height: conf.dimensions[1] || 64}),
+        board   = zone.getBoard();
+    
+    for (var mli = 0, mllen = Zone.MAP_LAYER_KEYS.length; mli < mllen; mli++) {
+        var confKey         = Zone.MAP_LAYER_KEYS[mli],
+            confMapLayer    = conf[confKey];
+            mapLayerStr     = confMapLayer.join(""),
+            layer           = board.getLayer(mli);
+        
+        for (var i = 0, len = mapLayerStr.length; i < len; i++) {
+            var ch = mapLayerStr.charAt(i);
+            
+            if (ch != " ") {
+                var lookup  = conf.tiles[ch],
+                    tileId;
+                
+                if ((typeof lookup) == "string") {
+                    tileId = lookup;
+                }
+                else {
+                    var klass   = eval(lookup.class),
+                        tile    = new klass(lookup.options);
+            
+                    tileId = zone.addTile(tile);
+                }
+        
+                layer.pushTile(i, [ tileId ]);
+            }
+        }
+    }
+    
+    if (conf.background) {
+        zone.setBackground(conf.background);
+    }
+    
+    if (conf.music) {
+        zone.setMusic(conf.music);
+    }
+
+    return zone;
 };
 
 _.extend(Zone.prototype, events.EventEmitter.prototype, {
     save: function(callback){
         if (callback === undefined ) { callback = function(){}; }
-        Persistence.getRedis().set('account:'+this._id, this.serialize(), callback);
+        Persistence.getRedis().set('zone:'+this._id, this.serialize(), callback);
     },
     
     serialize: function() {
-        var player = this.getPlayer();
         return JSON.stringify({
-            "id"            : this._id,
-            "musicOn"       : this._musicOn,
-            "username"      : this._username,
-            "zoneIdx"       : player ? player.getZoneId() : null,
-            "tileIdx"       : player ? player.getTileIndex() : null,
-            "orientation"   : player ? player.getOrientation() : null,
-            "score"         : this._score
+            "id"         : this._id,
+            "config"     : this.getRenderAttributes()
         });
     },
 
@@ -190,52 +251,54 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
             actor.setOrientation(direction);
         }
         
-        var world           = this._world,
-            zone            = this,
-            layer           = this._board.getLayer(Defs.ACTOR_LAYER),
-            prevTileIndex   = actor.getTileIndex(),
-            nextTileIndex   = this.indexForDirectionalMove(prevTileIndex, direction),
-            prevTiles       = this._board.getAllTilesFor(prevTileIndex),
-            nextTiles       = this._board.getAllTilesFor(nextTileIndex);
+        var prevTileIndex  = actor.getTileIndex(),        
+            nextTileIndex  = this.indexForDirectionalMove(prevTileIndex, direction);
                 
-        if (nextTileIndex != -1 && this.isTileIndexPassableBy(nextTileIndex, actor)) {            
-            var actorTiles  = layer.getTiles(prevTileIndex),
-                tileData    = actor.getTileDataFrom(actorTiles);
+        if (nextTileIndex == -1) {
+            actor.moveFailed();
+        }
+        else if (this.isTileIndexPassableBy(nextTileIndex, actor)) {
+            var world          = this._world,
+                layer          = this._board.getLayer(Defs.ACTOR_LAYER),
+                actorTiles     = layer.getTiles(prevTileIndex),
+                tileData       = actor.getTileDataFrom(actorTiles);
             
             layer.popTile(prevTileIndex, tileData);
             layer.pushTile(nextTileIndex, tileData);
-
-            _(prevTiles).each(function(tilesAndLayer) {
-                var tiles       = tilesAndLayer[0],
-                    layerIndex  = tilesAndLayer[1];
-                
-                _(tiles).each(function(_tileData) {
-                    var tile = zone.getTile(_tileData[0]);                    
-                    
-                    if (tile) {
-                        tile.moveOut(actor, prevTileIndex, _tileData, layerIndex, world);
-                    }
-                })
+            
+            this.tileAtIndex(prevTileIndex, function(tile, _tileData, layerIndex){
+                tile.moveOut(actor, prevTileIndex, _tileData, layerIndex, world);
             });
-
+            
             actor.setTileIndex(nextTileIndex);
-
-            _(nextTiles).each(function(tilesAndLayer) {
-                var tiles       = tilesAndLayer[0],
-                    layerIndex  = tilesAndLayer[1];
-                
-                _(tiles).each(function(_tileData) {
-                    var tile = zone.getTile(_tileData[0]);                    
-                    
-                    if (tile) {
-                        tile.moveInto(actor, nextTileIndex, _tileData, layerIndex, world);
-                    }
-                })
+            
+            this.tileAtIndex(nextTileIndex, function(tile, _tileData, layerIndex){
+                tile.moveInto(actor, nextTileIndex, _tileData, layerIndex, world);
             });
+            
         }
         else {
-            actor.moveFailed();
+            this.tileAtIndex(nextTileIndex, function(tile){
+                tile.bumpInto(actor);
+            });
         }
+    },
+    
+    tileAtIndex: function(tileIndex, callback) {
+        var zone         = this,
+            tilesAtIndex = this._board.getAllTilesFor(tileIndex);
+        
+        _(tilesAtIndex).each(function(tilesAndLayer) {
+            var tiles       = tilesAndLayer[0],
+                layerIndex  = tilesAndLayer[1];
+            
+            _(tiles).each(function(_tileData) {
+                var tile = zone.getTile(_tileData[0]);
+                if (tile) {
+                    callback(tile, _tileData, layerIndex);
+                }
+            })
+        });
     },
     
     getTiles: function() {
@@ -367,5 +430,13 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
     
     getMaxIndex: function() {
         return this.xyToIndex(this._dimensions[0] - 1, this._dimensions[1] - 1);
+    },
+    
+    setWorld: function(world) {
+        this._world = world;
+    },
+    
+    getWorld: function() {
+        return this._world;
     }
 });

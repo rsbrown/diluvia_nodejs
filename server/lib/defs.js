@@ -48,6 +48,7 @@ Defs.Tiles = {
     PLAYER_W:           { class: "ActorTile",   image: "dude.png:3,0" },
     SPAWN:              { class: "SpawnTile",   image: "sprites.png:2,8" },
     ROCK:               { class: "WallTile",    image: "sprites.png:3,4" },
+    BASE_WATER:         { class: "Tile",        image: "sprites.png:0,7" },
     BASE_GRASS:         { class: "Tile",        image: "sprites.png:2,7" },
     BASE_EMPTY:         { class: "Tile",        image: "sprites.png:0,9" },
     BASE_STONE:         { class: "Tile",        image: "sprites.png:4,7" },

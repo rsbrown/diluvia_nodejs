@@ -39,6 +39,7 @@ var Pointer = function(controller) {
     });
     
     $("canvas").click(function(ev) {
+        ev.preventDefault();
         self.movePlayer();
         return false;
     });

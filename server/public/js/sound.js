@@ -1,4 +1,4 @@
-soundManager.url = 'swf';
+soundManager.url = '/swf';
 soundManager.flashVersion = 9; // optional: shiny features (default = 8)
 soundManager.useFlashBlock = false; // optionally, enable when you're ready to dive in
 // enable HTML5 audio support, if you're feeling adventurous. iPad/iPhone will always get this.

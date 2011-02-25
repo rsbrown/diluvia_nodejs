@@ -91,58 +91,6 @@ header {
 	position: relative;
 }
 
-#dungeon_editor .editzone {
-    background-color: #AAAAAA;
-}
-
-#dungeon_editor .editzone textarea {
-    font-family: courier;
-}
-
-#tile_drawer {
-	width: 200px;
-	position: absolute;
-	top: 0;
-	left: 0;
-	height: 100%;
-	background: url(../img/greybg.png);
-	z-index: 10;
-}
-#tile_drawer.closed {
-	background: none;
-	width: 13px;
-}
-#drawer_button_box {
-	width: 11px;
-	height: 100%;
-	position: absolute;
-	top: 0;
-	right: 0;
-}
-#tile_drawer.closed #drawer_button_box {
-	padding: 0 2px 0 0;
-}
-#tile_drawer.open #drawer_button_box {
-	background: #000;
-	padding-left: 0 0 0 2px;
-}
-#tile_drawer.open #drawer_button {
-	background: url(../img/drawer-close_arrow.png) no-repeat;
-}
-#drawer_button {
-	width: 11px;
-	height: 24px;
-	position: absolute;
-	top: 50%;
-	margin-top: -12px;
-	background: url(../img/drawer-open_arrow.png) no-repeat;
-	display: block;
-}
-#drawer_button:hover {
-	background-position: 0 -24px !important;
-}
-
-
 canvas {
     
 }
@@ -230,4 +178,14 @@ a.logout {
 
 #scoreboard table td, #scoreboard table th { 
     padding:    3px;
+}
+
+#header-links a {
+    color: #999;
+    text-decoration: none;
+    border-bottom: 1px dotted #ba0000
+}
+
+#header-links:hover {
+    text-decoration: none;
 }

@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/smoothness/jquery-ui.css" type="text/css" media="screen" charset="utf-8">
     <script src="http://static.ak.fbcdn.net/connect/en_US/core.js"></script>
     <script src="/js/libs/soundmanager2-nodebug-jsmin.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/js/application.js" type="text/javascript" charset="utf-8"></script>
     <script src="/js/protocol.js" type="text/javascript" charset="utf-8"></script>
     <script src="/js/canvas.js" type="text/javascript" charset="utf-8"></script>
     <script src="/js/keyboard.js" type="text/javascript" charset="utf-8"></script>
@@ -17,6 +18,7 @@
     <script src="/js/sound.js" type="text/javascript" charset="utf-8"></script>
     <script src="/js/chat.js" type="text/javascript" charset="utf-8"></script>
     <script src="/js/diluvia.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/js/editor.js" type="text/javascript" charset="utf-8"></script>
   </head>
   <body>
     <% if(flash && flash.error) { %>
@@ -28,7 +30,7 @@
       <a href="/"><img src="/images/logo.png" alt="Diluvia" id="logo"></a>
       <div class="header-item" id="user-login">
         <% if (username) { %>
-          <%= username %> (<a class="logout" href="/logout">logout</a>)
+          <span id="header-links"><a id="account" href="#"><%= username %></a> (<a class="logout" href="/logout">logout</a>) </span> 
         <% } else { %>
           <div class="fb_button" id="fb-login" style="float:left; background-position: left -188px">
             <a href="/auth/facebook" class="fb_button_medium">

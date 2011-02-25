@@ -7,13 +7,13 @@ var START_HITPOINTS = 100;
 
 var Account = module.exports = function(attributes) {
     events.EventEmitter.call(this);
-    
-    this._id        = attributes["id"];
-    this._username  = attributes["username"];
-    this._musicOn   = attributes["musicOn"];
-    this._score     = attributes["score"] || 0;
-    this._client    = null;
-    this._player    = new Player(attributes);
+    this._id             = attributes["id"];
+    this._username       = attributes["username"];
+    this._islandZoneId   = attributes["islandZoneId"];
+    this._musicOn        = attributes["musicOn"];
+    this._score          = attributes["score"] || 0;
+    this._client         = null;
+    this._player         = new Player(attributes);
 };
 
 Account.initFromSession = function(sessionId, callback) {
@@ -62,6 +62,22 @@ Account.findByFacebookId = function(facebookUserId, callback){
     });
 };
 
+Account.findAll = function(callback) {
+    var redis = Persistence.getRedis();
+    var acctList = [];
+    redis.keys("account:*", function (err, keys) {
+        redis.mget(keys, function (err, accounts) {
+            if (accounts) {
+                accounts.forEach(function (data, index) {
+                    var a = new Account(JSON.parse(data));
+                    acctList[index] = a;
+                });
+            }
+            callback(acctList);
+        });
+    });
+};
+
 Account.findById = function(id, callback) {
     var redis = Persistence.getRedis();
     redis.get("account:" + id, function(err, data) {
@@ -85,6 +101,7 @@ _.extend(Account.prototype, events.EventEmitter.prototype, {
             "id"            : this._id,
             "musicOn"       : this._musicOn,
             "username"      : this._username,
+            "islandZoneId"  : this._islandZoneId,
             "zoneIdx"       : player ? player.getZoneId() : null,
             "tileIdx"       : player ? player.getTileIndex() : null,
             "orientation"   : player ? player.getOrientation() : null,
@@ -110,6 +127,14 @@ _.extend(Account.prototype, events.EventEmitter.prototype, {
     
     getId: function() {
         return this._id;
+    },
+    
+    getIslandZoneId: function() {
+        return this._islandZoneId;
+    },
+    
+    setIslandZoneId: function(id) {
+        this._islandZoneId = id;
     },
     
     getUsername: function() {

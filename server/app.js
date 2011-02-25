@@ -35,8 +35,8 @@ git.stdout.on("data", function(data) {
 var STATIC_ROOT =  __dirname + "/public";
 
 var app = express.createServer(
-    express.logger(),
     express.bodyDecoder(),
+    express.logger(),
     express.cookieDecoder(),
     express.session({
         secret:     "zZICGH40MKxHDTTqOCLbA4YN3CcvKoMOOZIkEkOc6C2LHuNMWHAEYzoeBjnqSzy3dpoDhZZhthe7y4ZpMpGpcQcdLVKHGhAlhAvkMxzlFC7eDleIEkXj3XMVWVVAd3Hbpp3epw9iBuBqvOZY4lZ7bdAgtN5VEVvRT5VM5UXzq7y1NX5uXkULPieYsuLFjyAlJRjczCCL",

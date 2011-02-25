@@ -15,7 +15,6 @@ var GameServer = module.exports = function(app) {
 
 GameServer.prototype = {
     _onWorldLoaded: function() {
-        console.log("world loaded?");
         this._socket = io.listen(this._app);
         this._socket.on("connection", _(this._onConnect).bind(this));
     },

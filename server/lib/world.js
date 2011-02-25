@@ -32,7 +32,6 @@ var World = module.exports = function() {
 };
 
 World.DEFAULT_ZONE_ID   = "zones:0";
-World.MAP_LAYER_KEYS    = [ "baseMap", "objectMap" ];
 
 _.extend(World.prototype, events.EventEmitter.prototype, {
     setDefaultZone: function(zone) {
@@ -144,6 +143,8 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
     _hookZone: function(zone) {
         var self    = this,
             board   = zone.getBoard();
+            
+        zone.setWorld(this);
                 
         zone.on("chat", function(message) {
             self._onZoneChat(zone, message);
@@ -589,50 +590,8 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         }
     },
     
-    emptyZone: function(width, height) {
-        return new Zone(this, null, {width: width || 64, height: height || 64});
-    },
-    
     createZoneFromConfig: function(conf) {
-        var zone    = this.emptyZone(conf.dimensions[0], conf.dimensions[1]),
-            board   = zone.getBoard();
-        
-        for (var mli = 0, mllen = World.MAP_LAYER_KEYS.length; mli < mllen; mli++) {
-            var confKey         = World.MAP_LAYER_KEYS[mli],
-                confMapLayer    = conf[confKey];
-                mapLayerStr     = confMapLayer.join(""),
-                layer           = board.getLayer(mli);
-            
-            for (var i = 0, len = mapLayerStr.length; i < len; i++) {
-                var ch = mapLayerStr.charAt(i);
-                
-                if (ch != " ") {
-                    var lookup  = conf.tiles[ch],
-                        tileId;
-                    
-                    if ((typeof lookup) == "string") {
-                        tileId = lookup;
-                    }
-                    else {
-                        var klass   = eval(lookup.class),
-                            tile    = new klass(lookup.options);
-                
-                        tileId = zone.addTile(tile);
-                    }
-            
-                    layer.pushTile(i, [ tileId ]);
-                }
-            }
-        }
-        
-        if (conf.background) {
-            zone.setBackground(conf.background);
-        }
-        
-        if (conf.music) {
-            zone.setMusic(conf.music);
-        }
-        
+        var zone = Zone.createFromConfig(conf);
         this.setZone(conf.zoneId, zone);
     },
     

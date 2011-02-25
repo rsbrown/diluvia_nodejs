@@ -10,7 +10,7 @@ Chat.prototype = {
             color   = msgData.color;
         
         msgDiv.css({ color: color });
-        msgDiv.html(text);
+        msgDiv.text(text);
         
         this._chatMessageElement.append(msgDiv);
         this._chatMessageElement.scrollTop(10000000); // TODO: this is kind of a hack
