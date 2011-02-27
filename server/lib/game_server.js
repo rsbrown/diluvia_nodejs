@@ -22,27 +22,35 @@ GameServer.prototype = {
     _onConnect: function(conn) {
         var server  = this,
             client  = new Client(conn);
-            
+        
         client.on("receivedHandshakeRequest", function(sessionId) {
             server.initAccount(client, sessionId);
         });
+        
+        client.on("startGame", function(sessionId) {
+            server.loadGame(client.getAccount());
+        });
+
+        client.on("initWorldView", function(sessionId) {
+            server.bindEditorEvents(client);
+        });
+
         conn.on("message", function(msg) { client.onMessage(msg); });
         conn.on("disconnect", function() { client.onDisconnect(); });
     },
     
     initAccount: function(client, sessionId) {
-        var server = this;
+        var self = this;
 
         Account.initFromSession(sessionId, function(account){
-            console.log("INIT SESSION FOR USER " + account.getUsername());
             // var alreadyLoggedInAccount = world.getAccountById(account.getId());
             // console.log(alreadyLoggedInAccount);
             // if (alreadyLoggedInAccount) {
             //     alreadyLoggedInAccount.kick();
             // }
-            client.sendMessage("ServerInfo", server.getInfo());
             account.setClient(client);
-            server.loadGame(account);
+            client.setAccount(account);
+            client.completeHandshake(self.serverInfo());
         });
     },
     
@@ -56,9 +64,9 @@ GameServer.prototype = {
             actor   = account.getPlayer(),
             zone    = world.getZone(actor.getZoneId());
 
+        console.log("INIT GAMEPLAY SESSION FOR USER " + account.getUsername());
         world.broadcastMessage(Defs.CHAT_SYSTEM, account.getUsername() + " connected.");
         
-        client.completeHandshake();
         client.sendZoneData(zone);
         client.sendZoneState(world.composeZoneStateFor(actor, zone.getStateAttributes()));
         client.sendScoreUpdate(account.getScore());
@@ -83,11 +91,10 @@ GameServer.prototype = {
         actor.on("landed", function() {
             client.sendFlash("black");
         });
-
+        
         client.on("receivedCommand", function(command) {
             var zoneId  = actor.getZoneId();
-
-            if (zoneId) {
+            if (zoneId !== undefined) {
                 var zone = world.getZone(zoneId);
 
                 if (command == "n" || command == "s" || command == "e" || command == "w") {
@@ -107,17 +114,19 @@ GameServer.prototype = {
             world.broadcastChat(account.getUsername(), text);
         });
     },
-
-    // Removed the cookie-based fetching of the session key because the Handshake is really
-    // the best way to get the session ID cookie. It works for everything, period.
     
-    getInfo: function() {
+    bindEditorEvents: function(client){
+        var account = client.getAccount(),
+            world   = this._world,
+            zone    = world.getZone(account.getIslandZoneId());
+        console.log("INIT EDITOR SESSION FOR USER " + account.getUsername());
+        client.sendZoneData(zone);
+        // client.sendZoneState(world.composeZoneStateFor(actor, zone.getStateAttributes()));
+    },
+
+    serverInfo: function() {
         return {
             revision: Defs.GIT_REVISION
         };
-    },
-    
-    onSuccessfulHandshake: function(client) {
-        client.sendMessage("ServerInfo", this.getInfo());
     }
 };

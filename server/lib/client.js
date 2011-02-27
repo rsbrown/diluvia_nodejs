@@ -7,17 +7,32 @@ var Client = module.exports = function(conn) {
     events.EventEmitter.call(this);
     
     this._conn          = conn;
+    this._account       = null;
     this._handshake     = false;
     this._startTime     = new Date();
 };
 
 _.extend(Client.prototype, events.EventEmitter.prototype, {
+    setAccount: function(acct) {
+        this._account = acct;
+    },
+
+    getAccount: function() {
+        return this._account;
+    },
+    
     onMessage: function(msg) {
         if (msg) {
             // console.log("MESSAGE: " + JSON.stringify(msg));
             
             if (this._handshake) {
-                if (msg.type == "Command") {
+                if (msg.type == "StartGame") {
+                    this.emit("startGame");
+                }
+                else if (msg.type == "InitWorldView") {
+                    this.emit("initWorldView");
+                }
+                else if (msg.type == "Command") {
                     this.emit("receivedCommand", msg.command);
                 }
                 else if (msg.type == "Chat") {
@@ -32,8 +47,9 @@ _.extend(Client.prototype, events.EventEmitter.prototype, {
         }
     },
 
-    completeHandshake: function() {
+    completeHandshake: function(serverInfo) {
         this._handshake = true;
+        this.sendMessage("CompleteHandshake", serverInfo);
     },
     
     onDisconnect: function() {

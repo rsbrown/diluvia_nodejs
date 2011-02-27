@@ -10,10 +10,11 @@ var Diluvia = {
     }
 };
 
-var DiluviaController = function(server, options) {
+var DiluviaController = function(options) {
     var self                = this;
     
-    this._protocol          = new Protocol(this, server, options);
+    this._protocol          = new Protocol(this, options.socket_host, options.socket_params);
+    this._connectCallback   = options.on_connect;
     this._keyboard          = new Keyboard(this);
     this._pointer           = new Pointer(this);
     this._canvas            = new Canvas(this, document.getElementById(Diluvia.CANVAS_ID));
@@ -61,7 +62,6 @@ DiluviaController.prototype = {
                 self    = this;
         
             image.src = Diluvia.IMAGE_BASE_PATH + path;
-            console.log("here: " + image.src);
         
             this._preload.push(path);
             this._imageCache[path] = image;
@@ -114,7 +114,15 @@ DiluviaController.prototype = {
     repaintCanvas: function() {
         this._canvas.paint(this._protocol.getZoneData(), this._currentZoneState);
     },
-        
+
+    initWorldView: function() {
+        this._protocol.send({ type: "InitWorldView" });
+    },
+    
+    startPlaying: function() {
+        this._protocol.send({ type: "StartGame" });
+    },
+    
     commandStart: function(cmd) {
         this._protocol.send({ "type": "CommandStart", "command": cmd });
     },
@@ -165,8 +173,6 @@ DiluviaController.prototype = {
     },
     
     flash: function(color) {
-        console.log("FLASHING " + color);
-        
         var flashDiv = $("<div></div>");
         
         flashDiv.css({
@@ -188,13 +194,15 @@ DiluviaController.prototype = {
         });
     },
     
-    setServerInfo: function(serverInfo) { 
+    completeHandshake: function(serverInfo) { 
         this._serverInfo = serverInfo;
     
         if (serverInfo.revision) {
             this._infoElement.html("Diluvia Server Revision " + serverInfo.revision);
         }
+        this._connectCallback.call(this);
     },
+    
     getServerInfo: function(serverInfo) { return this._serverInfo; },
     
     setScore: function(score) {

@@ -27,6 +27,15 @@ var Routes = module.exports = {
       }
     },
 
+    '/goto/:zoneid': {
+      get: {
+        middleware: ["loadUserSession"],
+        exec: function(req, res){
+        req.session.selectedZone = req.params.zoneid;
+        res.redirect("/play");
+      }}
+    },
+
     '/play': {
       get: {
         middleware: ["loadUserSession"],
@@ -37,6 +46,7 @@ var Routes = module.exports = {
             locals: { 
                 sessionId:  req.session.id,
                 play_music: req.session.isMusicOn,
+                selected_zone: req.session.selectedZone,
                 flash:      req.flash(),
                 username:   req.session.username
             }
@@ -132,6 +142,7 @@ var Routes = module.exports = {
                 self.getZones(function(zoneList) {
                     res.render('editor', {
                         locals: {
+                            sessionId:  req.session.id,
                             zones:        zoneList,
                             username:     req.session.username,
                             flash:        req.flash()

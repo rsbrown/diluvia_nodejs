@@ -31,7 +31,7 @@ var World = module.exports = function() {
     setInterval(_(this._onSlowInterval).bind(this), Defs.WORLD_SLOW_INTERVAL);
 };
 
-World.DEFAULT_ZONE_ID   = "zones:0";
+World.DEFAULT_ZONE_ID   = "0";
 
 _.extend(World.prototype, events.EventEmitter.prototype, {
     setDefaultZone: function(zone) {
@@ -308,14 +308,13 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         });
         
         client.on("disconnect", function() {
-            world.broadcastMessage(Defs.CHAT_SYSTEM, account.getUsername() + " disconnected.");            
+            world.broadcastMessage(Defs.CHAT_SYSTEM, account.getUsername() + " disconnected.");
             account.save();
             world.accountRemove(account);
         });
         
         var zone = world.getZone(account.getPlayer().getZoneId());
         world.accountSpawn(account, zone, account.getPlayer().getTileIndex());
-        
         client.sendChat(Defs.CHAT_ALERT, "Find the skull to become the assassin!");
     },
     
@@ -590,9 +589,9 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         }
     },
     
-    createZoneFromConfig: function(conf) {
-        var zone = Zone.createFromConfig(conf);
-        this.setZone(conf.zoneId, zone);
+    createZoneFromConfig: function(zoneData) {
+        console.log(zoneData.id);
+        this.setZone(zoneData.id, Zone.createFromConfig(zoneData.config));
     },
     
     broadcastMessage: function(color, text) {
@@ -611,17 +610,23 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         var world   = this,
             fence   = new Fence(callback);
         
-        fs.readdir("zones", function(err, files) {
-            if (err) {
-                console.log("Could not find zone config directory!");
+        // fs.readdir("zones", function(err, files) {
+        //     if (err) {
+        //         console.log("Could not find zone config directory!");
+        //     }
+        //     else {
+        //         _(files).each(function(filename) {
+        //             fs.readFile("zones/" + filename, fence.tap(function(err, data) {
+        //                 world.createZoneFromConfig(JSON.parse(data));
+        //             }));
+        //         });
+        //     }
+        // });
+        
+        Zone.findAll(fence.tap(function(zones){
+            for (zid in zones) {
+                world.createZoneFromConfig(zones[zid]);
             }
-            else {
-                _(files).each(function(filename) {
-                    fs.readFile("zones/" + filename, fence.tap(function(err, data) {
-                        world.createZoneFromConfig(JSON.parse(data));
-                    }));
-                });
-            }
-        });
+        }));
     }
 });

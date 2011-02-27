@@ -20,7 +20,6 @@ var Zone = module.exports = function(options) {
 
     this._id                = options["id"];
     this._world             = null;
-    this._zoneId            = options["zoneId"];
     this._board             = new Board();
     this._tiles             = {};
     this._dimensions        = [options.width, options.height, Defs.LAYER_COUNT];
@@ -73,7 +72,10 @@ Zone.createNewIsland = function(account, callback) {
     var redis = Persistence.getRedis();
     redis.incr( 'pkid' , function( err, newZoneId ) {
         fs.readFile("zones/default_island.js", function(err, data) {
-            var zone = Zone.createFromConfig(JSON.parse(data));
+            var conf = JSON.parse(data);
+            var zone = new Zone({width: conf.dimensions[0] || 64, height: conf.dimensions[1] || 64});
+            zone.setConfig(conf);
+            zone.setId(newZoneId);
             zone.save(function(){
                 account.setIslandZoneId(newZoneId);
                 account.save(function(){ callback(account); });
@@ -134,12 +136,28 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
     serialize: function() {
         return JSON.stringify({
             "id"         : this._id,
-            "config"     : this.getRenderAttributes()
+            "config"     : this.getConfig()
         });
+    },
+    
+    setConfig: function(conf) {
+        this._config = conf;
+    },
+    
+    getConfig: function() {
+      return this._config;
     },
 
     getNextTileId: function() {
         return this._tileUid++;
+    },
+
+    setId: function(id) {
+        this._id = id;
+    },
+
+    getId: function() {
+        return this._id;
     },
     
     getZoneId: function() {
@@ -330,8 +348,6 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
     },
     
     command: function(actor, command) {
-        var dir;
-        
         if (command == "n" || command == "s" || command == "e" || command == "w") {
             this.move(actor, command);
         }

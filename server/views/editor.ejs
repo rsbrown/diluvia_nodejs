@@ -1,8 +1,13 @@
+<script type="text/javascript" charset="utf-8">
+    DILUVIA_SESSION = "<%= sessionId %>";
+    PLAY_MUSIC = false;
+</script>
+
 <div id="editor_dashboard">
   <div>
     <select>
       <% for (zid in zones) { %>
-        <option value="1"><%=zones[zid].zoneId%></option>
+        <option value="1"><%=zones[zid].id%></option>
       <%}%>
     </select>
     <a style="color:#DDD;" href="/zones/new">Add new zone</a>
@@ -15,6 +20,9 @@
          <label for="zone[name]">Name:</label><input type="text" name="zone[name]" />, 
          <label for="zone[width]">W</label><input type="text" name="zone[width]" size="4"/> x <label for="zone[height]">H</label><input type="text" name="zone[name]" size="4"/>
       </p>
+      <textarea rows="40" cols="150" name="zone[config]">
+      <%=JSON.stringify(zones[zid].config)%>
+      </textarea>
     </form>
   </div>
 </div>
@@ -34,7 +42,11 @@
     }
     
     $(document).ready(function() {
-        var diluvia = new DiluviaEditor();
+        var diluvia = new DiluviaController({
+          socket_host: "<%=SOCKET_IO_HOSTNAME%>", 
+          socket_params: <%=SOCKET_IO_OPTIONS%>,
+          on_connect: function(){this.initWorldView();}
+        });
         size_element($('#viewport_container'));
         size_element($('#main'));
         

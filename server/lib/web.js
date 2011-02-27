@@ -66,7 +66,7 @@ Web.prototype = {
         Account.findAll(function(accounts) {
             for (i in accounts) {
                 var islandId = accounts[i].getIslandZoneId();
-                if (islandId) {
+                if (islandId !== undefined) {
                     islands.push(accounts[i]);
                 }
             }
