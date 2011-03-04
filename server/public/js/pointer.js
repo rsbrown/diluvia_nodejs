@@ -1,6 +1,5 @@
-var Pointer = function(controller) {
-    var keysDown   = {},
-        timeout,
+var GamePointer = function(controller) {
+    var timeout,
         self       = this;
     this._mouseX   = null;
     this._mouseY   = null;
@@ -47,5 +46,20 @@ var Pointer = function(controller) {
     $(document).mouseup(function(){
         clearInterval(timeout);
         return false;
+    });
+};
+
+
+var EditPointer = function(controller) {
+    var self       = this;
+    
+    $("canvas").click(function(ev) {
+        ev.preventDefault();
+        alert('do something');
+        return false;
+    });
+    
+    $("canvas").mousemove(function(ev){
+        controller.highlightTile(ev.pageX, ev.pageY);
     });
 };

@@ -52,7 +52,7 @@ _.extend(BoardLayer.prototype, events.EventEmitter.prototype, {
         }
     },
     
-    getRenderAttributes: function() {    
+    getRenderAttributes: function() {
         return this._tiles;
     }
 });

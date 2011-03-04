@@ -47,6 +47,7 @@ Protocol.prototype = {
     },
     
     send: function(msg) {
+        console.log(msg.type);
         this._socket.send(msg);
     },
     
@@ -69,7 +70,7 @@ Protocol.prototype = {
         var self = this;
         
         if (msg) {
-            // console.log(msg.type);
+            console.log(msg.type);
             
             if (msg.type == "ZoneData") {
                 var zoneData = this._zoneData = msg.attrs,

@@ -183,9 +183,14 @@ a.logout {
 #header-links a {
     color: #999;
     text-decoration: none;
-    border-bottom: 1px dotted #ba0000
+    border-bottom: 1px dotted #AAAAAA;
 }
 
-#header-links:hover {
+#header-links a:hover {
     text-decoration: none;
+    border-bottom: 1px dotted #ba0000;
+}
+
+#editor_dashboard {
+    background-color: #AAAAAA;
 }

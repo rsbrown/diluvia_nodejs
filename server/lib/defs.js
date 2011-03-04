@@ -136,7 +136,11 @@ Defs.Tiles = {
 	TREASURE:           { class: "GoalTile",    image: "sprites.png:5,5" },
 
 	SKULL:              { class: "GoalTile",    image: "sprites.png:5,5", goalType: "skull" },
-	SWORD:              { class: "GoalTile",    image: "sprites.png:3,5", goalType: "sword" }
+	SWORD:              { class: "GoalTile",    image: "sprites.png:3,5", goalType: "sword" },
+	
+	EDITOR_LOOK:        { class: "ActorTile",   image: "sprites.png:1,15" },
+	EDITOR_BRUSH:       { class: "ActorTile",   image: "sprites.png:0,15" },
+	EDITOR_DESTRUCT:    { class: "ActorTile",   image: "sprites.png:2,15" }
 };
 
 Defs.SPELLS = {

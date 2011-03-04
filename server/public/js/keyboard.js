@@ -8,7 +8,7 @@ var KEYCODE_MOVE_COMMANDS = {
     9:  "scoreboard"
 };
 
-var Keyboard = function(controller) {
+var GameKeyboard = function(controller) {
     var keysDown    = {},
         chatting    = false,
         sbDown      = false;
@@ -37,7 +37,7 @@ var Keyboard = function(controller) {
     $(window).keyup(function(ev) {
         var kc  = ev.keyCode,
             cmd = KEYCODE_MOVE_COMMANDS[kc];
-        
+        keysDown[kc] = false;
         if (cmd && !chatting) {
             if (cmd == "scoreboard") {
                 controller.hideScoreboard();
@@ -60,6 +60,42 @@ var Keyboard = function(controller) {
                     chatting = false;
                 }
                 
+                ev.preventDefault();
+            }
+        }
+    });
+};
+
+
+var EditKeyboard = function(controller) {
+    var keysDown    = {},
+        chatting    = false,
+        sbDown      = false;
+
+    $(window).keydown(function(ev) {
+        var kc  = ev.keyCode,
+            cmd = KEYCODE_MOVE_COMMANDS[kc];
+        keysDown[kc] = true;
+        if (cmd) {
+            controller.moveCanvas(cmd);
+            ev.preventDefault();
+        }
+    });
+    
+    
+    $(window).keyup(function(ev) {
+        var kc  = ev.keyCode,
+            cmd = KEYCODE_MOVE_COMMANDS[kc];
+        keysDown[kc] = false;
+    });
+
+    $(window).keypress(function(ev) {
+        var kc = ev.keyCode,
+            cmd = KEYCODE_MOVE_COMMANDS[kc];
+        
+        if (!cmd) {
+            if (kc == 13) { // enter
+                alert('SHOW EDITOR TOOLBAR');
                 ev.preventDefault();
             }
         }

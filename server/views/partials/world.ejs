@@ -1,7 +1,14 @@
 <script type="text/javascript" charset="utf-8">
     DILUVIA_SESSION = "<%= sessionId %>";
     PLAY_MUSIC = <%=play_music%>;
+    if (!window.console) {
+      window.console = {log: function() {}};
+    }
+    var $g = {};
+    $g.resourceBaseHref = '';
+    $g.ajaxBaseHref = './json/';
 </script>
+
 
 <div id="loading"><img src="/images/icons/loading_b.gif" /></div>
 <div id="connection-lost">Connection lost. Retrying... <img src='/images/icons/loading_w.gif' /></div>
@@ -20,12 +27,30 @@
     }
     
     $(document).ready(function() {
-        var diluvia = new DiluviaController({
-          socket_host: "<%=SOCKET_IO_HOSTNAME%>", 
-          socket_params: <%=SOCKET_IO_OPTIONS%>,
-          on_connect: function(){this.startPlaying();}
-        });
+        var gamejs = require('gamejs');
+        gamejs.preload(
+            ['/images/sprites.png',
+             '/images/background_island.png']
+        );
+        gamejs.ready(function() {
+            var diluvia = new DiluviaController(gamejs, {
+                mode:          "play",
+                socket_host:   "<%=SOCKET_IO_HOSTNAME%>", 
+                socket_params: <%=SOCKET_IO_OPTIONS%>,
+                on_connect:    function(){this.startPlaying();}
+            });
         
+            size_element($('#viewport_container'));
+            size_element($('#main'));
+        
+            $(window).resize(function() {
+                size_element($('#viewport_container'));
+                size_element($('#main'));
+                diluvia.repaintCanvas();
+            });
+        
+        });
+            
         var $helpDialog = $('<div></div>')
           .html(
             '<div>rules of the game:<br/><br/> \
@@ -48,15 +73,6 @@
           autoOpen: false,
           width: 500,
           title: 'Diluvia'
-        });
-        
-        size_element($('#viewport_container'));
-        size_element($('#main'));
-        
-        $(window).resize(function() {
-          size_element($('#viewport_container'));
-          size_element($('#main'));
-          diluvia.repaintCanvas();
         });
         
         $("div#welcome").html(

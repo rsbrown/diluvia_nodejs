@@ -7,17 +7,23 @@ var Diluvia = {
     
     rowColToPixels: function(row, col) {
         return [row * Diluvia.TILE_DIMS[0], col * Diluvia.TILE_DIMS[1]];
+    },
+    
+    pixelsToRowCol: function(locX, locY) {
+        return [Diluvia.TILE_DIMS[0] / locX, Diluvia.TILE_DIMS[1] / locY];
     }
 };
 
-var DiluviaController = function(options) {
+var DiluviaController = function(gamejs, options) {
     var self                = this;
     
+    this._mode              = options.mode;
     this._protocol          = new Protocol(this, options.socket_host, options.socket_params);
     this._connectCallback   = options.on_connect;
-    this._keyboard          = new Keyboard(this);
-    this._pointer           = new Pointer(this);
-    this._canvas            = new Canvas(this, document.getElementById(Diluvia.CANVAS_ID));
+    this._keyboard          = this.generateKeyboard();
+    this._pointer           = this.generatePointer();
+    // this._canvas            = new Canvas(this, document.getElementById(Diluvia.CANVAS_ID));
+    this._canvas            = new Canvas(this, gamejs);
     this._sound             = new Sound();
     this._preload           = [];
     this._imageCache        = {};
@@ -42,6 +48,8 @@ var DiluviaController = function(options) {
     
     this._scoreTable.append("<thead><th>User</th><th>Score</th><tbody></tbody>");
     
+    this._canvas.preloadImage("glow.png");
+    
     $(document).ready(function() {
         $(document.body).append(self._chatBoxElement); 
         $(document.body).append(self._scoreContainer);
@@ -49,7 +57,7 @@ var DiluviaController = function(options) {
         
         self._scoreBoard.hide();
         
-        $(document.getElementById(Diluvia.CANVAS_ID).parentNode).append(self._infoElement);
+        $("body").append(self._infoElement);
         self._chatBoxElement.hide();
         $(document.body).css({ overflow: "hidden" });
     });
@@ -57,6 +65,7 @@ var DiluviaController = function(options) {
 
 DiluviaController.prototype = {
     preloadImage: function(path) {
+        this._canvas.preloadImage(path);    
         if (this._preload.indexOf(path) == -1 && !this._imageCache[path]) {
             var image   = new Image(),
                 self    = this;
@@ -73,6 +82,22 @@ DiluviaController.prototype = {
                     self._preload.splice(idx, 1);
                 }
             });
+        }
+    },
+    
+    generateKeyboard: function() {
+        if (this._mode == "edit") {
+            return new EditKeyboard(this);
+        } else {
+            return new GameKeyboard(this);
+        }
+    },
+    
+    generatePointer: function() {
+        if (this._mode == "edit") {
+            return new EditPointer(this);
+        } else {
+            return new GamePointer(this);
         }
     },
     
@@ -109,6 +134,21 @@ DiluviaController.prototype = {
           $("div#loading").hide();
           clearInterval(this._laodingInterval, this._currentZoneState);
       }
+    },
+    
+    moveCanvas: function(cmd) {
+        var zoneWidth = this._protocol.getZoneData().dimensions[0];
+        switch (cmd) {
+          case "n":  this._currentZoneState.playerIdx -= zoneWidth; break;
+          case "e":  this._currentZoneState.playerIdx += 1; break;
+          case "s":  this._currentZoneState.playerIdx += zoneWidth; break;
+          case "w":  this._currentZoneState.playerIdx -= 1; break;
+        }
+        this._stateQueue.push(this._currentZoneState);
+    },
+    
+    highlightTile: function(locX, locY) {
+        this._canvas.highlightTile(locX, locY);
     },
     
     repaintCanvas: function() {

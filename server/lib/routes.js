@@ -73,7 +73,6 @@ var Routes = module.exports = {
               var self = this;
               req.authenticate(['facebook'], function(error, authenticated) { 
                   if(authenticated ) {
-                      console.log("here1");
                       self.getAccountFromFacebookAuth(req.getAuthDetails(), function(account){
                           if (account) {
                               req.session.accountId = account.getId();

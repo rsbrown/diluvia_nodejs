@@ -20,15 +20,12 @@
          <label for="zone[name]">Name:</label><input type="text" name="zone[name]" />, 
          <label for="zone[width]">W</label><input type="text" name="zone[width]" size="4"/> x <label for="zone[height]">H</label><input type="text" name="zone[name]" size="4"/>
       </p>
-      <textarea rows="40" cols="150" name="zone[config]">
-      <%=JSON.stringify(zones[zid].config)%>
-      </textarea>
     </form>
   </div>
 </div>
 
 <div id="viewport_container">
-    <canvas id="viewport" height="4096" width="4096"></canvas>
+    <canvas id="viewport"></canvas>
 </div>
 
 <script type="text/javascript" charset="utf-8">
@@ -42,18 +39,40 @@
     }
     
     $(document).ready(function() {
-        var diluvia = new DiluviaController({
-          socket_host: "<%=SOCKET_IO_HOSTNAME%>", 
-          socket_params: <%=SOCKET_IO_OPTIONS%>,
-          on_connect: function(){this.initWorldView();}
+        Crafty.init(50);
+        Crafty.canvas();
+        Crafty.load(
+            ['images/sprites.png',
+             'images/glow.png',
+             'images/background_island.png'], 
+            function() {
+                Crafty.sprite(64, "images/sprites.png", {
+                    ship: [0,0],
+                    big: [1,0],
+                    medium: [2,0],
+                    small: [3,0]
+                });
+                
+                Crafty.scene("main");
+             }
+        );
+        gamejs.ready(function() {
+            var diluvia = new DiluviaController(gamejs, {
+              mode:          "edit",
+              socket_host:   "<%=SOCKET_IO_HOSTNAME%>", 
+              socket_params: <%=SOCKET_IO_OPTIONS%>,
+              on_connect:    function(){this.initWorldView();}
+            });
+            
+            size_element($('#viewport_container'));
+            size_element($('#main'));
+            
+            $(window).resize(function() {
+                size_element($('#viewport_container'));
+                size_element($('#main'));
+                diluvia.repaintCanvas();
+            });
+            
         });
-        size_element($('#viewport_container'));
-        size_element($('#main'));
-        
-        $(window).resize(function() {
-          size_element($('#viewport_container'));
-          size_element($('#main'));
-          diluvia.repaintCanvas();
-        });        
     });
 </script>

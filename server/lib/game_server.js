@@ -2,6 +2,7 @@ var io          = require("socket.io"),
     _           = require("underscore"),
     Defs        = require("defs"),
     Client      = require("client"),
+    Actor       = require("actor"),
     World       = require("world"),
     Account     = require("account"),
     PortalTile  = require("portal_tile"),
@@ -121,7 +122,13 @@ GameServer.prototype = {
             zone    = world.getZone(account.getIslandZoneId());
         console.log("INIT EDITOR SESSION FOR USER " + account.getUsername());
         client.sendZoneData(zone);
-        // client.sendZoneState(world.composeZoneStateFor(actor, zone.getStateAttributes()));
+        var tileIdx = zone.getDefaultSpawnPointIndex();
+        var state = {
+            "playerIdx":    tileIdx,
+            "layers":       zone.getStateAttributes()
+        };
+        // console.log(JSON.stringify(state));
+        client.sendZoneState(state);
     },
 
     serverInfo: function() {
