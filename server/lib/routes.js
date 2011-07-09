@@ -9,7 +9,7 @@ var Routes = module.exports = {
                     locals: {
                         username:     req.session.username,
                         play_music:   req.session.isMusicOn,
-                        my_island:    req.session.myIslandId,  
+                        account:      req.session.account,
                         islands:      islandList,
                         flash:        req.flash()
                     }
@@ -40,15 +40,14 @@ var Routes = module.exports = {
       get: {
         middleware: ["loadUserSession"],
         exec: function(req, res){
-        // console.log(JSON.stringify(req.session));
         req.session["store_location"] = '/play';
         res.render('world', {
             locals: { 
-                sessionId:  req.session.id,
-                play_music: req.session.isMusicOn,
+                sessionId:     req.session.id,
+                play_music:    req.session.isMusicOn,
                 selected_zone: req.session.selectedZone,
-                flash:      req.flash(),
-                username:   req.session.username
+                flash:         req.flash(),
+                username:      req.session.username
             }
         });
       }}
@@ -73,7 +72,6 @@ var Routes = module.exports = {
               var self = this;
               req.authenticate(['facebook'], function(error, authenticated) { 
                   if(authenticated ) {
-                      console.log("here1");
                       self.getAccountFromFacebookAuth(req.getAuthDetails(), function(account){
                           if (account) {
                               req.session.accountId = account.getId();
@@ -111,8 +109,12 @@ var Routes = module.exports = {
             middleware: ["loadUserSession"],
             exec: function(req, res) {
                 if (req.session.account) {
-                    this.startNewIsland(req, res, function(){
-                        res.redirect("/edit");
+                    var world = this._gameServer.getWorld();
+                    this.startNewIsland(req, res, function(newZone){
+                      console.log("here1:" + newZone);
+                      console.log("here2:" + newZone.getId());
+                      world.setZone(newZone.getId(), newZone);
+                      res.redirect("/edit");
                     });
                 } else {
                     req.flash("error", "You must login to build your island.");
@@ -139,13 +141,14 @@ var Routes = module.exports = {
             var self = this;
             req.session["store_location"] = '/edit';
             if (req.session.account) {
-                self.getZones(function(zoneList) {
+                self.getEditableZones(req.session.account, function(zoneList) {
                     res.render('editor', {
                         locals: {
-                            sessionId:  req.session.id,
-                            zones:        zoneList,
-                            username:     req.session.username,
-                            flash:        req.flash()
+                            sessionId:      req.session.id,
+                            editingZoneId:  req.session.account.getEditorZoneId(),
+                            zones:          zoneList,
+                            username:       req.session.username,
+                            flash:          req.flash()
                         }
                     });
                 });

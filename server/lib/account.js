@@ -7,14 +7,15 @@ var START_HITPOINTS = 100;
 
 var Account = module.exports = function(attributes) {
     events.EventEmitter.call(this);
-    this._id             = attributes["id"];
-    this._username       = attributes["username"];
-    this._islandZoneId   = attributes["islandZoneId"];
-    this._musicOn        = attributes["musicOn"];
-    this._score          = attributes["score"] || 0;
-    this._client         = null;
-    this._player         = new Player(attributes);
-};
+    this._id                    = attributes["id"];
+    this._username              = attributes["username"];
+    this._islandZoneId          = attributes["islandZoneId"];
+    this._editorZoneId          = attributes["editorZoneId"] ? attributes["editorZoneId"] : this._islandZoneId;
+    this._musicOn               = attributes["musicOn"];
+    this._score                 = attributes["score"] || 0;
+    this._client                = null;
+    this._player                = new Player(attributes);
+};                          
 
 Account.initFromSession = function(sessionId, callback) {
     var redis = Persistence.getRedis();
@@ -98,14 +99,15 @@ _.extend(Account.prototype, events.EventEmitter.prototype, {
     serialize: function() {
         var player = this.getPlayer();
         return JSON.stringify({
-            "id"            : this._id,
-            "musicOn"       : this._musicOn,
-            "username"      : this._username,
-            "islandZoneId"  : this._islandZoneId,
-            "zoneIdx"       : player ? player.getZoneId() : null,
-            "tileIdx"       : player ? player.getTileIndex() : null,
-            "orientation"   : player ? player.getOrientation() : null,
-            "score"         : this._score
+            "id"                  : this._id,
+            "musicOn"             : this._musicOn,
+            "username"            : this._username,
+            "islandZoneId"        : this._islandZoneId,
+            "editorZoneId"        : this._editorZoneId,
+            "zoneIdx"             : player ? player.getZoneId() : null,
+            "tileIdx"             : player ? player.getTileIndex() : null,
+            "orientation"         : player ? player.getOrientation() : null,
+            "score"               : this._score
         });
     },
 
@@ -137,6 +139,26 @@ _.extend(Account.prototype, events.EventEmitter.prototype, {
         this._islandZoneId = id;
     },
     
+    getEditorZoneId: function() {
+        return this._editorZoneId;
+    },
+    
+    setEditorZoneId: function(id) {
+        this._editorZoneId = id;
+    },
+
+    getEditorViewTileIndex: function() {
+        return this._editorViewTileIndex;
+    },
+    
+    setEditorViewTileIndex: function(idx) {
+        this._editorViewTileIndex = idx;
+    },
+    
+    getCenterViewTileIndex: function(idx) {
+        return this._editorViewTileIndex ? this._editorViewTileIndex : this.getPlayer().getTileIndex();
+    },
+
     getUsername: function() {
         return this._username;
     },

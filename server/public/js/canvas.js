@@ -15,11 +15,11 @@ var Canvas = function(controller, element) {
 
 Canvas.prototype = {
     paint: function(zoneData, zoneState) {        
-        var zoneDims    = zoneData.dimensions,
-            playerIdx   = zoneState.playerIdx,
-            layerCount  = zoneDims[2],
-            tileWidth   = Diluvia.TILE_DIMS[0],
-            tileHeight  = Diluvia.TILE_DIMS[1],
+        var zoneDims        = zoneData.dimensions,
+            viewCenterIdx   = zoneState.viewCenterIdx,
+            layerCount      = zoneDims[2],
+            tileWidth       = Diluvia.TILE_DIMS[0],
+            tileHeight      = Diluvia.TILE_DIMS[1],
             bgImg;
                     
         if (zoneData.background) {
@@ -65,7 +65,7 @@ Canvas.prototype = {
                     destPixelCoords[0],
                     destPixelCoords[1],
                     Diluvia.TILE_DIMS[0],
-                    Diluvia.TILE_DIMS[1]                        
+                    Diluvia.TILE_DIMS[1]
                 );
             }
                     
@@ -103,11 +103,10 @@ Canvas.prototype = {
             }
         }
         
-        
         var vpCX            = this._viewport.width() / 2,
             vpCY            = this._viewport.height() / 2,
-            actorCanvasX    = ((playerIdx % zoneDims[0]) * tileWidth) + (tileWidth / 2),
-            actorCanvasY    = (Math.floor(playerIdx / zoneDims[0]) * tileHeight) + (tileHeight / 2),
+            actorCanvasX    = ((viewCenterIdx % zoneDims[0]) * tileWidth) + (tileWidth / 2),
+            actorCanvasY    = (Math.floor(viewCenterIdx / zoneDims[0]) * tileHeight) + (tileHeight / 2),
             canvasLeft      = vpCX - actorCanvasX,
             canvasTop       = vpCY - actorCanvasY;
 

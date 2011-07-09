@@ -58,6 +58,6 @@ app.set('view engine', 'ejs');
 
 var gameServer     = new GameServer(app),
     authController = new AuthController(app),
-    web            = new Web(app);
+    web            = new Web(app, gameServer);
 
 app.listen(3000);

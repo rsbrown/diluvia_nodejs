@@ -15,8 +15,7 @@ _.extend(BoardLayer.prototype, events.EventEmitter.prototype, {
         }
         
         this._tiles[tileIndex].push(tileData);
-
-        this.emit("tileChange", tileIndex, this._tiles[tileIndex]);        
+        this.emit("tileChange", tileIndex, this._tiles[tileIndex]);
     },
 
     popTile: function(tileIndex, tileData) {
@@ -35,7 +34,7 @@ _.extend(BoardLayer.prototype, events.EventEmitter.prototype, {
             }
         }
 
-        if (tiles.length == 0) {
+        if (tiles && tiles.length == 0) {
             delete this._tiles[tileIndex];
         }
         

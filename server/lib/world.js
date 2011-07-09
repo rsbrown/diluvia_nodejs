@@ -39,10 +39,14 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
     },
     
     getDefaultZone: function() {
-        return this._zones[World.DEFAULT_ZONE_ID];
+        // return this._zones[World.DEFAULT_ZONE_ID];
+        for (zoneId in this._zones) {
+          return this._zones[zoneId];
+        }
     },
     
     setZone: function(zoneId, zone) {
+      console.log("setting zone " + zoneId + " to " + zone);
         if (zone) {
             zone._zoneId        = zoneId;
             this._zones[zoneId] = zone;
@@ -54,7 +58,7 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
     },
     
     getZone: function(zoneId) {
-        return this._zones[zoneId];
+      return this._zones[zoneId];
     },
     
     _getAccountFromPlayer: function(player) {
@@ -131,7 +135,7 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
                         
                 _(this.getAccountsForZone(zone)).each(function(account) {
                     account.getClient().sendZoneState(
-                        world.composeZoneStateFor(account.getPlayer(), state)
+                        world.composeZoneStateFor(account, state)
                     )
                 });
             }
@@ -153,10 +157,9 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         zone.on("sound", function(sound) {
             self._onZoneSound(zone, sound);
         });
-        
+
         board.on("layerTileChange", function(layerIndex, tileIndex, tiles) {
             var layers = board.getLayers();
-            
             // we push all of them so client gets a full state stack to redraw the tile
             for (var i = 0, len = layers.length; i < len; i++) {
                 self._stateQueue.push([zone, i, tileIndex, layers[i].getTiles(tileIndex)]);
@@ -378,10 +381,10 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         zone.removeActor(player);
     },
     
-    composeZoneStateFor: function(actor, zoneState) {
+    composeZoneStateFor: function(account, zoneState) {
         return {
-            "playerIdx":    actor.getTileIndex(),
-            "layers":       zoneState
+            "viewCenterIdx":    account.getCenterViewTileIndex(),
+            "layers":           zoneState
         };
     },
     
@@ -589,9 +592,8 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         }
     },
     
-    createZoneFromConfig: function(zoneData) {
-        console.log(zoneData.id);
-        this.setZone(zoneData.id, Zone.createFromConfig(zoneData.config));
+    createZoneFromConfig: function(zoneId, zoneConfig) {
+        this.setZone(zoneId, Zone.createFromConfig(zoneConfig));
     },
     
     broadcastMessage: function(color, text) {
@@ -625,7 +627,7 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         
         Zone.findAll(fence.tap(function(zones){
             for (zid in zones) {
-                world.createZoneFromConfig(zones[zid]);
+                world.createZoneFromConfig(zones[zid].id, zones[zid].config);
             }
         }));
     }

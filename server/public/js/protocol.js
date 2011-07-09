@@ -93,7 +93,7 @@ Protocol.prototype = {
                 this._controller.updatedZoneData(zoneData);
             }
             else if (msg.type == "ZoneState")  {
-                this._controller.updatedZoneState(msg.attrs);
+                this._controller.updateZoneState(msg.attrs);
             }
             else if (msg.type == "MoveFailed") {
                 self._controller.getSound().playAudio("bump");

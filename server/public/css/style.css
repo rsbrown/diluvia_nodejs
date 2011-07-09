@@ -189,3 +189,7 @@ a.logout {
 #header-links:hover {
     text-decoration: none;
 }
+
+.editzone {
+  color: #FFFFFF;
+}

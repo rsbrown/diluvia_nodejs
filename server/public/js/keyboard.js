@@ -9,59 +9,79 @@ var KEYCODE_MOVE_COMMANDS = {
 };
 
 var Keyboard = function(controller) {
-    var keysDown    = {},
-        chatting    = false,
-        sbDown      = false;
-
-    $(window).keydown(function(ev) {
-        var kc  = ev.keyCode,
-            cmd = KEYCODE_MOVE_COMMANDS[kc];
-    
-        if (cmd && !chatting) {
-            keysDown[kc] = true;
-                
-            if (cmd == "scoreboard") {
-                if (!sbDown) {
-                    sbDown = true;
-                    controller.command(cmd);
-                }
-            }
-            else {
-                controller.command(cmd);
-            }
-            
-            ev.preventDefault();
-        }
-    });
-    
-    $(window).keyup(function(ev) {
-        var kc  = ev.keyCode,
-            cmd = KEYCODE_MOVE_COMMANDS[kc];
-        
-        if (cmd && !chatting) {
-            if (cmd == "scoreboard") {
-                controller.hideScoreboard();
-                sbDown = false;
-            }
-        }
-    });
-    
-    $(window).keypress(function(ev) {
-        var kc = ev.keyCode;
-        
-        if (!KEYCODE_MOVE_COMMANDS[kc]) {
-            if (kc == 13) { // enter
-                if (!chatting) {
-                    controller.showChatBox();
-                    chatting = true;
-                }
-                else {
-                    controller.sendChatMessageInChatBox();
-                    chatting = false;
-                }
-                
-                ev.preventDefault();
-            }
-        }
-    });
+  this.keysDown    = {},
+  this.chatting    = false,
+  this.sbDown      = false;
+  this._controller = controller;
+  this[controller.getMode() + "KeyBindings"]();
 };
+
+Keyboard.prototype = {
+    editorKeyBindings: function() {
+      var self = this;
+      $(window).keydown(function(ev) {
+          var kc  = ev.keyCode,
+              cmd = KEYCODE_MOVE_COMMANDS[kc];
+          if (cmd && kc < 65) {
+              self.keysDown[kc] = true;
+              self._controller.command(cmd);
+              ev.preventDefault();
+          }
+      });
+    },
+    
+    worldKeyBindings: function() {
+      var self = this;
+      $(window).keydown(function(ev) {
+          var kc  = ev.keyCode,
+              cmd = KEYCODE_MOVE_COMMANDS[kc];
+
+          if (cmd && !self.chatting) {
+              self.keysDown[kc] = true;
+
+              if (cmd == "scoreboard") {
+                  if (!self.sbDown) {
+                      self.sbDown = true;
+                      self._controller.command(cmd);
+                  }
+              }
+              else {
+                  self._controller.command(cmd);
+              }
+
+              ev.preventDefault();
+          }
+      });
+
+      $(window).keyup(function(ev) {
+          var kc  = ev.keyCode,
+              cmd = KEYCODE_MOVE_COMMANDS[kc];
+
+          if (cmd && !self.chatting) {
+              if (cmd == "scoreboard") {
+                  self._controller.hideScoreboard();
+                  self.sbDown = false;
+              }
+          }
+      });
+
+      $(window).keypress(function(ev) {
+          var kc = ev.keyCode;
+
+          if (!KEYCODE_MOVE_COMMANDS[kc]) {
+              if (kc == 13) { // enter
+                  if (!self.chatting) {
+                      self._controller.showChatBox();
+                      self.chatting = true;
+                  }
+                  else {
+                      self._controller.sendChatMessageInChatBox();
+                      self.chatting = false;
+                  }
+
+                  ev.preventDefault();
+              }
+          }
+      });
+    }
+}

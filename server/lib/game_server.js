@@ -32,7 +32,7 @@ GameServer.prototype = {
         });
 
         client.on("initWorldView", function(sessionId) {
-            server.bindEditorEvents(client);
+            server.loadEditor(client.getAccount());
         });
 
         conn.on("message", function(msg) { client.onMessage(msg); });
@@ -58,6 +58,10 @@ GameServer.prototype = {
         this._world.connectPlayer(account, this, this.bindActorEvents);
     },
     
+    loadEditor: function(account){
+        this.bindEditorEvents(account);
+    },
+    
     bindActorEvents: function(account){
         var world   = this._world,
             client  = account.getClient(),
@@ -68,7 +72,7 @@ GameServer.prototype = {
         world.broadcastMessage(Defs.CHAT_SYSTEM, account.getUsername() + " connected.");
         
         client.sendZoneData(zone);
-        client.sendZoneState(world.composeZoneStateFor(actor, zone.getStateAttributes()));
+        client.sendZoneState(world.composeZoneStateFor(account, zone.getStateAttributes()));
         client.sendScoreUpdate(account.getScore());
 
         account.on("changeScore", function(score) {
@@ -80,7 +84,7 @@ GameServer.prototype = {
             if (zoneId) {
                 var zone = world.getZone(zoneId);
                 client.sendZoneData(zone);
-                client.sendZoneState(world.composeZoneStateFor(actor, zone.getStateAttributes()));
+                client.sendZoneState(world.composeZoneStateFor(account, zone.getStateAttributes()));
             }
         });
         
@@ -115,15 +119,31 @@ GameServer.prototype = {
         });
     },
     
-    bindEditorEvents: function(client){
-        var account = client.getAccount(),
+    bindEditorEvents: function(account){
+        var client  = account.getClient(),
             world   = this._world,
-            zone    = world.getZone(account.getIslandZoneId());
+            zone    = world.getZone(account.getEditorZoneId());
         console.log("INIT EDITOR SESSION FOR USER " + account.getUsername());
+        account.setEditorViewTileIndex(zone.getDefaultSpawnPointIndex());
         client.sendZoneData(zone);
-        // client.sendZoneState(world.composeZoneStateFor(actor, zone.getStateAttributes()));
+        client.sendZoneState(world.composeZoneStateFor(account, zone.getStateAttributes()));
+        
+        client.on("receivedCommand", function(command) {
+            var zoneId  = account.getEditorZoneId();
+            if (zoneId !== undefined) {
+                var zone = world.getZone(zoneId);
+                if (command == "n" || command == "s" || command == "e" || command == "w") {
+                    zone.moveEditor(account, command);
+                    client.sendZoneState(world.composeZoneStateFor(account, zone.getStateAttributes()));
+                }
+            }
+        });
     },
-
+    
+    getWorld: function() {
+      return this._world;
+    },
+    
     serverInfo: function() {
         return {
             revision: Defs.GIT_REVISION

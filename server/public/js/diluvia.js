@@ -13,6 +13,7 @@ var Diluvia = {
 var DiluviaController = function(options) {
     var self                = this;
     
+    this._mode              = options.mode;
     this._protocol          = new Protocol(this, options.socket_host, options.socket_params);
     this._connectCallback   = options.on_connect;
     this._keyboard          = new Keyboard(this);
@@ -80,6 +81,10 @@ DiluviaController.prototype = {
         return this._preload.length != 0;
     },
     
+    getMode: function() {
+      return this._mode;
+    },
+    
     getImage: function(path) {
         return this._imageCache[path];
     },
@@ -92,7 +97,7 @@ DiluviaController.prototype = {
         this._hasRecvData = true;
     },
     
-    updatedZoneState: function(zoneState) {
+    updateZoneState: function(zoneState) {
         this._hasRecvState = true;
         this._stateQueue.push(zoneState);
     },
@@ -107,7 +112,7 @@ DiluviaController.prototype = {
     _onLoadingInterval: function() {
       if (!this.isLoadingImages() && this._hasRecvState) {
           $("div#loading").hide();
-          clearInterval(this._laodingInterval, this._currentZoneState);
+          clearInterval(this._loadingInterval, this._currentZoneState);
       }
     },
     

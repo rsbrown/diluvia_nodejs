@@ -1,10 +1,12 @@
 <div id="content">
   <div class="info">Welcome to Diluvia!</div> 
-  <% if (my_island !== undefined) { %>
+<%  if (account) { %>
+<%    if (account.getIslandZoneId() !== undefined) { %>
     <a href="/edit">Edit your island</a>
-  <% } else { %>
+<%    } else { %>
     <a href="/create_island">Create your own island</a>
-  <% } %>
+<%    } %>
+<%  } %>
   <div id="islands">
     <% for (id in islands) { %>
       <a class="island" href="/goto/<%=islands[id].getIslandZoneId()%>">

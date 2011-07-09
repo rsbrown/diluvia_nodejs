@@ -4,25 +4,28 @@
 </script>
 
 <div id="editor_dashboard">
-  <div>
-    <select>
-      <% for (zid in zones) { %>
-        <option value="1"><%=zones[zid].id%></option>
-      <%}%>
-    </select>
-    <a style="color:#DDD;" href="/zones/new">Add new zone</a>
-  </div>
   <div class="editzone">
     <form action="/zones/save" method="post">
-      <input type="hidden" name="zone[id]" value="<%=zones[zid].zoneId%>"/>
-      <p>
+      <div>
+         <select name="zone[id]">
+            <% var editingZone;%>
+            <% for (zid in zones) { %>
+              <% if (zones[zid].id === editingZoneId) { editingZone = zones[zid];} %>
+              <option value="<%=zones[zid].id%>"><%=zones[zid].name%></option>
+            <%}%>
+         </select>
+         <a style="color:#DDD;" href="/zones/new">Add new zone</a>
+      </div>
+      <div>
+         <label for="zone[name]">Name:</label><input type="text" name="zone[name]" value="<%=editingZone.name%>" />, 
+         <label for="zone[width]">W</label><input type="text" name="zone[width]" size="4" value="<%=editingZone.width%>"/> x <label for="zone[height]">H</label><input type="text" name="zone[height]" size="4" value="<%=editingZone.height%>"/>
          <input type="submit" value="save"/>
-         <label for="zone[name]">Name:</label><input type="text" name="zone[name]" />, 
-         <label for="zone[width]">W</label><input type="text" name="zone[width]" size="4"/> x <label for="zone[height]">H</label><input type="text" name="zone[name]" size="4"/>
-      </p>
+      </div>
+      <% if (false) { %>
       <textarea rows="40" cols="150" name="zone[config]">
       <%=JSON.stringify(zones[zid].config)%>
       </textarea>
+      <% } %>
     </form>
   </div>
 </div>
@@ -43,9 +46,10 @@
     
     $(document).ready(function() {
         var diluvia = new DiluviaController({
-          socket_host: "<%=SOCKET_IO_HOSTNAME%>", 
+          mode:          "editor",
+          socket_host:   "<%=SOCKET_IO_HOSTNAME%>", 
           socket_params: <%=SOCKET_IO_OPTIONS%>,
-          on_connect: function(){this.initWorldView();}
+          on_connect:    function(){this.initWorldView();}
         });
         size_element($('#viewport_container'));
         size_element($('#main'));

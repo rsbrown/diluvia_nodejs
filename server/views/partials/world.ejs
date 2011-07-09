@@ -21,9 +21,10 @@
     
     $(document).ready(function() {
         var diluvia = new DiluviaController({
-          socket_host: "<%=SOCKET_IO_HOSTNAME%>", 
+          mode:          "world",
+          socket_host:   "<%=SOCKET_IO_HOSTNAME%>", 
           socket_params: <%=SOCKET_IO_OPTIONS%>,
-          on_connect: function(){this.startPlaying();}
+          on_connect:    function(){this.startPlaying();}
         });
         
         var $helpDialog = $('<div></div>')
@@ -92,6 +93,5 @@
         <% } else { %>
           $("#audio-pause").hide();
         <% } %>
-        
     });
 </script>
