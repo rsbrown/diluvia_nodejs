@@ -93,7 +93,7 @@ DiluviaController.prototype = {
         return this._sound;
     },
     
-    updatedZoneData: function(zoneData) {
+    updateZoneData: function(zoneData) {
         this._hasRecvData = true;
     },
     
@@ -138,6 +138,50 @@ DiluviaController.prototype = {
     
     command: function(cmd) {
         this._protocol.send({ "type": "Command", "command": cmd });
+    },
+    
+    moveEditorView: function(dir) {
+      var nextTileIndex  = this.indexForDirectionalMove(this._currentZoneState.viewCenterIdx, dir);
+      if (nextTileIndex != -1) {
+        this._currentZoneState.viewCenterIdx = nextTileIndex;
+      }
+      this.repaintCanvas();
+    },
+    
+    indexToXy: function(idx) {
+      var dims = this._protocol.getZoneData().dimensions;
+      var y = Math.floor(idx / dims[0]),
+          x = idx % dims[0];
+              
+      return [x, y];
+    },
+    
+    xyToIndex: function(x, y) {
+      var dims = this._protocol.getZoneData().dimensions;
+      if (!(x < 0 || y < 0 || x >= dims[0] || y >= dims[1])) {
+          return (y * dims[0]) + x;
+      }
+      else {
+          return -1;
+      }
+    },
+    
+    indexForDirectionalMove: function(idx, direction) {
+        var xy = this.indexToXy(idx);
+        if (direction == "n") {
+            xy[1] -= 1;
+        }
+        else if (direction == "s") {
+            xy[1] += 1;
+        }
+        else if (direction == "e") {
+            xy[0] += 1;
+        }
+        else if (direction == "w") {
+            xy[0] -= 1;
+        }
+        
+        return this.xyToIndex(xy[0], xy[1]);
     },
     
     getChat: function() {

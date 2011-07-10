@@ -24,7 +24,8 @@ Keyboard.prototype = {
               cmd = KEYCODE_MOVE_COMMANDS[kc];
           if (cmd && kc < 65) {
               self.keysDown[kc] = true;
-              self._controller.command(cmd);
+              // self._controller.command(cmd);
+              self._controller.moveEditorView(cmd);
               ev.preventDefault();
           }
       });

@@ -93,7 +93,7 @@ Web.prototype = {
     updateZone: function(zoneParams) {
         Zone.findById(zoneParams.id, function(zone) {
             zone.setName(zoneParams.name);
-            // zone.setDimensions(zoneParams.width, zoneParams.height);
+            zone.setDimensions(zoneParams.width, zoneParams.height);
             zone.save();
         });
     }

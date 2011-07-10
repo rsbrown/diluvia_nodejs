@@ -69,8 +69,6 @@ Protocol.prototype = {
         var self = this;
         
         if (msg) {
-            // console.log(msg.type);
-            
             if (msg.type == "ZoneData") {
                 var zoneData = this._zoneData = msg.attrs,
                     tileData = zoneData.tiles;
@@ -90,7 +88,7 @@ Protocol.prototype = {
                     self._controller.preloadImage(item.imagePath);
                 }
                 
-                this._controller.updatedZoneData(zoneData);
+                this._controller.updateZoneData(zoneData);
             }
             else if (msg.type == "ZoneState")  {
                 this._controller.updateZoneState(msg.attrs);

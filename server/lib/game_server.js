@@ -134,7 +134,7 @@ GameServer.prototype = {
                 var zone = world.getZone(zoneId);
                 if (command == "n" || command == "s" || command == "e" || command == "w") {
                     zone.moveEditor(account, command);
-                    client.sendZoneState(world.composeZoneStateFor(account, zone.getStateAttributes()));
+                    // client.sendZoneState(world.composeZoneStateFor(account, zone.getStateAttributes()));
                 }
             }
         });

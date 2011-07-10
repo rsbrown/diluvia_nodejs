@@ -82,6 +82,7 @@ Zone.findById = function(id, callback) {
         var zone = null;
         if (data) {
             zone = new Zone(JSON.parse(data));
+            zone.loadConfig(data);
         }
         callback(zone);
     });
@@ -104,7 +105,8 @@ Zone.createNewIsland = function(account, callback) {
 };
 
 Zone.createFromConfig = function(conf) {
-    var zone    = new Zone({width: conf.dimensions[0] || 64, height: conf.dimensions[1] || 64});
+    var zone = new Zone({width: conf.dimensions[0] || 64, height: conf.dimensions[1] || 64});
+    console.log(conf);
     zone.loadConfig(conf);
     return zone;
 };
