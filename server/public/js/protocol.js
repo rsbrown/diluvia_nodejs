@@ -26,7 +26,6 @@ var Protocol = function(controller, server, options) {
 
     this._socket.on("disconnect", function() {
         connected = false;
-        
         $("#connection-lost").dialog({
             resizable: false,
             modal: true,

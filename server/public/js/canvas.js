@@ -95,7 +95,7 @@ Canvas.prototype = {
                                     destPixelCoords[1],
                                     Diluvia.TILE_DIMS[0],
                                     Diluvia.TILE_DIMS[1]                    
-                                );         
+                                );
                             }
                             else {
                                 console.log("COULD NOT DRAW " + tileId);

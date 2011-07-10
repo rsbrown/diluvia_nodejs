@@ -43,6 +43,13 @@ var DiluviaController = function(options) {
     
     this._scoreTable.append("<thead><th>User</th><th>Score</th><tbody></tbody>");
     
+    this._editState = {
+      selectedLayer: "BASE_LAYER",
+      "BASE_LAYER": "BASE_WATER",
+      "OBJECT_LAYER": null,
+      "ACTOR_LAYER": null
+    };
+    
     $(document).ready(function() {
         $(document.body).append(self._chatBoxElement); 
         $(document.body).append(self._scoreContainer);
@@ -140,9 +147,29 @@ DiluviaController.prototype = {
         this._protocol.send({ "type": "Command", "command": cmd });
     },
     
+    showTileChooser: function() {
+      var self = this;
+      $("#tile_chooser").load('/tiles/list', function(){
+        $(".tile_image").hover(
+          function(){ $("#ui-dialog-title-tile_chooser").html($(this).attr("data-tileName")); },
+          function(){ $("#ui-dialog-title-tile_chooser").html("&nbsp;"); }
+        );
+        $(".tile_image").click(function(){
+          self._editState[self._editState.selectedLayer] = $(this).attr("data-tileName");
+          $("#tile_chooser").dialog("close");
+        });
+      }).dialog({
+          modal: true,
+          closeOnEscape: true,
+          width: 600,
+          height: 600
+      });
+    },
+    
     editTile: function(x, y) {
       var tileIdx = this.pixelsToIndex(x, y);
-      this._protocol.send({ "type": "EditTile", "tile_idx": tileIdx, "layer": "BASE_LAYER", "new_tile": "BASE_WATER" });
+      this._editState[this._editState.selectedLayer]
+      this._protocol.send({ "type": "EditTile", "tile_idx": tileIdx, "layer": this._editState.selectedLayer, "new_tile": this._editState[this._editState.selectedLayer] });
     },
     
     moveEditorView: function(dir) {

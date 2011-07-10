@@ -1,5 +1,6 @@
 var _           = require("underscore"),
     Account     = require("account"),
+    Defs        = require("defs"),
     Zone        = require("zone"),
     Routes      = require("routes");
 

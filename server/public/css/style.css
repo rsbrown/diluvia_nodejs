@@ -133,7 +133,28 @@ canvas {
 }
 
 #connection-lost {
-    display: none;
+  display: none;
+}
+
+#tile_chooser {
+  display: none;
+}
+
+.tile_image {
+  float: left;
+  border: 3px solid black; 
+  margin: 5px;
+  width:  64px;
+  height: 64px;
+}
+
+.tile_image:hover {
+  cursor: pointer;
+  border: 3px solid red;
+}
+
+.tile_image img {
+  position: relative;
 }
 
 #info_area {
@@ -180,7 +201,7 @@ a.logout {
     padding:    3px;
 }
 
-#header-links a {
+#header-links a, .editzone a {
     color: #999;
     text-decoration: none;
     border-bottom: 1px dotted #ba0000

@@ -54,6 +54,11 @@ Pointer.prototype = {
         self._controller.editTile(ev.pageX, ev.pageY);
         return false;
     });
+    
+    $("#tile_chooser_link").click(function(ev) {
+        ev.preventDefault();
+        self._controller.showTileChooser();
+    })
   },
 
   worldMouseBindings: function() {

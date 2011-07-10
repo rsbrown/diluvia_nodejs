@@ -1,3 +1,5 @@
+var Defs        = require("defs");
+
 var Routes = module.exports = {
     '/': {
       get: {
@@ -120,6 +122,25 @@ var Routes = module.exports = {
                 }
             }
         }
+    },
+    
+    '/tiles/list': {
+      get: {
+          middleware: ["loadUserSession"],
+          exec: function(req, res) {
+              if (req.session.account) {
+                res.render('tiles/list', {
+                  layout: false,
+                  locals: {
+                    tiles:      Defs.Tiles
+                  }
+                });
+              } else {
+                  req.flash("error", "You must login to build your island.");
+                  res.redirect("/login");
+              }
+          }
+      }
     },
     
     '/zones/new': {

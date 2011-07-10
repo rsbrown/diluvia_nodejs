@@ -91,6 +91,7 @@ Defs.Tiles = {
     DUNGEON_TOWER_3_2:  { class: "WallTile",    image: "sprites.png:1,4" },
     DUNGEON_TOWER_3_3:  { class: "WallTile",    image: "sprites.png:2,4" },
     DUNGEON_TOWER_4_1:  { class: "WallTile",    image: "sprites.png:0,5" },
+    DUNGEON_TOWER_4_2:  { class: "PortalTile",  image: "sprites.png:1,5" },
     DUNGEON_TOWER_4_3:  { class: "WallTile",    image: "sprites.png:2,5" },
 
     DUNGEON_WALL_T:     { class: "WallTile",    image: "sprites.png:2,0" },

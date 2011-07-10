@@ -20,6 +20,7 @@
          <label for="zone[name]">Name:</label><input type="text" name="zone[name]" value="<%=editingZone.name%>" />, 
          <label for="zone[width]">W</label><input type="text" name="zone[width]" size="4" value="<%=editingZone.width%>"/> x <label for="zone[height]">H</label><input type="text" name="zone[height]" size="4" value="<%=editingZone.height%>"/>
          <input type="submit" value="save"/>
+         <a href="#" id="tile_chooser_link">Choose Tile</a>
       </div>
       <% if (false) { %>
       <textarea rows="40" cols="150" name="zone[config]">
@@ -29,6 +30,10 @@
     </form>
   </div>
 </div>
+
+<div id="loading"><img src="/images/icons/loading_b.gif" /></div>
+<div id="tile_chooser"><canvas height="500" width="500"></canvas></div>
+<div id="connection-lost">Connection lost. Retrying... <img src='/images/icons/loading_w.gif' /></div>
 
 <div id="viewport_container">
     <canvas id="viewport" height="4096" width="4096"></canvas>
