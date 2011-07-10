@@ -140,48 +140,64 @@ DiluviaController.prototype = {
         this._protocol.send({ "type": "Command", "command": cmd });
     },
     
+    editTile: function(x, y) {
+      var tileIdx = this.pixelsToIndex(x, y);
+      this._protocol.send({ "type": "EditTile", "tile_idx": tileIdx, "layer": "BASE_LAYER", "new_tile": "BASE_WATER" });
+    },
+    
     moveEditorView: function(dir) {
       var nextTileIndex  = this.indexForDirectionalMove(this._currentZoneState.viewCenterIdx, dir);
       if (nextTileIndex != -1) {
         this._currentZoneState.viewCenterIdx = nextTileIndex;
+        this._canvas.recenter(this._protocol.getZoneData(), this._currentZoneState);
+        // this.repaintCanvas();
       }
-      this.repaintCanvas();
     },
     
-    indexToXy: function(idx) {
+    settleEditorView: function(dir) {
+      this._protocol.send({ "type": "CenterEditorView", "index": this._currentZoneState.viewCenterIdx });
+    },
+    
+    indexToRowCol: function(idx) {
       var dims = this._protocol.getZoneData().dimensions;
-      var y = Math.floor(idx / dims[0]),
-          x = idx % dims[0];
+      var row = Math.floor(idx / dims[0]),
+          col = idx % dims[0];
               
-      return [x, y];
+      return [row, col];
     },
     
-    xyToIndex: function(x, y) {
+    rowColToIndex: function(row, col) {
       var dims = this._protocol.getZoneData().dimensions;
-      if (!(x < 0 || y < 0 || x >= dims[0] || y >= dims[1])) {
-          return (y * dims[0]) + x;
+      if (!(col < 0 || row < 0 || col >= dims[0] || row >= dims[1])) {
+          return (row * dims[0]) + col;
       }
       else {
           return -1;
       }
     },
     
+    pixelsToIndex: function(x, y) {
+      var col = Math.floor((x-this._canvas._canvasLeft)/Diluvia.TILE_DIMS[0]);
+      var row = Math.floor((y-this._canvas._canvasTop-$("#editor_dashboard").height()-$('header').height())/Diluvia.TILE_DIMS[1]);
+      return this.rowColToIndex(row, col);
+    },
+    
     indexForDirectionalMove: function(idx, direction) {
-        var xy = this.indexToXy(idx);
+        var rowCol = this.indexToRowCol(idx);
         if (direction == "n") {
-            xy[1] -= 1;
+            rowCol[0] -= 1;
         }
         else if (direction == "s") {
-            xy[1] += 1;
+            rowCol[0] += 1;
         }
         else if (direction == "e") {
-            xy[0] += 1;
+            rowCol[1] += 1;
         }
         else if (direction == "w") {
-            xy[0] -= 1;
+            rowCol[1] -= 1;
         }
         
-        return this.xyToIndex(xy[0], xy[1]);
+        return this.rowColToIndex(rowCol[0], rowCol[1]);
     },
     
     getChat: function() {

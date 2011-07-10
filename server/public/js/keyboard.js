@@ -24,9 +24,17 @@ Keyboard.prototype = {
               cmd = KEYCODE_MOVE_COMMANDS[kc];
           if (cmd && kc < 65) {
               self.keysDown[kc] = true;
-              // self._controller.command(cmd);
               self._controller.moveEditorView(cmd);
               ev.preventDefault();
+          }
+      });
+      
+      $(window).keyup(function(ev) {
+          var kc  = ev.keyCode,
+              cmd = KEYCODE_MOVE_COMMANDS[kc];
+
+          if (cmd && kc < 65) {
+              self._controller.settleEditorView(cmd);
           }
       });
     },

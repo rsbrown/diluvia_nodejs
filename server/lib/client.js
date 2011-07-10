@@ -35,6 +35,12 @@ _.extend(Client.prototype, events.EventEmitter.prototype, {
                 else if (msg.type == "Command") {
                     this.emit("receivedCommand", msg.command);
                 }
+                else if (msg.type == "CenterEditorView") {
+                    this.emit("centerEditorView", msg.index);
+                }
+                else if (msg.type == "EditTile") {
+                    this.emit("editTile", msg);
+                }
                 else if (msg.type == "Chat") {
                     this.emit("receivedChat", msg.text);
                 }

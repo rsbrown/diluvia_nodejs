@@ -46,7 +46,6 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
     },
     
     setZone: function(zoneId, zone) {
-      console.log("setting zone " + zoneId + " to " + zone);
         if (zone) {
             zone._zoneId        = zoneId;
             this._zones[zoneId] = zone;

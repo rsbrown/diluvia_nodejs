@@ -128,15 +128,22 @@ GameServer.prototype = {
         client.sendZoneData(zone);
         client.sendZoneState(world.composeZoneStateFor(account, zone.getStateAttributes()));
         
-        client.on("receivedCommand", function(command) {
+        client.on("centerEditorView", function(index) {
             var zoneId  = account.getEditorZoneId();
             if (zoneId !== undefined) {
                 var zone = world.getZone(zoneId);
-                if (command == "n" || command == "s" || command == "e" || command == "w") {
-                    zone.moveEditor(account, command);
-                    // client.sendZoneState(world.composeZoneStateFor(account, zone.getStateAttributes()));
-                }
+                zone.centerEditor(account, index);
             }
+        });
+        
+        client.on("editTile", function(msg) {
+          var zoneId  = account.getEditorZoneId();
+          if (zoneId !== undefined) {
+              var zone = world.getZone(zoneId);
+              zone.getBoard().getLayer(Defs.BASE_LAYER).popTile(msg.tile_idx, msg.new_tile);
+              zone.getBoard().getLayer(Defs.BASE_LAYER).pushTile(msg.tile_idx, [ msg.new_tile ]);
+              client.sendZoneState(world.composeZoneStateFor(account, zone.getStateAttributes()));
+          }
         });
     },
     

@@ -10,6 +10,9 @@ var Canvas = function(controller, element) {
     this._lastDims      = [ 0, 0 ];
     this._lastMusic     = null;
     
+    this._canvasLeft    = -1;
+    this._canvasTop     = -1;
+    
     this._element.style.position = "absolute";
 };
 
@@ -102,17 +105,30 @@ Canvas.prototype = {
                 }
             }
         }
-        
-        var vpCX            = this._viewport.width() / 2,
-            vpCY            = this._viewport.height() / 2,
-            actorCanvasX    = ((viewCenterIdx % zoneDims[0]) * tileWidth) + (tileWidth / 2),
-            actorCanvasY    = (Math.floor(viewCenterIdx / zoneDims[0]) * tileHeight) + (tileHeight / 2),
-            canvasLeft      = vpCX - actorCanvasX,
-            canvasTop       = vpCY - actorCanvasY;
+        this.recenter(zoneData, zoneState);
+    },
+    
+    recenter: function(zoneData, zoneState) {
+      var zoneDims              = zoneData.dimensions,
+          viewCenterIdx         = zoneState.viewCenterIdx,
+          tileWidth             = Diluvia.TILE_DIMS[0],
+          tileHeight            = Diluvia.TILE_DIMS[1],
+          vpCX                  = this._viewport.width() / 2,
+          vpCY                  = this._viewport.height() / 2,
+          actorCanvasX          = ((viewCenterIdx % zoneDims[0]) * tileWidth) + (tileWidth / 2),
+          actorCanvasY          = (Math.floor(viewCenterIdx / zoneDims[0]) * tileHeight) + (tileHeight / 2);
 
-        $(this._element).css({
-            "left": canvasLeft + "px",
-            "top":  canvasTop  + "px"
-        });
+      this._canvasLeft      = vpCX - actorCanvasX,
+      this._canvasTop       = vpCY - actorCanvasY;
+      
+
+      $(this._element).css({
+          "left": this._canvasLeft + "px",
+          "top":  this._canvasTop  + "px"
+      });
+    },
+    
+    getCenterPixels: function() {
+      return {"x": this._viewport.width() / 2, "y": this._viewport.height() / 2};
     }
 }

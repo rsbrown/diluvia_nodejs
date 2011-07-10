@@ -111,8 +111,6 @@ var Routes = module.exports = {
                 if (req.session.account) {
                     var world = this._gameServer.getWorld();
                     this.startNewIsland(req, res, function(newZone){
-                      console.log("here1:" + newZone);
-                      console.log("here2:" + newZone.getId());
                       world.setZone(newZone.getId(), newZone);
                       res.redirect("/edit");
                     });

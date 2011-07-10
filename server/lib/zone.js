@@ -81,8 +81,9 @@ Zone.findById = function(id, callback) {
     redis.get("zone:" + id, function(err, data) {
         var zone = null;
         if (data) {
-            zone = new Zone(JSON.parse(data));
-            zone.loadConfig(data);
+            var conf = JSON.parse(data);
+            zone = new Zone(conf);
+            zone.loadConfig(conf.config);
         }
         callback(zone);
     });
@@ -106,7 +107,6 @@ Zone.createNewIsland = function(account, callback) {
 
 Zone.createFromConfig = function(conf) {
     var zone = new Zone({width: conf.dimensions[0] || 64, height: conf.dimensions[1] || 64});
-    console.log(conf);
     zone.loadConfig(conf);
     return zone;
 };
@@ -305,11 +305,9 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         });
     },
     
-    moveEditor: function(account, direction) {
-      var prevTileIndex  = account.getEditorViewTileIndex(),
-          nextTileIndex  = this.indexForDirectionalMove(prevTileIndex, direction);
-      if (nextTileIndex != -1) {
-        account.setEditorViewTileIndex(nextTileIndex);
+    centerEditor: function(account, index) {
+      if (index != -1) {
+        account.setEditorViewTileIndex(index);
       }
     },
 
@@ -464,7 +462,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         
         if (tileData) {
             layer.popTile(tileIndex, tileData);
-            layer.pushTile(tileIndex, [ "PLAYER_" + orientation.toUpperCase(), tileData[1] ]);            
+            layer.pushTile(tileIndex, [ "PLAYER_" + orientation.toUpperCase(), tileData[1] ]);
         }
     },
     

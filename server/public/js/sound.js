@@ -44,7 +44,6 @@ Sound.prototype = {
         if (this._musicOn) {
         
             var self = this;
-            console.log(src);
         
             if (!(src in this._loops)) {
                 var audio;

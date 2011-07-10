@@ -4,6 +4,7 @@ var Pointer = function(controller) {
         self         = this;
     this._mouseX     = null;
     this._mouseY     = null;
+    this._painting   = false;
     this._controller = controller;
     this[controller.getMode() + "MouseBindings"]();
 };
@@ -30,6 +31,29 @@ Pointer.prototype = {
 
   editorMouseBindings: function() {
     var self = this;
+    $("canvas").mousedown(function(ev) {
+        if (ev.which != 1) return true;
+        self._painting = true;
+        return false;
+    });
+    
+    $(document).mousemove(function(ev){
+      if (self._painting) {
+        self._controller.editTile(ev.pageX, ev.pageY);
+      }
+      return false;
+     });
+    
+    $(document).mouseup(function(){
+        self._painting = false;
+        return false;
+    });
+    
+    $("canvas").click(function(ev) {
+        ev.preventDefault();
+        self._controller.editTile(ev.pageX, ev.pageY);
+        return false;
+    });
   },
 
   worldMouseBindings: function() {
