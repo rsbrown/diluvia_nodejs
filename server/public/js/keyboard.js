@@ -39,7 +39,7 @@ Keyboard.prototype = {
       });
     },
     
-    worldKeyBindings: function() {
+    gameKeyBindings: function() {
       var self = this;
       $(window).keydown(function(ev) {
           var kc  = ev.keyCode,

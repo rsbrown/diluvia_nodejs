@@ -13,36 +13,33 @@ var Diluvia = {
 var DiluviaController = function(options) {
     var self                = this;
     
-    this._mode              = options.mode;
-    this._protocol          = new Protocol(this, options.socket_host, options.socket_params);
-    this._connectCallback   = options.on_connect;
-    this._keyboard          = new Keyboard(this);
-    this._pointer           = new Pointer(this);
-    this._canvas            = new Canvas(this, document.getElementById(Diluvia.CANVAS_ID));
-    this._sound             = new Sound();
-    this._preload           = [];
-    this._imageCache        = {};
-    this._hasRecvData       = false;
-    this._hasRecvState      = false;
-    this._currentZoneState  = null;
-    this._interval          = setInterval(function() { self._onInterval(); }, Diluvia.INTERVAL_DELAY);
-    this._stateQueue        = [];
-    this._loadingInterval   = setInterval(function() { self._onLoadingInterval(); }, Diluvia.INTERVAL_DELAY);
-    
-    this._chatBoxElement    = $('<input id="chat_box">');
-    this._chat              = new Chat(document.body);
-    this._serverInfo        = {};
-    this._infoElement       = $('<div id="info_area"></div>');
-    this._scoreElement      = $('<div id="score_number">0</div>');
-    this._scoreContainer    = $('<div id="score">Score: </div>');
-    this._scoreBoard        = $('<div id="scoreboard"></div>');
-    this._scoreTable        = $('<table cellspacing="0" cellpadding="0" border="0"></table>');
-    
-    this._scoreContainer.append(this._scoreElement);
-    this._scoreBoard.append(this._scoreTable);
-    
-    this._scoreTable.append("<thead><th>User</th><th>Score</th><tbody></tbody>");
-    
+    this._mode                     = options.mode;
+    this._protocol                 = new Protocol(this, options.socket_host, options.socket_params);
+    this._connectCallback          = options.on_connect;
+    this._keyboard                 = new Keyboard(this);
+    this._pointer                  = new Pointer(this);
+    this._canvas                   = new Canvas(this, document.getElementById(Diluvia.CANVAS_ID));
+    this._sound                    = new Sound();
+    this._preload                  = [];
+    this._imageCache               = {};
+    this._hasRecvData              = false;
+    this._hasRecvState             = false;
+    this._currentZoneState         = null;
+    this._interval                 = setInterval(function() { self._onInterval(); }, Diluvia.INTERVAL_DELAY);
+    this._stateQueue               = [];
+    this._loadingInterval          = setInterval(function() { self._onLoadingInterval(); }, Diluvia.INTERVAL_DELAY);
+                                   
+    this._chatBoxElement           = $('<input id="chat_box">');
+    this._chat                     = new Chat(document.body);
+    this._serverInfo               = {};
+    this._infoElement              = $('<div id="info_area"></div>');
+    this._infoContainer            = $('<div id="infoBar"></div>');
+    this._scoreElement             = $('<div id="score_number">0</div>');
+    this._scoreBoard               = $('<div id="scoreboard"></div>');
+    this._scoreTable               = $('<table cellspacing="0" cellpadding="0" border="0"></table>');
+    this._selectedTileContainer    = $('<span id="selectedTile"></span>');
+    this._selectedLayerContainer   = $('<span id="selectedLayer"></span>');
+        
     this._editState = {
       selectedLayer: "BASE_LAYER",
       "BASE_LAYER": "BASE_WATER",
@@ -50,17 +47,7 @@ var DiluviaController = function(options) {
       "ACTOR_LAYER": null
     };
     
-    $(document).ready(function() {
-        $(document.body).append(self._chatBoxElement); 
-        $(document.body).append(self._scoreContainer);
-        $(document.body).append(self._scoreBoard);
-        
-        self._scoreBoard.hide();
-        
-        $(document.getElementById(Diluvia.CANVAS_ID).parentNode).append(self._infoElement);
-        self._chatBoxElement.hide();
-        $(document.body).css({ overflow: "hidden" });
-    });
+    this["appendElementsFor_" + this._mode]();
 };
 
 DiluviaController.prototype = {
@@ -84,6 +71,34 @@ DiluviaController.prototype = {
         }
     },
     
+    appendElementsFor_game: function() {
+      this._infoContainer.html("Score: ");
+      this._infoContainer.append(this._scoreElement);
+      this._scoreBoard.append(this._scoreTable);    
+      this._scoreTable.append("<thead><th>User</th><th>Score</th><tbody></tbody>");
+      $(document.body).append(this._chatBoxElement);
+      $(document.body).append(this._infoContainer);
+      $(document.body).append(this._scoreBoard);
+      this._scoreBoard.hide();
+      $(document.getElementById(Diluvia.CANVAS_ID).parentNode).append(this._infoElement);
+      this._chatBoxElement.hide();
+      $(document.body).css({ overflow: "hidden" });
+    },
+    
+    appendElementsFor_editor: function() {
+      this._infoContainer.html("Painting ");
+      this._infoContainer.append(this._selectedTileContainer);
+      this._infoContainer.append(" on ");
+      this._infoContainer.append(this._selectedLayerContainer);
+      $(document.body).append(this._infoContainer);
+      this._selectedTileContainer.html(this.getSelectedEditTile());
+      this._selectedLayerContainer.html(this._editState.selectedLayer);
+    },
+    
+    getSelectedEditTile: function() {
+      return this._editState[this._editState.selectedLayer]
+    },
+       
     isLoadingImages: function() {
         return this._preload.length != 0;
     },
@@ -149,27 +164,43 @@ DiluviaController.prototype = {
     
     showTileChooser: function() {
       var self = this;
-      $("#tile_chooser").load('/tiles/list', function(){
+      $("#chooser").load('/tiles/list', function(){
         $(".tile_image").hover(
-          function(){ $("#ui-dialog-title-tile_chooser").html($(this).attr("data-tileName")); },
-          function(){ $("#ui-dialog-title-tile_chooser").html("&nbsp;"); }
+          function(){ $("#ui-dialog-title-chooser").html($(this).attr("data-tileName")); },
+          function(){ $("#ui-dialog-title-chooser").html("&nbsp;"); }
         );
         $(".tile_image").click(function(){
-          self._editState[self._editState.selectedLayer] = $(this).attr("data-tileName");
-          $("#tile_chooser").dialog("close");
+          var newTile = $(this).attr("data-tileName");
+          self._editState[self._editState.selectedLayer] = newTile;
+          self._selectedTileContainer.html(newTile);
+          $("#chooser").dialog("close");
         });
       }).dialog({
           modal: true,
           closeOnEscape: true,
-          width: 600,
+          width: 610,
           height: 600
       });
+    },
+
+    showLayerChooser: function() {
+      var self = this;
+      $("#chooser").html('<div id="layer_chooser"><p><a href="#" id="BASE_LAYER">BASE_LAYER</a></p><p><a href="#" id="OBJECT_LAYER">OBJECT_LAYER</a></p><p><a href="#" id="ACTOR_LAYER">ACTOR_LAYER</a></p></div>').dialog({
+          modal: true,
+          closeOnEscape: true,
+          width: 300,
+          height: 300
+      }).find("#" + this._editState.selectedLayer).addClass("selected");
+      $("#layer_chooser p a").click(function(){
+         self._editState.selectedLayer = $(this).attr("id");
+         self._selectedLayerContainer.html(self._editState.selectedLayer);
+         $("#chooser").dialog("close");
+       });
     },
     
     editTile: function(x, y) {
       var tileIdx = this.pixelsToIndex(x, y);
-      this._editState[this._editState.selectedLayer]
-      this._protocol.send({ "type": "EditTile", "tile_idx": tileIdx, "layer": this._editState.selectedLayer, "new_tile": this._editState[this._editState.selectedLayer] });
+      this._protocol.send({ "type": "EditTile", "tile_idx": tileIdx, "layer": this._editState.selectedLayer, "new_tile": this.getSelectedEditTile() });
     },
     
     moveEditorView: function(dir) {

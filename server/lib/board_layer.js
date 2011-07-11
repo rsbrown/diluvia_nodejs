@@ -17,6 +17,11 @@ _.extend(BoardLayer.prototype, events.EventEmitter.prototype, {
         this._tiles[tileIndex].push(tileData);
         this.emit("tileChange", tileIndex, this._tiles[tileIndex]);
     },
+    
+    clearTile: function(tileIndex) {
+        delete this._tiles[tileIndex];
+        this.emit("tileChange", tileIndex, this._tiles);
+    },
 
     popTile: function(tileIndex, tileData) {
         var tiles           = this._tiles[tileIndex],

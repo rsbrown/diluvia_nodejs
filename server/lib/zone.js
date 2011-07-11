@@ -237,6 +237,8 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
                 });
             });
         }
+        
+        if(resIndex == -1) {resIndex = 0;}
 
         return resIndex;
     },

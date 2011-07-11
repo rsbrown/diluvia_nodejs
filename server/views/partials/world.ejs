@@ -21,7 +21,7 @@
     
     $(document).ready(function() {
         var diluvia = new DiluviaController({
-          mode:          "world",
+          mode:          "game",
           socket_host:   "<%=SOCKET_IO_HOSTNAME%>", 
           socket_params: <%=SOCKET_IO_OPTIONS%>,
           on_connect:    function(){this.startPlaying();}

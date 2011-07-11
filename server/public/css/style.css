@@ -136,8 +136,26 @@ canvas {
   display: none;
 }
 
-#tile_chooser {
+#chooser {
   display: none;
+}
+
+#layer_chooser a.selected {
+  border: 2px solid #FF0000;
+}
+
+#layer_chooser a {
+  background-color: #AAAAAA;
+  border: 2px solid #DDDDDD;
+  border-radius: 5px;
+  padding: 3px;
+  text-decoration: none;
+}
+
+#layer_chooser a:hover {
+  border: none;
+  padding: 5px;
+  background-color: #BBBBBB;
 }
 
 .tile_image {
@@ -178,7 +196,7 @@ a.logout {
     color: #DD3333;
 }
 
-#score {
+#infoBar {
     position:   absolute;
     top:        10px;
     left:       250px;
@@ -201,14 +219,27 @@ a.logout {
     padding:    3px;
 }
 
-#header-links a, .editzone a {
+#header-links a {
     color: #999;
     text-decoration: none;
     border-bottom: 1px dotted #ba0000
 }
 
-#header-links:hover {
-    text-decoration: none;
+.editzone img.active {
+  border: 2px solid #AAAAAA;
+}
+
+.editzone img {
+  background-color: #111111;
+  border: 2px solid #222222;
+  border-radius: 5px;
+  padding: 3px;
+}
+
+.editzone img:hover {
+  border: none;
+  padding: 5px;
+  background-color: #555555;
 }
 
 .editzone {

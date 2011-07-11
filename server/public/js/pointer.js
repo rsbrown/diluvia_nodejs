@@ -59,9 +59,15 @@ Pointer.prototype = {
         ev.preventDefault();
         self._controller.showTileChooser();
     })
+    
+    $("#layer_chooser_link").click(function(ev) {
+        ev.preventDefault();
+        self._controller.showLayerChooser();
+    })
+    
   },
 
-  worldMouseBindings: function() {
+  gameMouseBindings: function() {
     var self = this;
     
     $(document).mousemove(function(ev){

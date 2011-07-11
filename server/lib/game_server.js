@@ -139,9 +139,10 @@ GameServer.prototype = {
         client.on("editTile", function(msg) {
           var zoneId  = account.getEditorZoneId();
           if (zoneId !== undefined) {
+              var editLayer = Defs[msg.layer];
               var zone = world.getZone(zoneId);
-              zone.getBoard().getLayer(Defs.BASE_LAYER).popTile(msg.tile_idx, msg.new_tile);
-              zone.getBoard().getLayer(Defs.BASE_LAYER).pushTile(msg.tile_idx, [ msg.new_tile ]);
+              zone.getBoard().getLayer(editLayer).clearTile(msg.tile_idx);
+              zone.getBoard().getLayer(editLayer).pushTile(msg.tile_idx, [ msg.new_tile ]);
               client.sendZoneState(world.composeZoneStateFor(account, zone.getStateAttributes()));
           }
         });
