@@ -120,12 +120,6 @@ Zone.createNewIsland = function(account, callback) {
     });
 };
 
-Zone.createFromConfig = function(conf) {
-    var zone = new Zone({width: conf.dimensions[0] || 64, height: conf.dimensions[1] || 64});
-    zone.loadConfig(conf);
-    return zone;
-};
-
 _.extend(Zone.prototype, events.EventEmitter.prototype, {
     save: function(callback){
         if (callback === undefined ) { callback = function(){}; }

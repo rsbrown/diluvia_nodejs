@@ -89,14 +89,51 @@ Web.prototype = {
         Zone.createNewIsland(req.session.account, callback);
     },
     
+    getPortalInfo: function(req, callback) {
+      var account = req.session.account;
+      var portalTileIdx = req.params.portalTileIdx;
+      var zone = this._gameServer.getWorld().getZone(account.getEditorZoneId());
+      if (zone) {
+        zone.tileAtIndex(portalTileIdx, function(tile){
+          if (tile.getType() === "Portal") {
+            Zone.findAllForAccount(account, function(zones) {
+                callback(tile, portalTileIdx, zones);
+            });
+          }
+        });
+      } else {
+        callback(null);
+      }
+    },
+    
+    setPortalInfo: function(req, callback) {
+      var account = req.session.account;
+      var portalTileIdx = req.params.portalTileIdx;
+      var zone = this._gameServer.getWorld().getZone(account.getEditorZoneId());
+      if (zone) {
+        zone.tileAtIndex(portalTileIdx, function(tile){
+          if (tile.getType() === "Portal") {
+            tile.setDestinationZone(req.body.portal.zone);
+            if (req.body.portal.dest_coords && req.body.portal.dest_coords !== "") {
+              var newCoords = req.body.portal.dest_coords.split(",");
+              tile.setDestinationCoords([Number(newCoords[0]), Number(newCoords[1])]);
+            } else {
+              tile.setDestinationCoords(null);
+            }
+          }
+          callback();
+        });
+      }
+    },
+    
     getEditableZones: function(account, callback){
         Zone.findAllForAccount(account, function(zones) {
             callback(zones);
         });
     },
-    
-    updateZone: function(zoneParams) {
-        Zone.findById(zoneParams.id, function(zone) {
+
+    updateZone: function(zoneId, zoneParams) {
+        Zone.findById(zoneId, function(zone) {
             zone.setName(zoneParams.name);
             zone.setDimensions(zoneParams.width, zoneParams.height);
             zone.save();

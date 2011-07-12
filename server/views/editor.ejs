@@ -8,7 +8,7 @@
     <form action="/zones/save" method="post">
       <div class="inline-menu">
         <div>
-          Zone: 
+          Zone:
           <select name="zone[id]" id="zone-selector">
              <% var editingZone;%>
              <% for (zid in zones) { %>
@@ -21,14 +21,10 @@
                <% } %>
              <%}%>
           </select>
-          <a style="color:#DDD;" href="/zones/new">Add new zone</a>
+          <a href="#" id="edit_zone_link">Edit Zone Info</a>
         </div>
-        <div>
-          <label for="zone[name]">Name:</label><input type="text" name="zone[name]" value="<%=editingZone.name%>" />, 
-          <label for="zone[width]">W</label><input type="text" name="zone[width]" size="4" value="<%=editingZone.width%>"/> x <label for="zone[height]">H</label><input type="text" name="zone[height]" size="4" value="<%=editingZone.height%>"/>
-          <input type="submit" value="save"/>
-        </div>
-      </div>
+        <div><a href="/zones/new">Add new zone</a></div>
+      </div>      
       <div class="inline-menu" id="edit_menu">
          <div id="menu-info"></div>
          <div>

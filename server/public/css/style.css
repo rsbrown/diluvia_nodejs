@@ -13,8 +13,16 @@ li {
 a img {
 	border: 0;
 }
+
 a {
-	outline: none;
+    color: #AAAAAA;
+    text-decoration: none;
+    outline: none;
+    border-bottom: 1px dotted #AA0000
+}
+
+a:hover {
+    color: #FFFFFF;
 }
 
 /* main styles */
@@ -67,21 +75,23 @@ header {
 #islands {
 	width: 240px;
 }
-#islands .island {
+#islands a.island {
 	text-decoration: none;
+	border-bottom: none;
 	color: #e0e0e0;
 	display: block;
-	padding: 10px;
+	margin: 10px;
+	padding: 5px;
 }
-#islands .island:hover {
+#islands a.island:hover {
 	background: #363636;
 	outline: 1px solid #464646;
 	
 }
-#islands .island .name {
+#islands a.island .name {
 	font-weight: bold;
 }
-#islands .island .info {
+#islands a.island .info {
 	color: #6f6f6f;
 	font-size: 13px;
 }
@@ -225,13 +235,8 @@ a.logout {
     padding:    3px;
 }
 
-#header-links a {
-    color: #999;
-    text-decoration: none;
-    border-bottom: 1px dotted #ba0000
-}
-
 .editzone {
+  font: 12px "Lucida Grande", Verdana, sans-serif;
   color: #FFFFFF;
 }
 

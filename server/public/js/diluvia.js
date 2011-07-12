@@ -45,8 +45,8 @@ var DiluviaController = function(options) {
       selectedMode:   "paint",
       selectedLayer:  "BASE_LAYER",
       "BASE_LAYER":   "BASE_EMPTY",
-      "OBJECT_LAYER": null,
-      "ACTOR_LAYER":  null
+      "OBJECT_LAYER": "BASE_EMPTY",
+      "ACTOR_LAYER":  "BASE_EMPTY"
     };
     
     this["appendElementsFor_" + this._mode]();
@@ -101,7 +101,7 @@ DiluviaController.prototype = {
     },
     
     getSelectedEditTile: function() {
-      return this._editState[this._editState.selectedLayer]
+      return this._editState[this._editState.selectedLayer];
     },
        
     isLoadingImages: function() {
@@ -198,6 +198,15 @@ DiluviaController.prototype = {
           height: 600
       });
     },
+    
+    showZoneEditor: function() {
+      $("#chooser").load('/editor/zone').dialog({
+          modal: true,
+          closeOnEscape: true,
+          width: 300,
+          height: 300
+      });
+    },
 
     showLayerChooser: function() {
       var self = this;
@@ -206,6 +215,7 @@ DiluviaController.prototype = {
         $("#layer_chooser p a").click(function(){
            self._editState.selectedLayer = $(this).attr("id");
            self._selectedLayerContainer.html(self._editState.selectedLayer);
+           self._selectedTileContainer.html(self._editState[self._editState.selectedLayer]);
            $("#chooser").dialog("close");
          });
       }).dialog({
@@ -223,15 +233,13 @@ DiluviaController.prototype = {
       this._selectedLayerContainer.html(this._editState.selectedLayer);
     },
 
-    showPortalEditor: function() {
+    showPortalEditor: function(tileIdx) {
       var self = this;
-      $("#chooser").load('/editor/portals', function(){
-        
-      }).dialog({
+      $("#chooser").load('/editor/portal/' + tileIdx).dialog({
           modal: true,
           closeOnEscape: true,
-          width: 610,
-          height: 600
+          width: 300,
+          height: 300
       });
     },
     
@@ -259,7 +267,7 @@ DiluviaController.prototype = {
                   tileId      = tileData[0],
                   tile        = zoneData.tiles[tileId];
             if (tile && tileId.indexOf("PortalTile") === 0) {
-              this.showPortalEditor();
+              this.showPortalEditor(tileIdx);
             };
           }
         }

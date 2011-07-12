@@ -78,6 +78,11 @@ Pointer.prototype = {
       self._controller.selectEraser();
     });
     
+    $("#edit_zone_link").click(function(ev) {
+      ev.preventDefault();
+      self._controller.showZoneEditor();
+    });
+      
     $("#tile_chooser_link").click(function(ev) {
         ev.preventDefault();
         $(this).parent().find("img.selected").removeClass("selected")

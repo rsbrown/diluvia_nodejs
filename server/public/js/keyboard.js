@@ -1,11 +1,12 @@
 var KEYCODE_MOVE_COMMANDS = {
-    38: "n",
-    40: "s",
-    39: "e",
-    37: "w",
-    65: "attack",
-    69: "drop",
-    9:  "scoreboard"
+    38:  "n",
+    40:  "s",
+    39:  "e",
+    37:  "w",
+    65:  "attack",
+    69:  "drop",
+    192: "suicide",
+    9:   "scoreboard"
 };
 
 var Keyboard = function(controller) {
@@ -44,7 +45,6 @@ Keyboard.prototype = {
       $(window).keydown(function(ev) {
           var kc  = ev.keyCode,
               cmd = KEYCODE_MOVE_COMMANDS[kc];
-
           if (cmd && !self.chatting) {
               self.keysDown[kc] = true;
 

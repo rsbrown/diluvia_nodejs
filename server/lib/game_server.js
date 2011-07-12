@@ -104,6 +104,9 @@ GameServer.prototype = {
                 if (command == "n" || command == "s" || command == "e" || command == "w") {
                     zone.command(actor, command);
                 }
+                else if (command == "suicide") {
+                    world.accountDeath(account);
+                }
                 else if (command == "StopMusic" || command == "StartMusic") {
                     account.setSoundOn((command == "StartMusic"));
                     account.save();

@@ -591,8 +591,10 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         }
     },
     
-    createZoneFromConfig: function(zoneId, zoneConfig) {
-        this.setZone(zoneId, Zone.createFromConfig(zoneConfig));
+    setZoneFromConfig: function(zoneConfig) {
+        var zone = new Zone(zoneConfig);
+        zone.loadConfig(zoneConfig.config);
+        this.setZone(zone.getId(), zone);
     },
     
     broadcastMessage: function(color, text) {
@@ -626,7 +628,7 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         
         Zone.findAll(fence.tap(function(zones){
             for (zid in zones) {
-                world.createZoneFromConfig(zones[zid].id, zones[zid].config);
+                world.setZoneFromConfig(zones[zid]);
             }
         }));
     }

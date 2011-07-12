@@ -6,7 +6,7 @@ var Tile = module.exports = function(options) {
     
     this._image         = options.image         || "empty.png:0,0";
     this._label         = options.label         || null;
-    this._title         = options.title         || "Tile";
+    this._type          = options.type          || "Tile";
     this._description   = options.description   || "Tile";
     this._fps           = options.fps           || undefined;
 };
@@ -45,7 +45,7 @@ Tile.prototype = {
     
     getImage:       function() { return this._image },
     getLabel:       function() { return this._label },
-    getTitle:       function() { return this._title },
+    getType:        function() { return this._type },
     getDescription: function() { return this._description },
     getFPS:         function() { return this._fps },
     

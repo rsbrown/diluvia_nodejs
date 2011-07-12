@@ -7,6 +7,7 @@ var PortalTile = module.exports = function(options) {
     
     this._destZone      = options.zone   || 0;
     this._destCoords    = options.dropAt;
+    this._type          = "Portal";
 };
 
 _.extend(PortalTile.prototype, Tile.prototype, {
@@ -16,5 +17,10 @@ _.extend(PortalTile.prototype, Tile.prototype, {
     
     moveInto: function(actor, tileIndex, tileData, layerIndex, world) {
         world.teleport(actor, this._destZone, this._destCoords);
-    }
+    },
+    
+    getDestinationZone:   function() { return this._destZone },
+    getDestinationCoords: function() { return this._destCoords },
+    setDestinationZone:   function(z) { this._destZone  = z },
+    setDestinationCoords: function(c) { this._destCoords = c }
 });

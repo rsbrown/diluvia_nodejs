@@ -158,16 +158,17 @@ var Routes = module.exports = {
           }
       }
     },
-    
-    '/editor/portals': {
+
+    '/editor/zone': {
       get: {
           middleware: ["loadUserSession"],
           exec: function(req, res) {
               if (req.session.account) {
-                res.render('editor/portals', {
+                var editingZoneId = req.session.account.getEditorZoneId();
+                res.render('editor/zone', {
                   layout: false,
                   locals: {
-                    tiles:      Defs.Tiles
+                    editingZone: this._gameServer.getWorld().getZone(editingZoneId)
                   }
                 });
               } else {
@@ -175,6 +176,56 @@ var Routes = module.exports = {
                   res.redirect("/login");
               }
           }
+      },
+      post: {
+        middleware: ["loadUserSession"],
+        exec: function(req, res) {
+          if (req.session.account) {
+            var editingZoneId = req.session.account.getEditorZoneId();
+            this.updateZone(editingZoneId, req.body.zone);
+            res.redirect("/edit");
+          } else {
+            req.flash("error", "You must login to build your island.");
+            res.redirect("/login");
+          }
+        }
+      }
+    },
+    
+    '/editor/portal/:portalTileIdx': {
+      get: {
+          middleware: ["loadUserSession"],
+          exec: function(req, res) {
+              if (req.session.account) {
+                this.getPortalInfo(req, function(portalInfo, portalTileIdx, zoneList){
+                  res.render('editor/portal', {
+                    layout: false,
+                    locals: {
+                      portal:  portalInfo,
+                      tileIdx: portalTileIdx,
+                      zones:   zoneList
+                    }
+                  });
+                })
+              } else {
+                  req.flash("error", "You must login to build your island.");
+                  res.redirect("/login");
+              }
+          }
+      },
+      post: {
+        middleware: ["loadUserSession"],
+        exec: function(req, res) {
+          if (req.session.account) {
+            this.setPortalInfo(req, function(){
+              req.flash("info", "Portal info updated.");
+              res.redirect("/edit");
+            });
+          } else {
+            req.flash("error", "You must login to build your island.");
+            res.redirect("/login");
+          }
+        }
       }
     },
     
@@ -194,13 +245,6 @@ var Routes = module.exports = {
               }
           }
       }
-    },
-
-    '/zones/save': {
-      post: {exec: function(req, res){
-          this.updateZone(req.body.zone);
-          res.redirect("/edit");
-      }}
     },
 
     '/edit': {

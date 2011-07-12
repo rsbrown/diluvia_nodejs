@@ -1,0 +1,20 @@
+<form action="/editor/portal/<%=tileIdx%>" method="post">
+  <div>
+    <div>
+      Zone: 
+      <select name="portal[zone]">
+         <% for (zid in zones) { %>
+           <% if (zones[zid].id == portal.getDestinationZone() ) { %>
+           <option value="<%=zones[zid].id%>" selected="true"><%=zones[zid].name%></option>
+           <% } else { %>
+           <option value="<%=zones[zid].id%>"><%=zones[zid].name%></option>
+           <% } %>
+         <%}%>
+      </select>
+    </div>
+    <div>
+      <label for="portal[dest_coords]">Destination Tile (col,row):</label><input type="text" name="portal[dest_coords]" value="<%=portal.getDestinationCoords() ? portal.getDestinationCoords() : ""%>" />
+      <input type="submit" value="save"/>
+    </div>
+  </div>
+</form>
