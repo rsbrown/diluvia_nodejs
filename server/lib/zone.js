@@ -89,6 +89,21 @@ Zone.findById = function(id, callback) {
     });
 };
 
+Zone.createNewZone = function(account, callback) {
+    var redis = Persistence.getRedis();
+    redis.incr( 'pkid' , function( err, newZoneId ) {
+        fs.readFile("zones/dungeon_01.js", function(err, data) {
+            var conf = JSON.parse(data);
+            var zone = new Zone({id: newZoneId, name:  "New Zone", account_id: account.getId(), width: conf.dimensions[0] || 64, height: conf.dimensions[1] || 64});
+            zone.loadConfig(conf);
+            zone.save(function(){
+                account.setEditorZoneId(newZoneId);
+                account.save(function() {callback(zone)});
+            });
+        });
+    });
+};
+
 Zone.createNewIsland = function(account, callback) {
     var redis = Persistence.getRedis();
     redis.incr( 'pkid' , function( err, newZoneId ) {
@@ -159,7 +174,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
                       var klass   = eval(lookup.class),
                           tile    = new klass(lookup.options);
 
-                      tileId = this.addTile(tile);
+                      tileId = this.addTile(tile, lookup.class);
                   }
 
                   layer.pushTile(i, [ tileId ]);
@@ -371,8 +386,8 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         return this._tiles;
     },
     
-    addTile: function(tile) {
-        var idx = this.getNextTileId();
+    addTile: function(tile, class) {
+        var idx = class + "_" + this.getNextTileId();
         this._tiles[idx] = tile;
         tile.setZone(this);
         return idx;
@@ -391,7 +406,6 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
     },
         
     chat: function(user, text) {
-        // TODO: need to bind this
         this.emit("chat", user + "> " + text);
     },
     

@@ -33,7 +33,7 @@ var DiluviaController = function(options) {
     this._chat                     = new Chat(document.body);
     this._serverInfo               = {};
     this._infoElement              = $('<div id="info_area"></div>');
-    this._infoContainer            = $('<div id="infoBar"></div>');
+    this._infoContainer            = $('<div id="info-bar"></div>');
     this._scoreElement             = $('<div id="score_number">0</div>');
     this._scoreBoard               = $('<div id="scoreboard"></div>');
     this._scoreTable               = $('<table cellspacing="0" cellpadding="0" border="0"></table>');
@@ -41,10 +41,12 @@ var DiluviaController = function(options) {
     this._selectedLayerContainer   = $('<span id="selectedLayer"></span>');
         
     this._editState = {
-      selectedLayer: "BASE_LAYER",
-      "BASE_LAYER": "BASE_WATER",
+      hoverTileIdx:   0,
+      selectedMode:   "paint",
+      selectedLayer:  "BASE_LAYER",
+      "BASE_LAYER":   "BASE_EMPTY",
       "OBJECT_LAYER": null,
-      "ACTOR_LAYER": null
+      "ACTOR_LAYER":  null
     };
     
     this["appendElementsFor_" + this._mode]();
@@ -86,6 +88,9 @@ DiluviaController.prototype = {
     },
     
     appendElementsFor_editor: function() {
+      this.preloadImage("tile_highlight.png");
+      this.preloadImage("tile_target.png");
+      $("#eraser_link img").addClass("selected");
       this._infoContainer.html("Painting ");
       this._infoContainer.append(this._selectedTileContainer);
       this._infoContainer.append(" on ");
@@ -162,9 +167,20 @@ DiluviaController.prototype = {
         this._protocol.send({ "type": "Command", "command": cmd });
     },
     
+    selectEraser: function() {
+      this._editState.selectedMode = "paint";
+      this._editState[this._editState.selectedLayer] = "BASE_EMPTY";
+      this._selectedTileContainer.html("BASE_EMPTY");
+    },
+    
+    switchZone: function(zoneId) {
+      this._protocol.send({ "type": "SwitchZone", "zone_id": zoneId });
+    },
+    
     showTileChooser: function() {
       var self = this;
-      $("#chooser").load('/tiles/list', function(){
+      this._editState.selectedMode = "paint";
+      $("#chooser").load('/editor/tiles', function(){
         $(".tile_image").hover(
           function(){ $("#ui-dialog-title-chooser").html($(this).attr("data-tileName")); },
           function(){ $("#ui-dialog-title-chooser").html("&nbsp;"); }
@@ -185,22 +201,70 @@ DiluviaController.prototype = {
 
     showLayerChooser: function() {
       var self = this;
-      $("#chooser").html('<div id="layer_chooser"><p><a href="#" id="BASE_LAYER">BASE_LAYER</a></p><p><a href="#" id="OBJECT_LAYER">OBJECT_LAYER</a></p><p><a href="#" id="ACTOR_LAYER">ACTOR_LAYER</a></p></div>').dialog({
+      $("#chooser").load('/editor/layers',function(){
+        $("#" + self._editState.selectedLayer).addClass("selected");
+        $("#layer_chooser p a").click(function(){
+           self._editState.selectedLayer = $(this).attr("id");
+           self._selectedLayerContainer.html(self._editState.selectedLayer);
+           $("#chooser").dialog("close");
+         });
+      }).dialog({
           modal: true,
           closeOnEscape: true,
           width: 300,
           height: 300
-      }).find("#" + this._editState.selectedLayer).addClass("selected");
-      $("#layer_chooser p a").click(function(){
-         self._editState.selectedLayer = $(this).attr("id");
-         self._selectedLayerContainer.html(self._editState.selectedLayer);
-         $("#chooser").dialog("close");
-       });
+      });
     },
     
+    startPortalEditing: function() {
+      this._editState.selectedMode = "portal";
+      this._selectedTileContainer.html("portals");
+      this._editState.selectedLayer = "OBJECT_LAYER";
+      this._selectedLayerContainer.html(this._editState.selectedLayer);
+    },
+
+    showPortalEditor: function() {
+      var self = this;
+      $("#chooser").load('/editor/portals', function(){
+        
+      }).dialog({
+          modal: true,
+          closeOnEscape: true,
+          width: 610,
+          height: 600
+      });
+    },
+    
+    hoverTile: function(x, y) {
+      var tileIdx = this.pixelsToIndex(x, y);
+      if (tileIdx != this._editState.hoverTileIdx) {
+        this._canvas.drawTargetTile(this._protocol.getZoneData(), tileIdx);
+        this._editState.hoverTileIdx = tileIdx;
+      }
+    },
+
     editTile: function(x, y) {
       var tileIdx = this.pixelsToIndex(x, y);
-      this._protocol.send({ "type": "EditTile", "tile_idx": tileIdx, "layer": this._editState.selectedLayer, "new_tile": this.getSelectedEditTile() });
+      if (this._editState.selectedMode === "paint") {
+        this._canvas.clearTarget();
+        this._protocol.send({ "type": "EditTile", "tile_idx": tileIdx, "layer": this._editState.selectedLayer, "new_tile": this.getSelectedEditTile() });
+      }
+      else if (this._editState.selectedMode === "portal") {
+        var zone = this._currentZoneState;
+        var zoneData = this._protocol.getZoneData();
+        var tileSet = zone.layers[1][tileIdx];
+        if (tileSet) {
+          for (var tsi = 0, tslen = tileSet.length; tsi < tslen; tsi++) {
+              var tileData    = tileSet[tsi],
+                  tileId      = tileData[0],
+                  tile        = zoneData.tiles[tileId];
+            if (tile && tileId.indexOf("PortalTile") === 0) {
+              this.showPortalEditor();
+            };
+          }
+        }
+        // this._protocol.send({ "type": "EditTile", "tile_idx": tileIdx, "layer": this._editState.selectedLayer, "new_tile": this.getSelectedEditTile() });
+      }
     },
     
     moveEditorView: function(dir) {

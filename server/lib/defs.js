@@ -134,7 +134,7 @@ Defs.Tiles = {
   
     HOLE:               { class: "PainTile",    image: "sprites.png:12,8", damage: -1 },
   
-    TREASURE:           { class: "GoalTile",    image: "sprites.png:5,5" },
+    TREASURE:           { class: "GoalTile",    image: "sprites.png:3,6", goalType: "treasure" },
 
     SKULL:              { class: "GoalTile",    image: "sprites.png:5,5", goalType: "skull" },
     SWORD:              { class: "GoalTile",    image: "sprites.png:3,5", goalType: "sword" }

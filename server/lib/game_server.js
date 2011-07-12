@@ -136,6 +136,18 @@ GameServer.prototype = {
             }
         });
         
+        client.on("switchZone", function(zoneId) {
+          var newZone = world.getZone(zoneId);
+          if (newZone !== undefined) {
+            account.setEditorZoneId(zoneId);
+            account.setEditorViewTileIndex(newZone.getDefaultSpawnPointIndex());
+            account.save(function(){
+              client.sendZoneData(newZone);
+              client.sendZoneState(world.composeZoneStateFor(account, newZone.getStateAttributes()));
+            });
+          }
+        });
+        
         client.on("editTile", function(msg) {
           var zoneId  = account.getEditorZoneId();
           if (zoneId !== undefined) {

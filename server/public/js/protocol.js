@@ -66,10 +66,9 @@ Protocol.prototype = {
     
     parseMessage: function(msg) {
         var self = this;
-        
         if (msg) {
             if (msg.type == "ZoneData") {
-                var zoneData = this._zoneData = msg.attrs,
+                var zoneData = self._zoneData = msg.attrs,
                     tileData = zoneData.tiles;
                 
                 if (zoneData.background) {
@@ -87,10 +86,10 @@ Protocol.prototype = {
                     self._controller.preloadImage(item.imagePath);
                 }
                 
-                this._controller.updateZoneData(zoneData);
+                self._controller.updateZoneData(zoneData);
             }
             else if (msg.type == "ZoneState")  {
-                this._controller.updateZoneState(msg.attrs);
+                self._controller.updateZoneState(msg.attrs);
             }
             else if (msg.type == "MoveFailed") {
                 self._controller.getSound().playAudio("bump");

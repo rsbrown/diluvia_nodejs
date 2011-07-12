@@ -196,12 +196,18 @@ a.logout {
     color: #DD3333;
 }
 
-#infoBar {
+#info-bar {
     position:   absolute;
     top:        10px;
     left:       250px;
     z-Index:    95;
     color:      white;
+}
+
+#menu-info {
+  height: 25px;
+  z-Index:    95;
+  color:      white;
 }
 
 #scoreboard {
@@ -225,8 +231,17 @@ a.logout {
     border-bottom: 1px dotted #ba0000
 }
 
-.editzone img.active {
-  border: 2px solid #AAAAAA;
+.editzone {
+  color: #FFFFFF;
+}
+
+.editzone .inline-menu {
+  float: left;
+  margin: 0 10px;
+}
+
+.editzone img.selected {
+  border: 2px solid #FF0000;
 }
 
 .editzone img {
@@ -240,8 +255,4 @@ a.logout {
   border: none;
   padding: 5px;
   background-color: #555555;
-}
-
-.editzone {
-  color: #FFFFFF;
 }

@@ -1,6 +1,6 @@
-var Chat = function(parent) {
+var Chat = function(canvas) {
     this._chatMessageElement = $('<div id="chat_messages"></div>');
-    $(parent).append(this._chatMessageElement);
+    $(canvas).append(this._chatMessageElement);
 };
 
 Chat.prototype = {

@@ -6,23 +6,39 @@
 <div id="editor_dashboard">
   <div class="editzone">
     <form action="/zones/save" method="post">
-      <div>
-         <select name="zone[id]">
-            <% var editingZone;%>
-            <% for (zid in zones) { %>
-              <% if (zones[zid].id === editingZoneId) { editingZone = zones[zid];} %>
-              <option value="<%=zones[zid].id%>"><%=zones[zid].name%></option>
-            <%}%>
-         </select>
-         <a style="color:#DDD;" href="/zones/new">Add new zone</a>
+      <div class="inline-menu">
+        <div>
+          Zone: 
+          <select name="zone[id]" id="zone-selector">
+             <% var editingZone;%>
+             <% for (zid in zones) { %>
+               <% if (zones[zid].id == editingZoneId) { 
+                    editingZone = zones[zid];
+                %>
+               <option value="<%=zones[zid].id%>" selected="true"><%=zones[zid].name%></option>
+               <% } else { %>
+               <option value="<%=zones[zid].id%>"><%=zones[zid].name%></option>
+               <% } %>
+             <%}%>
+          </select>
+          <a style="color:#DDD;" href="/zones/new">Add new zone</a>
+        </div>
+        <div>
+          <label for="zone[name]">Name:</label><input type="text" name="zone[name]" value="<%=editingZone.name%>" />, 
+          <label for="zone[width]">W</label><input type="text" name="zone[width]" size="4" value="<%=editingZone.width%>"/> x <label for="zone[height]">H</label><input type="text" name="zone[height]" size="4" value="<%=editingZone.height%>"/>
+          <input type="submit" value="save"/>
+        </div>
       </div>
-      <div>
-         <label for="zone[name]">Name:</label><input type="text" name="zone[name]" value="<%=editingZone.name%>" />, 
-         <label for="zone[width]">W</label><input type="text" name="zone[width]" size="4" value="<%=editingZone.width%>"/> x <label for="zone[height]">H</label><input type="text" name="zone[height]" size="4" value="<%=editingZone.height%>"/>
-         <input type="submit" value="save"/>
-         <a href="#" id="tile_chooser_link"><img src="/images/icons/paintbrush.png"/></a>
-         <a href="#" id="layer_chooser_link"><img src="/images/icons/layers.png"/></a>
+      <div class="inline-menu" id="edit_menu">
+         <div id="menu-info"></div>
+         <div>
+             <a href="#" id="eraser_link" data-info="Erase Tiles from Current Layer"><img src="/images/icons/bullet_delete.png"/></a>
+             <a href="#" id="tile_chooser_link" data-info="Paint Tiles on Current Layer"><img src="/images/icons/paintbrush.png"/></a>
+             <a href="#" id="layer_chooser_link" data-info="Choose Layer to Edit"><img src="/images/icons/layers.png"/></a>
+             <a href="#" id="portal_edit_link" data-info="Create/Edit Portals"><img src="/images/icons/map_edit.png"/></a>
+        </div>
       </div>
+      <div style="clear: both;"></div>
       <% if (false) { %>
       <textarea rows="40" cols="150" name="zone[config]">
       <%=JSON.stringify(zones[zid].config)%>
@@ -45,8 +61,8 @@
     
     function size_element(element) {
       element.css({
-          'width':  $(window).width() + "px",
-          'height': $(window).height() - $('#editor_dashboard').outerHeight() - $('header').outerHeight() + "px"
+          'width':  ($(window).width() - 20) + "px",
+          'height': ($(window).height() - 140) + "px"
       });
     }
     

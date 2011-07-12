@@ -81,6 +81,10 @@ Web.prototype = {
         });
     },
     
+    createNewZone: function(req, res, callback) {
+        Zone.createNewZone(req.session.account, callback);
+    },
+    
     startNewIsland: function(req, res, callback) {
         Zone.createNewIsland(req.session.account, callback);
     },

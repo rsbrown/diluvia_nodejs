@@ -38,6 +38,9 @@ _.extend(Client.prototype, events.EventEmitter.prototype, {
                 else if (msg.type == "CenterEditorView") {
                     this.emit("centerEditorView", msg.index);
                 }
+                else if (msg.type == "SwitchZone") {
+                    this.emit("switchZone", msg.zone_id);
+                }
                 else if (msg.type == "EditTile") {
                     this.emit("editTile", msg);
                 }

@@ -124,12 +124,47 @@ var Routes = module.exports = {
         }
     },
     
-    '/tiles/list': {
+    '/editor/tiles': {
       get: {
           middleware: ["loadUserSession"],
           exec: function(req, res) {
               if (req.session.account) {
-                res.render('tiles/list', {
+                res.render('editor/tiles', {
+                  layout: false,
+                  locals: {
+                    tiles:      Defs.Tiles
+                  }
+                });
+              } else {
+                  req.flash("error", "You must login to build your island.");
+                  res.redirect("/login");
+              }
+          }
+      }
+    },
+    
+    '/editor/layers': {
+      get: {
+          middleware: ["loadUserSession"],
+          exec: function(req, res) {
+              if (req.session.account) {
+                res.render('editor/layers', {
+                  layout: false
+                });
+              } else {
+                  req.flash("error", "You must login to build your island.");
+                  res.redirect("/login");
+              }
+          }
+      }
+    },
+    
+    '/editor/portals': {
+      get: {
+          middleware: ["loadUserSession"],
+          exec: function(req, res) {
+              if (req.session.account) {
+                res.render('editor/portals', {
                   layout: false,
                   locals: {
                     tiles:      Defs.Tiles
@@ -144,13 +179,28 @@ var Routes = module.exports = {
     },
     
     '/zones/new': {
+      get: {
+          middleware: ["loadUserSession"],
+          exec: function(req, res) {
+              if (req.session.account) {
+                  var world = this._gameServer.getWorld();
+                  this.createNewZone(req, res, function(newZone){
+                    world.setZone(newZone.getId(), newZone);
+                    res.redirect("/edit");
+                  });
+              } else {
+                  req.flash("error", "You must login to build your island.");
+                  res.redirect("/login");
+              }
+          }
+      }
     },
 
     '/zones/save': {
-        post: {exec: function(req, res){
-            this.updateZone(req.body.zone);
-            res.redirect("/edit");
-        }}
+      post: {exec: function(req, res){
+          this.updateZone(req.body.zone);
+          res.redirect("/edit");
+      }}
     },
 
     '/edit': {

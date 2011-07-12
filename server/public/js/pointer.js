@@ -32,9 +32,9 @@ Pointer.prototype = {
   editorMouseBindings: function() {
     var self = this;
     $("canvas").mousedown(function(ev) {
-        if (ev.which != 1) return true;
-        self._painting = true;
-        return false;
+      if (ev.which != 1) return true;
+      self._painting = true;
+      return false;
     });
     
     $(document).mousemove(function(ev){
@@ -45,25 +45,58 @@ Pointer.prototype = {
      });
     
     $(document).mouseup(function(){
-        self._painting = false;
-        return false;
+      self._painting = false;
+      return false;
+    });
+    
+    $("#zone-selector").change(function(){
+      self._controller.switchZone($(this).val());
     });
     
     $("canvas").click(function(ev) {
-        ev.preventDefault();
-        self._controller.editTile(ev.pageX, ev.pageY);
-        return false;
+      ev.preventDefault();
+      self._controller.editTile(ev.pageX, ev.pageY);
+    });
+    
+    $("canvas").mousemove(function(ev) {
+      self._controller.hoverTile(ev.pageX, ev.pageY);
+    });
+    
+    $("#edit_menu a").hover(
+      function() {
+        $("#menu-info").html($(this).data("info"));
+      },
+      function() {
+        $("#menu-info").html("");
+      }
+    );
+    
+    $("#eraser_link").click(function(ev){
+      ev.preventDefault();
+      $(this).parent().find("img.selected").removeClass("selected")
+      $(this).find("img").addClass("selected");
+      self._controller.selectEraser();
     });
     
     $("#tile_chooser_link").click(function(ev) {
         ev.preventDefault();
+        $(this).parent().find("img.selected").removeClass("selected")
+        $(this).find("img").addClass("selected");
         self._controller.showTileChooser();
-    })
+    });
     
     $("#layer_chooser_link").click(function(ev) {
         ev.preventDefault();
         self._controller.showLayerChooser();
-    })
+    });
+
+    $("#portal_edit_link").click(function(ev) {
+        ev.preventDefault();
+        $(this).parent().find("img.selected").removeClass("selected")
+        $(this).find("img").addClass("selected");
+        self._controller.startPortalEditing();
+        // self._controller.showPortalEditor();
+    });
     
   },
 
