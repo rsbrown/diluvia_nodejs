@@ -4,7 +4,6 @@ var Defs    = require("defs"),
 
 var SpawnTile = module.exports = function(options) {
     Tile.apply(this, arguments);
-    
     this.spawnTile = true;
 };
 

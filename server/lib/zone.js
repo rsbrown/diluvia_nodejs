@@ -218,7 +218,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
     },
     
     setDimensions: function(width, height) {
-        this._dimensions = [width, height];
+      this._dimensions = [width, height];
     },
     
     getDefaultSpawnPointIndex: function() {
@@ -327,7 +327,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
             actor.setOrientation(direction);
         }
         
-        var prevTileIndex  = actor.getTileIndex(),        
+        var prevTileIndex  = actor.getTileIndex(),
             nextTileIndex  = this.indexForDirectionalMove(prevTileIndex, direction);
                 
         if (nextTileIndex == -1) {

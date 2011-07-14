@@ -4,7 +4,7 @@ var Defs        = require("defs"),
 var Tile = module.exports = function(options) {
     options             = options || {};
     
-    this._image         = options.image         || "empty.png:0,0";
+    this._image         = options.image         || "";
     this._label         = options.label         || null;
     this._type          = options.type          || "Tile";
     this._description   = options.description   || "Tile";
@@ -48,6 +48,8 @@ Tile.prototype = {
     getType:        function() { return this._type },
     getDescription: function() { return this._description },
     getFPS:         function() { return this._fps },
+    
+    setImage:       function(img) { this._image = img; },
     
     getRenderAttributes: function() {
         return {

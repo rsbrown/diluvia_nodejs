@@ -201,9 +201,10 @@ var Routes = module.exports = {
                   res.render('editor/portal', {
                     layout: false,
                     locals: {
-                      portal:  portalInfo,
-                      tileIdx: portalTileIdx,
-                      zones:   zoneList
+                      portal:   portalInfo,
+                      tileIdx:  portalTileIdx,
+                      tiles:    Defs.Tiles,
+                      zones:    zoneList
                     }
                   });
                 })

@@ -1,20 +1,39 @@
-<form action="/editor/portal/<%=tileIdx%>" method="post">
-  <div>
-    <div>
-      Zone: 
-      <select name="portal[zone]">
-         <% for (zid in zones) { %>
-           <% if (zones[zid].id == portal.getDestinationZone() ) { %>
-           <option value="<%=zones[zid].id%>" selected="true"><%=zones[zid].name%></option>
-           <% } else { %>
-           <option value="<%=zones[zid].id%>"><%=zones[zid].name%></option>
-           <% } %>
-         <%}%>
-      </select>
-    </div>
-    <div>
-      <label for="portal[dest_coords]">Destination Tile (col,row):</label><input type="text" name="portal[dest_coords]" value="<%=portal.getDestinationCoords() ? portal.getDestinationCoords() : ""%>" />
-      <input type="submit" value="save"/>
-    </div>
-  </div>
-</form>
+<div id="portal_form">
+    <form action="/editor/portal/<%=tileIdx%>" method="post">
+        <div>
+          Zone: 
+          <select name="portal[zone]">
+             <% for (zid in zones) { %>
+               <% if (portal && zones[zid].id == portal.getDestinationZone() ) { %>
+               <option value="<%=zones[zid].id%>" selected="true"><%=zones[zid].name%></option>
+               <% } else { %>
+               <option value="<%=zones[zid].id%>"><%=zones[zid].name%></option>
+               <% } %>
+             <%}%>
+          </select>
+        </div>
+        <div>
+          <label for="portal[dest_coords]">Destination Tile (col,row):</label>
+          <input type="text" name="portal[dest_coords]" value="<%=(portal && portal.getDestinationCoords()) ? portal.getDestinationCoords() : ""%>" size="9"/>
+        </div>
+        <div>
+<%
+    var imgInfo = portal.getImage().split(":") 
+    var imgCoords = imgInfo[1].split(",");
+    var bgX = imgCoords[0]*64;
+    var bgY = imgCoords[1]*64;
+%>
+          <div style="float:left; paddi-right: 5px;">Display Image:</div>
+          <a id="portal_tile_chooser" href="#">
+            <div id="portal_tile_preview" class="tile_image_preview" style="background-image: url(/images/<%=imgInfo[0]%>); background-position: -<%=bgX%>px -<%=bgY%>px;">
+                <input type="hidden" id="portal_image_info" name="portal[image]" value="<%= portal.getImage() %>"/>
+            </div>
+          </a>
+        </div>
+        <div style="clear:both;">
+            <input type="submit" value="save"/>
+        </div>
+    </form>
+</div>
+
+<div id="portal_form_tiles"></div>

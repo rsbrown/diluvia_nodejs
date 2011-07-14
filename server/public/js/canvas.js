@@ -85,23 +85,24 @@ Canvas.prototype = {
                             var tileData    = tileSet[tsi],
                                 tileId      = tileData[0],
                                 tile        = zoneData.tiles[tileId];
-                    
+                            
+                            
                             if (tile) {
-                                this._context.drawImage(
-                                    this._controller.getImage(tile.imagePath),
-                                    tile.coords[0],
-                                    tile.coords[1],
-                                    Diluvia.TILE_DIMS[0],
-                                    Diluvia.TILE_DIMS[1],
-                                    destPixelCoords[0],
-                                    destPixelCoords[1],
-                                    Diluvia.TILE_DIMS[0],
-                                    Diluvia.TILE_DIMS[1]
-                                );
-                                if (this._controller.getMode() === "editor") {this.hookEditorTiles(tile, tileId, destPixelCoords);}
+                              this._context.drawImage(
+                                  this._controller.getImage(tile.imagePath),
+                                  tile.coords[0],
+                                  tile.coords[1],
+                                  Diluvia.TILE_DIMS[0],
+                                  Diluvia.TILE_DIMS[1],
+                                  destPixelCoords[0],
+                                  destPixelCoords[1],
+                                  Diluvia.TILE_DIMS[0],
+                                  Diluvia.TILE_DIMS[1]
+                              );
+                              if (this._controller.getMode() === "editor") {this.hookEditorTiles(tile, tileId, destPixelCoords);}
                             }
                             else {
-                                console.log("COULD NOT DRAW " + tileId);
+                                console.log("COULD NOT DRAW " + JSON.stringify(tileId));
                             }
                         }
                     }
@@ -141,7 +142,7 @@ Canvas.prototype = {
     },
     
     hookEditorTiles: function(tile, tileId, destPixelCoords) {
-      if(tileId.indexOf("PortalTile") === 0) {
+      if(this.isPortalTile(tileId)) {
         this._context.drawImage(
           this._controller.getImage("tile_highlight.png"),
           destPixelCoords[0],
@@ -152,6 +153,10 @@ Canvas.prototype = {
       }
     },
     
+    isPortalTile: function(tileId) {
+      return (tileId.indexOf("PortalTile") === 0);
+    },
+        
     recenter: function(zoneData, zoneState) {
       var zoneDims              = zoneData.dimensions,
           viewCenterIdx         = zoneState.viewCenterIdx,

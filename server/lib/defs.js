@@ -109,12 +109,16 @@ Defs.Tiles = {
     
     DUNGEON_DOOR_T:     { class: "WallTile",    image: "sprites.png:5,0" },
     DUNGEON_OPEN_T:     { class: "WallTile",    image: "sprites.png:4,0" },
+    DUNGEON_EXIT_T:     { class: "WallTile",    image: "sprites.png:9,0" },
     DUNGEON_DOOR_R:     { class: "WallTile",    image: "sprites.png:6,1" },
     DUNGEON_OPEN_R:     { class: "WallTile",    image: "sprites.png:6,0" },
+    DUNGEON_EXIT_R:     { class: "WallTile",    image: "sprites.png:9,1" },
     DUNGEON_DOOR_B:     { class: "WallTile",    image: "sprites.png:4,1" },
     DUNGEON_OPEN_B:     { class: "WallTile",    image: "sprites.png:5,1" },
+    DUNGEON_EXIT_B:     { class: "WallTile",    image: "sprites.png:8,1" },
     DUNGEON_DOOR_L:     { class: "WallTile",    image: "sprites.png:7,0" },
     DUNGEON_OPEN_L:     { class: "WallTile",    image: "sprites.png:7,1" },
+    DUNGEON_EXIT_R:     { class: "WallTile",    image: "sprites.png:8,0" },
   
     BORDER_T:           { class: "WallTile",    image: "sprites.png:13,7" },
     BORDER_B:           { class: "WallTile",    image: "sprites.png:13,8" },
@@ -132,7 +136,7 @@ Defs.Tiles = {
     WATER:              { class: "WallTile",    image: "sprites.png:0,7" },
     LAVA:               { class: "PainTile",    image: "sprites.png:8,7" , damage: 10, interval: 200 },
   
-    HOLE:               { class: "PainTile",    image: "sprites.png:12,8", damage: -1 },
+    VOID:               { class: "PainTile",    image: "sprites.png:12,8", damage: -1 },
   
     TREASURE:           { class: "GoalTile",    image: "sprites.png:3,6", goalType: "treasure" },
 

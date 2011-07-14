@@ -7,7 +7,6 @@
   <div class="editzone">
     <form action="/zones/save" method="post">
       <div class="inline-menu">
-        <div>
           Zone:
           <select name="zone[id]" id="zone-selector">
              <% var editingZone;%>
@@ -21,18 +20,17 @@
                <% } %>
              <%}%>
           </select>
-          <a href="#" id="edit_zone_link">Edit Zone Info</a>
-        </div>
-        <div><a href="/zones/new">Add new zone</a></div>
+          <span><a href="#" id="edit_zone_link">Edit Zone Info</a></span>
+          <span><a href="/zones/new">Add new zone</a></span>
       </div>      
       <div class="inline-menu" id="edit_menu">
-         <div id="menu-info"></div>
-         <div>
-             <a href="#" id="eraser_link" data-info="Erase Tiles from Current Layer"><img src="/images/icons/bullet_delete.png"/></a>
-             <a href="#" id="tile_chooser_link" data-info="Paint Tiles on Current Layer"><img src="/images/icons/paintbrush.png"/></a>
-             <a href="#" id="layer_chooser_link" data-info="Choose Layer to Edit"><img src="/images/icons/layers.png"/></a>
-             <a href="#" id="portal_edit_link" data-info="Create/Edit Portals"><img src="/images/icons/map_edit.png"/></a>
-        </div>
+        <span>
+          <a href="#" id="eraser_link" data-info="Erase Tiles from Current Layer"><img src="/images/icons/bullet_delete.png"/></a>
+          <a href="#" id="tile_chooser_link" data-info="Paint Tiles on Current Layer"><img src="/images/icons/paintbrush.png"/></a>
+          <a href="#" id="layer_chooser_link" data-info="Choose Layer to Edit"><img src="/images/icons/layers.png"/></a>
+          <a href="#" id="portal_edit_link" data-info="Create/Edit Portals"><img src="/images/icons/map_edit.png"/></a>
+        </span>
+        <span id="menu-info"></span>
       </div>
       <div style="clear: both;"></div>
       <% if (false) { %>

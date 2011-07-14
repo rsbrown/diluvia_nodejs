@@ -129,8 +129,12 @@ DiluviaController.prototype = {
         this._stateQueue.push(zoneState);
     },
     
+    isInitialized: function() {
+      return (!this.isLoadingImages() && this._hasRecvData && this._hasRecvState);
+    },
+    
     _onInterval: function() {
-        if (!this.isLoadingImages() && this._hasRecvData && this._hasRecvState && this._stateQueue.length > 0) {
+        if (this.isInitialized() && this._stateQueue.length > 0) {
             this._currentZoneState = this._stateQueue.shift();
             this.repaintCanvas();
         }
@@ -177,25 +181,35 @@ DiluviaController.prototype = {
       this._protocol.send({ "type": "SwitchZone", "zone_id": zoneId });
     },
     
-    showTileChooser: function() {
+    showTileChooser: function(callback) {
       var self = this;
       this._editState.selectedMode = "paint";
-      $("#chooser").load('/editor/tiles', function(){
-        $(".tile_image").hover(
-          function(){ $("#ui-dialog-title-chooser").html($(this).attr("data-tileName")); },
-          function(){ $("#ui-dialog-title-chooser").html("&nbsp;"); }
-        );
-        $(".tile_image").click(function(){
-          var newTile = $(this).attr("data-tileName");
-          self._editState[self._editState.selectedLayer] = newTile;
-          self._selectedTileContainer.html(newTile);
-          $("#chooser").dialog("close");
-        });
-      }).dialog({
+      $("#chooser").dialog({
           modal: true,
           closeOnEscape: true,
           width: 610,
           height: 600
+      });
+      this.loadTileChooser($("#chooser"), function(newTileName, newTileInfo) {
+        self._editState[self._editState.selectedLayer] = newTileName;
+        self._selectedTileContainer.html(newTileName);
+        $("#chooser").dialog("close");
+      });
+    },
+    
+    loadTileChooser: function(element, callback) {
+      var self = this;
+      element.load('/editor/tiles', function(){
+        $(".tile_image").hover(
+          function(){ $("#ui-dialog-title-chooser").html($(this).attr("data-tileName")); },
+          function(){ $("#ui-dialog-title-chooser").html("&nbsp;"); }
+        );
+        $(".tile_image").click(function(ev){
+          ev.preventDefault();
+          var newTileName = $(this).attr("data-tileName");
+          var newTileInfo = $(this).attr("data-tileInfo");
+          callback(newTileName, newTileInfo);
+        });
       });
     },
     
@@ -232,22 +246,46 @@ DiluviaController.prototype = {
       this._editState.selectedLayer = "OBJECT_LAYER";
       this._selectedLayerContainer.html(this._editState.selectedLayer);
     },
+    
+    bindPortalTileChooser: function() {
+      var self = this;
+      $("#portal_tile_chooser").click(function(ev) {
+        ev.preventDefault();
+        $("#portal_form").hide();
+        $("#portal_form_tiles").show();
+        self.loadTileChooser($("#portal_form_tiles"), function(tileName, tileInfo){
+          $("#portal_image_info").val(tileInfo);
+          $("#portal_form_tiles").hide();
+          $("#portal_form").show();
+          var imgInfo = tileInfo.split(":");
+          var imgCoords = imgInfo[1].split(",");
+          var bgX = imgCoords[0]*64;
+          var bgY = imgCoords[1]*64;
+          $("#portal_tile_preview").css("background-image", "url(/images/" + imgInfo[0] + ")");
+          $("#portal_tile_preview").css("background-position", "-" + bgX + "px -" + bgY + "px");
+        });
+      });
+    },
 
     showPortalEditor: function(tileIdx) {
       var self = this;
-      $("#chooser").load('/editor/portal/' + tileIdx).dialog({
+      $("#chooser").load('/editor/portal/' + tileIdx, function(){
+        self.bindPortalTileChooser();
+      }).dialog({
           modal: true,
           closeOnEscape: true,
-          width: 300,
-          height: 300
+          width: 610,
+          height: 600
       });
     },
     
     hoverTile: function(x, y) {
-      var tileIdx = this.pixelsToIndex(x, y);
-      if (tileIdx != this._editState.hoverTileIdx) {
-        this._canvas.drawTargetTile(this._protocol.getZoneData(), tileIdx);
-        this._editState.hoverTileIdx = tileIdx;
+      if (this.isInitialized()) {
+        var tileIdx = this.pixelsToIndex(x, y);
+        if (tileIdx != this._editState.hoverTileIdx) {
+          this._canvas.drawTargetTile(this._protocol.getZoneData(), tileIdx);
+          this._editState.hoverTileIdx = tileIdx;
+        }
       }
     },
 
@@ -258,20 +296,7 @@ DiluviaController.prototype = {
         this._protocol.send({ "type": "EditTile", "tile_idx": tileIdx, "layer": this._editState.selectedLayer, "new_tile": this.getSelectedEditTile() });
       }
       else if (this._editState.selectedMode === "portal") {
-        var zone = this._currentZoneState;
-        var zoneData = this._protocol.getZoneData();
-        var tileSet = zone.layers[1][tileIdx];
-        if (tileSet) {
-          for (var tsi = 0, tslen = tileSet.length; tsi < tslen; tsi++) {
-              var tileData    = tileSet[tsi],
-                  tileId      = tileData[0],
-                  tile        = zoneData.tiles[tileId];
-            if (tile && tileId.indexOf("PortalTile") === 0) {
-              this.showPortalEditor(tileIdx);
-            };
-          }
-        }
-        // this._protocol.send({ "type": "EditTile", "tile_idx": tileIdx, "layer": this._editState.selectedLayer, "new_tile": this.getSelectedEditTile() });
+        this.showPortalEditor(tileIdx);
       }
     },
     
@@ -280,7 +305,6 @@ DiluviaController.prototype = {
       if (nextTileIndex != -1) {
         this._currentZoneState.viewCenterIdx = nextTileIndex;
         this._canvas.recenter(this._protocol.getZoneData(), this._currentZoneState);
-        // this.repaintCanvas();
       }
     },
     

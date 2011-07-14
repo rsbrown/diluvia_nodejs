@@ -2,7 +2,9 @@ var _           = require("underscore"),
     Account     = require("account"),
     Defs        = require("defs"),
     Zone        = require("zone"),
-    Routes      = require("routes");
+    PortalTile  = require("portal_tile"),
+    Routes      = require("routes"),
+    Fence       = require("fence");
 
 var Web = module.exports = function(app, gameServer) {
     var self         = this;
@@ -94,15 +96,23 @@ Web.prototype = {
       var portalTileIdx = req.params.portalTileIdx;
       var zone = this._gameServer.getWorld().getZone(account.getEditorZoneId());
       if (zone) {
-        zone.tileAtIndex(portalTileIdx, function(tile){
-          if (tile.getType() === "Portal") {
-            Zone.findAllForAccount(account, function(zones) {
-                callback(tile, portalTileIdx, zones);
-            });
-          }
+        var portalTile = null;
+        var fence = new Fence(function(){
+          Zone.findAllForAccount(account, function(zones) {
+            if (portalTile) {
+              callback(portalTile, portalTileIdx, zones);
+            } else {
+              callback(null, portalTileIdx, zones);
+            }
+          });
         });
-      } else {
-        callback(null);
+        zone.tileAtIndex(portalTileIdx, fence.tap(function(tile, tileData, layerIndex){
+          if (layerIndex === Defs.OBJECT_LAYER) {
+            if (tile.portalTile) {
+              portalTile = tile;
+            }
+          }
+        }));
       }
     },
     
@@ -111,18 +121,31 @@ Web.prototype = {
       var portalTileIdx = req.params.portalTileIdx;
       var zone = this._gameServer.getWorld().getZone(account.getEditorZoneId());
       if (zone) {
-        zone.tileAtIndex(portalTileIdx, function(tile){
-          if (tile.getType() === "Portal") {
-            tile.setDestinationZone(req.body.portal.zone);
-            if (req.body.portal.dest_coords && req.body.portal.dest_coords !== "") {
-              var newCoords = req.body.portal.dest_coords.split(",");
-              tile.setDestinationCoords([Number(newCoords[0]), Number(newCoords[1])]);
-            } else {
-              tile.setDestinationCoords(null);
+        var portalTile = null;
+        var newCoords = null;
+        if (req.body.portal.dest_coords && req.body.portal.dest_coords !== "") {
+          var editCoords = req.body.portal.dest_coords.split(",");
+          newCoords = [Number(editCoords[0]), Number(editCoords[1])];
+        }
+        var fence = new Fence(function(){
+          if (portalTile == null) {
+              zone.getBoard().getLayer(Defs.OBJECT_LAYER).clearTile(portalTileIdx);
+              portalTile = new PortalTile({"image": "sprites.png:1,12"});
+              var newIdx = zone.addTile(portalTile, "PortalTile");
+              zone.getBoard().getLayer(Defs.OBJECT_LAYER).pushTile(portalTileIdx, [ newIdx ]);
+          }
+          portalTile.setDestinationZone(req.body.portal.zone);
+          portalTile.setDestinationCoords(newCoords);
+          portalTile.setImage(req.body.portal.image);
+          callback();
+        });        
+        zone.tileAtIndex(portalTileIdx, fence.tap(function(tile, tileData, layerIndex){
+          if (layerIndex === Defs.OBJECT_LAYER) {
+            if (tile.portalTile) {
+              portalTile = tile;
             }
           }
-          callback();
-        });
+        }));
       }
     },
     

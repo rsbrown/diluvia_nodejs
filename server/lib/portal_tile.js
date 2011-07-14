@@ -7,7 +7,7 @@ var PortalTile = module.exports = function(options) {
     
     this._destZone      = options.zone   || 0;
     this._destCoords    = options.dropAt;
-    this._type          = "Portal";
+    this.portalTile     = true;
 };
 
 _.extend(PortalTile.prototype, Tile.prototype, {

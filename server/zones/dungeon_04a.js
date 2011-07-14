@@ -21,7 +21,7 @@
         "$":    "DUNGEON_CORNER_BR",
         "^":    "DUNGEON_CORNER_BL",
         
-        "X":    "HOLE",
+        "X":    "VOID",
         
         "A":    "DUNGEON_DOOR_T",
         "B":    "DUNGEON_OPEN_T",

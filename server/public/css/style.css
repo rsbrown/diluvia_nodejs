@@ -37,8 +37,12 @@ header {
 }
 .flash {
     position: absolute;
+    left: 400px;
     background-color: #FFF;
     color: #FF3333;
+    left: 300px;
+    padding: 5px;
+    border: 2px solid #FF3333;
 }
 #logo {
 	font-size: 27px;
@@ -168,7 +172,7 @@ canvas {
   background-color: #BBBBBB;
 }
 
-.tile_image {
+.tile_image, .tile_image_preview {
   float: left;
   border: 3px solid black; 
   margin: 5px;
@@ -176,12 +180,12 @@ canvas {
   height: 64px;
 }
 
-.tile_image:hover {
+.tile_image:hover, .tile_image_preview:hover {
   cursor: pointer;
   border: 3px solid red;
 }
 
-.tile_image img {
+.tile_image img, .tile_image_preview img {
   position: relative;
 }
 
@@ -215,7 +219,7 @@ a.logout {
 }
 
 #menu-info {
-  height: 25px;
+  font-size:  18px;
   z-Index:    95;
   color:      white;
 }
@@ -245,6 +249,14 @@ a.logout {
   margin: 0 10px;
 }
 
+.editzone .inline-menu span {
+  margin: 0 8px;
+}
+
+#edit_menu a {
+  border: none;
+}
+
 .editzone img.selected {
   border: 2px solid #FF0000;
 }
@@ -260,4 +272,8 @@ a.logout {
   border: none;
   padding: 5px;
   background-color: #555555;
+}
+
+#portal_form_tiles {
+  display: none;
 }
