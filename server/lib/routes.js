@@ -29,14 +29,14 @@ var Routes = module.exports = {
       }
     },
 
-    '/goto/:zoneid': {
-      get: {
-        middleware: ["loadUserSession"],
-        exec: function(req, res){
-        req.session.selectedZone = req.params.zoneid;
-        res.redirect("/play");
-      }}
-    },
+    // '/goto/:zoneid': {
+    //   get: {
+    //     middleware: ["loadUserSession"],
+    //     exec: function(req, res){
+    //     req.session.selectedZone = req.params.zoneid;
+    //     res.redirect("/play");
+    //   }}
+    // },
 
     '/play': {
       get: {
@@ -47,8 +47,8 @@ var Routes = module.exports = {
             locals: { 
                 sessionId:     req.session.id,
                 play_music:    req.session.isMusicOn,
-                selected_zone: req.session.selectedZone,
                 flash:         req.flash(),
+                account:       req.session.account,
                 username:      req.session.username
             }
         });
@@ -124,6 +124,41 @@ var Routes = module.exports = {
         }
     },
     
+    '/editor/save': {
+      get: {
+        middleware: ["loadUserSession"],
+        exec: function(req, res) {
+          var account = req.session.account;
+          if (account) {
+            this.saveEditorState(account.getId(), function(){
+              res.send("SUCCESS");
+            });
+          } else {
+            req.flash("error", "You must login to build your island.");
+            res.redirect("/login");
+          }
+        }
+      }
+    },
+    
+    '/edit/:zoneid': {
+      get: {
+        middleware: ["loadUserSession"],
+        exec: function(req, res) {
+          var account = req.session.account;
+          if (account) {
+            account.setEditorZoneId(req.params.zoneid);
+            account.save(function(){
+              res.redirect("/edit");
+            });
+          } else {
+            req.flash("error", "You must login to build your island.");
+            res.redirect("/login");
+          }
+        }
+      }
+    },
+    
     '/editor/tiles': {
       get: {
           middleware: ["loadUserSession"],
@@ -182,7 +217,7 @@ var Routes = module.exports = {
         exec: function(req, res) {
           if (req.session.account) {
             var editingZoneId = req.session.account.getEditorZoneId();
-            this.updateZone(editingZoneId, req.body.zone);
+            this.updateZone(req.session.account, editingZoneId, req.body.zone);
             res.redirect("/edit");
           } else {
             req.flash("error", "You must login to build your island.");
@@ -197,14 +232,16 @@ var Routes = module.exports = {
           middleware: ["loadUserSession"],
           exec: function(req, res) {
               if (req.session.account) {
-                this.getPortalInfo(req, function(portalInfo, portalTileIdx, zoneList){
+                this.getPortalInfo(req, function(portalInfo, portalTileIdx, zoneList, accountList){
                   res.render('editor/portal', {
                     layout: false,
                     locals: {
-                      portal:   portalInfo,
-                      tileIdx:  portalTileIdx,
-                      tiles:    Defs.Tiles,
-                      zones:    zoneList
+                      portal:      portalInfo,
+                      tileIdx:     portalTileIdx,
+                      tiles:       Defs.Tiles,
+                      zones:       zoneList,
+                      myAccountId: req.session.account.getId(),
+                      accounts:    accountList
                     }
                   });
                 })

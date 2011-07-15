@@ -1,15 +1,22 @@
+<% 
+  var accountNames = {};
+  for (aid in accounts) { 
+    accountNames[accounts[aid]._id] = accounts[aid]._username;
+  } 
+%>
+
 <div id="portal_form">
     <form action="/editor/portal/<%=tileIdx%>" method="post">
         <div>
           Zone: 
-          <select name="portal[zone]">
-             <% for (zid in zones) { %>
-               <% if (portal && zones[zid].id == portal.getDestinationZone() ) { %>
-               <option value="<%=zones[zid].id%>" selected="true"><%=zones[zid].name%></option>
-               <% } else { %>
-               <option value="<%=zones[zid].id%>"><%=zones[zid].name%></option>
-               <% } %>
-             <%}%>
+          <select name="portal[zone]" id="portal_zones">
+          <% for (zid in zones) { %>
+            <% if (portal && zones[zid].id == portal.getDestinationZone() ) { %>
+              <option value="<%=zones[zid].id%>" selected="true"><%=accountNames[zones[zid].account_id]%> - <%=zones[zid].name%></option>
+            <% } else { %>
+              <option value="<%=zones[zid].id%>"><%=accountNames[zones[zid].account_id]%> - <%=zones[zid].name%></option>
+            <% } %>
+          <% } %>
           </select>
         </div>
         <div>
@@ -18,6 +25,7 @@
         </div>
         <div>
 <%
+    portal = portal ? portal : {getImage: function(){return "sprites.png:0,6";}};
     var imgInfo = portal.getImage().split(":") 
     var imgCoords = imgInfo[1].split(",");
     var bgX = imgCoords[0]*64;

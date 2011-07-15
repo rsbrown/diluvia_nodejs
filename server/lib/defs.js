@@ -55,7 +55,7 @@ Defs.Tiles = {
     SPAWN_STONE:        { class: "SpawnTile",   image: "sprites.png:4,7" },
     SPAWN_GRASS:        { class: "SpawnTile",   image: "sprites.png:2,7" },
     EMPTY_WALL:         { class: "WallTile",    image: "sprites.png:0,6" },
-    EMPTY_SPACE:        { class: "Tile",        image: "sprites.png:12,8" },
+    EMPTY_SPACE:        { class: "Tile",        image: "sprites.png:0,6" },
 
     TREE_1:       { class: "WallTile",    image: "sprites.png:3,2" },
     TREE_2:       { class: "WallTile",    image: "sprites.png:4,2" },

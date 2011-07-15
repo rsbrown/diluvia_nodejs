@@ -110,7 +110,7 @@ _.extend(Account.prototype, events.EventEmitter.prototype, {
             "score"               : this._score
         });
     },
-
+    
     getPlayer: function() {
         return this._player;
     },

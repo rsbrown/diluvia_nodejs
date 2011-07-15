@@ -8,8 +8,9 @@ var io          = require("socket.io"),
     Routes      = require("routes");
 
 var GameServer = module.exports = function(app) {
-    this._app   = app;
-    this._world = new World();
+    this._app          = app;
+    this._world        = new World();
+    this._unsavedEdits = {};
     this._world.on("loaded", _(this._onWorldLoaded).bind(this));
 };
 
@@ -124,6 +125,7 @@ GameServer.prototype = {
     
     bindEditorEvents: function(account){
         var client  = account.getClient(),
+            self    = this,
             world   = this._world,
             zone    = world.getZone(account.getEditorZoneId());
         console.log("INIT EDITOR SESSION FOR USER " + account.getUsername());
@@ -141,7 +143,7 @@ GameServer.prototype = {
         
         client.on("switchZone", function(zoneId) {
           var newZone = world.getZone(zoneId);
-          if (newZone !== undefined) {
+          if ((newZone !== undefined) && (newZone.getAccountId() == account.getId())) {
             account.setEditorZoneId(zoneId);
             account.setEditorViewTileIndex(newZone.getDefaultSpawnPointIndex());
             account.save(function(){
@@ -152,15 +154,31 @@ GameServer.prototype = {
         });
         
         client.on("editTile", function(msg) {
-          var zoneId  = account.getEditorZoneId();
-          if (zoneId !== undefined) {
+          var zoneId = account.getEditorZoneId();
+          var zone = world.getZone(zoneId);
+          if ((zone !== undefined) && (zone.getAccountId() == account.getId())) {
               var editLayer = Defs[msg.layer];
-              var zone = world.getZone(zoneId);
               zone.getBoard().getLayer(editLayer).clearTile(msg.tile_idx);
               zone.getBoard().getLayer(editLayer).pushTile(msg.tile_idx, [ msg.new_tile ]);
+              self.addUnsavedEdit(account.getId(), zoneId);
               client.sendZoneState(world.composeZoneStateFor(account, zone.getStateAttributes()));
           }
         });
+    },
+    
+    addUnsavedEdit: function(accountId, zoneId) {
+      if (this._unsavedEdits[accountId] === undefined) { this._unsavedEdits[accountId] = [];}
+      if (this._unsavedEdits[accountId].indexOf(zoneId) == -1) {
+        this._unsavedEdits[accountId].push(zoneId);
+      }
+    },
+    
+    getUnsavedEdits: function(accountId) {
+      return this._unsavedEdits[accountId];
+    },
+    
+    clearUnsavedEdits: function(accountId) {
+      this._unsavedEdits[accountId] = [];
     },
     
     getWorld: function() {

@@ -26,7 +26,7 @@ Canvas.prototype = {
             tileWidth       = Diluvia.TILE_DIMS[0],
             tileHeight      = Diluvia.TILE_DIMS[1],
             bgImg;
-                    
+
         if (zoneData.background) {
             bgImg = this._controller.getImage(zoneData.background);
         }

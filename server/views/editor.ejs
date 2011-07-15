@@ -1,6 +1,7 @@
 <script type="text/javascript" charset="utf-8">
     DILUVIA_SESSION = "<%= sessionId %>";
     PLAY_MUSIC = false;
+    $("div#welcome").html("<div><a href='/play'>Play Mode</a></div>");
 </script>
 
 <div id="editor_dashboard">
@@ -22,7 +23,8 @@
           </select>
           <span><a href="#" id="edit_zone_link">Edit Zone Info</a></span>
           <span><a href="/zones/new">Add new zone</a></span>
-      </div>      
+          <div><form action="/editor/save"><input type="submit" id="save-button" value="save your changes"/></form><span id="save-msg"></span></div>
+      </div>
       <div class="inline-menu" id="edit_menu">
         <span>
           <a href="#" id="eraser_link" data-info="Erase Tiles from Current Layer"><img src="/images/icons/bullet_delete.png"/></a>
@@ -69,6 +71,16 @@
         });
         size_element($('#viewport_container'));
         size_element($('#main'));
+        
+        $("#save-button").click(function(ev){
+            ev.preventDefault();
+            $.ajax({
+                url: "/editor/save",
+                success: function() {
+                 $("#save-msg").html("saved").show().fadeOut(5000);
+                }
+            });
+        });
         
         $(window).resize(function() {
           size_element($('#main'));

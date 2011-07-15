@@ -98,12 +98,14 @@ Web.prototype = {
       if (zone) {
         var portalTile = null;
         var fence = new Fence(function(){
-          Zone.findAllForAccount(account, function(zones) {
-            if (portalTile) {
-              callback(portalTile, portalTileIdx, zones);
-            } else {
-              callback(null, portalTileIdx, zones);
-            }
+          Zone.findAll(function(zones) {
+            Account.findAll(function(accounts) {
+              if (portalTile) {
+                callback(portalTile, portalTileIdx, zones, accounts);
+              } else {
+                callback(null, portalTileIdx, zones, accounts);
+              }
+            });
           });
         });
         zone.tileAtIndex(portalTileIdx, fence.tap(function(tile, tileData, layerIndex){
@@ -118,9 +120,11 @@ Web.prototype = {
     
     setPortalInfo: function(req, callback) {
       var account = req.session.account;
+      var server = this._gameServer;
       var portalTileIdx = req.params.portalTileIdx;
-      var zone = this._gameServer.getWorld().getZone(account.getEditorZoneId());
-      if (zone) {
+      var zoneId = account.getEditorZoneId();
+      var zone = server.getWorld().getZone(zoneId);
+      if (zone && (zone.getAccountId() == account.getId())) {
         var portalTile = null;
         var newCoords = null;
         if (req.body.portal.dest_coords && req.body.portal.dest_coords !== "") {
@@ -137,6 +141,7 @@ Web.prototype = {
           portalTile.setDestinationZone(req.body.portal.zone);
           portalTile.setDestinationCoords(newCoords);
           portalTile.setImage(req.body.portal.image);
+          server.addUnsavedEdit(account.getId(), zoneId);
           callback();
         });        
         zone.tileAtIndex(portalTileIdx, fence.tap(function(tile, tileData, layerIndex){
@@ -155,12 +160,29 @@ Web.prototype = {
         });
     },
 
-    updateZone: function(zoneId, zoneParams) {
+    updateZone: function(account, zoneId, zoneParams) {
+        var server = this._gameServer;
         Zone.findById(zoneId, function(zone) {
+          if (zone && (zone.getAccountId() == account.getId())) {
             zone.setName(zoneParams.name);
             zone.setDimensions(zoneParams.width, zoneParams.height);
-            zone.save();
+            server.addUnsavedEdit(account.getId(), zoneId);
+          }
         });
+    },
+    
+    saveEditorState: function(accountId, callback) {
+      var server = this._gameServer;
+      var zoneList = server.getUnsavedEdits(accountId);
+      var fence = new Fence(callback);
+      for (i in zoneList) {
+        var zoneId = zoneList[i];
+        Zone.findById(zoneId, fence.tap(function(zone) {
+          // SAVE ZONE
+          console.log("saved zone " + zone.getId());
+        }));
+      }
+      server.clearUnsavedEdits(accountId);
     }
     
 };

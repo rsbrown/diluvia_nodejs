@@ -61,12 +61,16 @@
         });
         
         $("div#welcome").html(
-          "<div id='audio-controls'>                                                                               \
-            <div id='help'><a href='#'><img src='/images/icons/help.png'/></a></div>                                                                                      \
-            <div id='audio-pause'><a href='#'><img src='/images/icons/pause.png'/></a></div>                       \
-            <div id='audio-play'><a href='#'><img src='/images/icons/play.png'/></a></div>  \
+          "<div id='audio-controls'>                                                         \
+            <div id='help'><a href='#'><img src='/images/icons/help.png'/></a></div>         \
+            <div id='audio-pause'><a href='#'><img src='/images/icons/pause.png'/></a></div> \
+            <div id='audio-play'><a href='#'><img src='/images/icons/play.png'/></a></div>   \
           </div>"
         );
+
+        <% if (account && account.getIslandZoneId() !== undefined) { %>
+          $("div#welcome").append("<div><a href='/edit'>Edit Mode</a></div>");
+        <% } %>        
         
         $("#audio-pause a").click(function(e){
           e.preventDefault();
