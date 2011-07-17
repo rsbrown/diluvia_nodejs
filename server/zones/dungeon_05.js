@@ -35,7 +35,7 @@
         "R":    { "class": "PortalTile", "options": { "zone": "zones:6", "image": "sprites.png:3,1", "dropAt": [ 2, 3 ] } }
     },
     
-    "baseMap":  [   
+    "LAYER_0":  [   
                     ".........",
                     ".........",
                     ".........",
@@ -57,7 +57,7 @@
                     "........."
                 ],
                      
-     "objectMap": [  
+     "LAYER_1": [  
                     "000000000",
                     "0811Q1120",
                     "07     30",

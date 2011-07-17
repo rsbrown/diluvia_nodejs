@@ -5,6 +5,8 @@ var Diluvia = {
     INTERVAL_DELAY:         10,
     FLASH_DURATION:         250,
     
+    BASE_EMPTY_TILE:        7,
+    
     rowColToPixels: function(row, col) {
         return [row * Diluvia.TILE_DIMS[0], col * Diluvia.TILE_DIMS[1]];
     }
@@ -14,7 +16,7 @@ var DiluviaController = function(options) {
     var self                = this;
     
     this._mode                     = options.mode;
-    this._protocol                 = new Protocol(this, options.socket_host, options.socket_params);
+    this._protocol                 = new Protocol(this);
     this._connectCallback          = options.on_connect;
     this._keyboard                 = new Keyboard(this);
     this._pointer                  = new Pointer(this);
@@ -44,9 +46,9 @@ var DiluviaController = function(options) {
       hoverTileIdx:   0,
       selectedMode:   "paint",
       selectedLayer:  "BASE_LAYER",
-      "BASE_LAYER":   "BASE_EMPTY",
-      "OBJECT_LAYER": "BASE_EMPTY",
-      "ACTOR_LAYER":  "BASE_EMPTY"
+      "BASE_LAYER":   Diluvia.BASE_EMPTY_TILE,
+      "OBJECT_LAYER": Diluvia.BASE_EMPTY_TILE,
+      "ACTOR_LAYER":  Diluvia.BASE_EMPTY_TILE
     };
     
     this["appendElementsFor_" + this._mode]();
@@ -96,7 +98,7 @@ DiluviaController.prototype = {
       this._infoContainer.append(" on ");
       this._infoContainer.append(this._selectedLayerContainer);
       $(document.body).append(this._infoContainer);
-      this._selectedTileContainer.html(this.getSelectedEditTile());
+      this._selectedTileContainer.html("BASE_EMPTY_TILE");
       this._selectedLayerContainer.html(this._editState.selectedLayer);
     },
     
@@ -173,8 +175,8 @@ DiluviaController.prototype = {
     
     selectEraser: function() {
       this._editState.selectedMode = "paint";
-      this._editState[this._editState.selectedLayer] = "BASE_EMPTY";
-      this._selectedTileContainer.html("BASE_EMPTY");
+      this._editState[this._editState.selectedLayer] = Diluvia.BASE_EMPTY_TILE;
+      this._selectedTileContainer.html("BASE_EMPTY_TILE");
     },
     
     switchZone: function(zoneId) {
@@ -183,15 +185,15 @@ DiluviaController.prototype = {
     
     showTileChooser: function(callback) {
       var self = this;
-      this._editState.selectedMode = "paint";
       $("#chooser").dialog({
           modal: true,
           closeOnEscape: true,
           width: 610,
           height: 600
       });
-      this.loadTileChooser($("#chooser"), function(newTileName, newTileInfo) {
-        self._editState[self._editState.selectedLayer] = newTileName;
+      this.loadTileChooser($("#chooser"), function(newTileId, newTileName, newTileInfo) {
+        self._editState.selectedMode = "paint";
+        self._editState[self._editState.selectedLayer] = newTileId;
         self._selectedTileContainer.html(newTileName);
         $("#chooser").dialog("close");
       });
@@ -207,8 +209,9 @@ DiluviaController.prototype = {
         $(".tile_image").click(function(ev){
           ev.preventDefault();
           var newTileName = $(this).attr("data-tileName");
+          var newTileId = $(this).attr("data-tileId");
           var newTileInfo = $(this).attr("data-tileInfo");
-          callback(newTileName, newTileInfo);
+          callback(newTileId, newTileName, newTileInfo);
         });
       });
     },
@@ -227,6 +230,7 @@ DiluviaController.prototype = {
       $("#chooser").load('/editor/layers',function(){
         $("#" + self._editState.selectedLayer).addClass("selected");
         $("#layer_chooser p a").click(function(){
+           self._editState.selectedMode = "paint";
            self._editState.selectedLayer = $(this).attr("id");
            self._selectedLayerContainer.html(self._editState.selectedLayer);
            self._selectedTileContainer.html(self._editState[self._editState.selectedLayer]);
@@ -253,7 +257,7 @@ DiluviaController.prototype = {
         ev.preventDefault();
         $("#portal_form").hide();
         $("#portal_form_tiles").show();
-        self.loadTileChooser($("#portal_form_tiles"), function(tileName, tileInfo){
+        self.loadTileChooser($("#portal_form_tiles"), function(tileId, tileName, tileInfo) {
           $("#portal_image_info").val(tileInfo);
           $("#portal_form_tiles").hide();
           $("#portal_form").show();
@@ -282,6 +286,8 @@ DiluviaController.prototype = {
     hoverTile: function(x, y) {
       if (this.isInitialized()) {
         var tileIdx = this.pixelsToIndex(x, y);
+        var rowCol = this.indexToRowCol(tileIdx);
+        $("#menu-info").html(rowCol[1] + "," + rowCol[0]);
         if (tileIdx != this._editState.hoverTileIdx) {
           this._canvas.drawTargetTile(this._protocol.getZoneData(), tileIdx);
           this._editState.hoverTileIdx = tileIdx;

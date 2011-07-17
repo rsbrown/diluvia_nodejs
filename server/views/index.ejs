@@ -1,7 +1,7 @@
 <div id="content">
   <div class="info">Welcome to Diluvia!</div> 
-<%  if (account) { %>
-<%    if (account.getIslandZoneId() !== undefined) { %>
+<%  if (everyauth.user) { %>
+<%    if (everyauth.user._islandZoneId) { %>
     <a href="/edit">Edit your island</a>
 <%    } else { %>
     <a href="/create_island">Create your own island</a>

@@ -11,7 +11,7 @@ var Routes = module.exports = {
                     locals: {
                         username:     req.session.username,
                         play_music:   req.session.isMusicOn,
-                        account:      req.session.account,
+                        account:      req.user,
                         islands:      islandList,
                         flash:        req.flash()
                     }
@@ -48,7 +48,7 @@ var Routes = module.exports = {
                 sessionId:     req.session.id,
                 play_music:    req.session.isMusicOn,
                 flash:         req.flash(),
-                account:       req.session.account,
+                account:       req.user,
                 username:      req.session.username
             }
         });
@@ -68,49 +68,11 @@ var Routes = module.exports = {
       }}
     },
 
-    '/auth/facebook': {
-      get: {
-          exec: function(req, res) {
-              var self = this;
-              req.authenticate(['facebook'], function(error, authenticated) { 
-                  if(authenticated ) {
-                      self.getAccountFromFacebookAuth(req.getAuthDetails(), function(account){
-                          if (account) {
-                              req.session.accountId = account.getId();
-                          }
-                          else {
-                              req.session.flash.error = "Account validation failed";
-                          }
-                          self.redirectBackOrRoot(req, res);
-                      });
-                  }
-                  else {
-                      req.session.flash.error = "Facebook authentication failed";
-                      self.redirectBackOrRoot(req, res);
-                  }
-              });
-          }
-      }
-    },
-
-    '/auth/twitter': {
-      get: {exec: function(req, res) {
-        req.authenticate(['twitter'], function(error, authenticated) {
-                if( authenticated ) {
-                    // CONGRATS, DO SOME STUFF
-                } else {
-                    req.session.flash.error = "Twitter authentication failed";
-                    res.render('index', {locals: {flash: req.flash(), username: null}});
-                }
-        });
-      }}
-    },
-
     '/create_island': {
         get: {
             middleware: ["loadUserSession"],
             exec: function(req, res) {
-                if (req.session.account) {
+                if (req.user) {
                     var world = this._gameServer.getWorld();
                     this.startNewIsland(req, res, function(newZone){
                       world.setZone(newZone.getId(), newZone);
@@ -128,7 +90,7 @@ var Routes = module.exports = {
       get: {
         middleware: ["loadUserSession"],
         exec: function(req, res) {
-          var account = req.session.account;
+          var account = req.user;
           if (account) {
             this.saveEditorState(account.getId(), function(){
               res.send("SUCCESS");
@@ -145,7 +107,7 @@ var Routes = module.exports = {
       get: {
         middleware: ["loadUserSession"],
         exec: function(req, res) {
-          var account = req.session.account;
+          var account = req.user;
           if (account) {
             account.setEditorZoneId(req.params.zoneid);
             account.save(function(){
@@ -163,7 +125,7 @@ var Routes = module.exports = {
       get: {
           middleware: ["loadUserSession"],
           exec: function(req, res) {
-              if (req.session.account) {
+              if (req.user) {
                 res.render('editor/tiles', {
                   layout: false,
                   locals: {
@@ -182,7 +144,7 @@ var Routes = module.exports = {
       get: {
           middleware: ["loadUserSession"],
           exec: function(req, res) {
-              if (req.session.account) {
+              if (req.user) {
                 res.render('editor/layers', {
                   layout: false
                 });
@@ -198,8 +160,8 @@ var Routes = module.exports = {
       get: {
           middleware: ["loadUserSession"],
           exec: function(req, res) {
-              if (req.session.account) {
-                var editingZoneId = req.session.account.getEditorZoneId();
+              if (req.user) {
+                var editingZoneId = req.user.getEditorZoneId();
                 res.render('editor/zone', {
                   layout: false,
                   locals: {
@@ -215,9 +177,9 @@ var Routes = module.exports = {
       post: {
         middleware: ["loadUserSession"],
         exec: function(req, res) {
-          if (req.session.account) {
-            var editingZoneId = req.session.account.getEditorZoneId();
-            this.updateZone(req.session.account, editingZoneId, req.body.zone);
+          if (req.user) {
+            var editingZoneId = req.user.getEditorZoneId();
+            this.updateZone(req.user, editingZoneId, req.body.zone);
             res.redirect("/edit");
           } else {
             req.flash("error", "You must login to build your island.");
@@ -231,7 +193,7 @@ var Routes = module.exports = {
       get: {
           middleware: ["loadUserSession"],
           exec: function(req, res) {
-              if (req.session.account) {
+              if (req.user) {
                 this.getPortalInfo(req, function(portalInfo, portalTileIdx, zoneList, accountList){
                   res.render('editor/portal', {
                     layout: false,
@@ -240,7 +202,7 @@ var Routes = module.exports = {
                       tileIdx:     portalTileIdx,
                       tiles:       Defs.Tiles,
                       zones:       zoneList,
-                      myAccountId: req.session.account.getId(),
+                      myAccountId: req.user.getId(),
                       accounts:    accountList
                     }
                   });
@@ -254,7 +216,7 @@ var Routes = module.exports = {
       post: {
         middleware: ["loadUserSession"],
         exec: function(req, res) {
-          if (req.session.account) {
+          if (req.user) {
             this.setPortalInfo(req, function(){
               req.flash("info", "Portal info updated.");
               res.redirect("/edit");
@@ -271,7 +233,7 @@ var Routes = module.exports = {
       get: {
           middleware: ["loadUserSession"],
           exec: function(req, res) {
-              if (req.session.account) {
+              if (req.user) {
                   var world = this._gameServer.getWorld();
                   this.createNewZone(req, res, function(newZone){
                     world.setZone(newZone.getId(), newZone);
@@ -291,12 +253,12 @@ var Routes = module.exports = {
         exec: function(req, res){
             var self = this;
             req.session["store_location"] = '/edit';
-            if (req.session.account) {
-                self.getEditableZones(req.session.account, function(zoneList) {
+            if (req.user) {
+                self.getEditableZones(req.user, function(zoneList) {
                     res.render('editor', {
                         locals: {
                             sessionId:      req.session.id,
-                            editingZoneId:  req.session.account.getEditorZoneId(),
+                            editingZoneId:  req.user.getEditorZoneId(),
                             zones:          zoneList,
                             username:       req.session.username,
                             flash:          req.flash()

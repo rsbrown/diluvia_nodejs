@@ -18,6 +18,9 @@
     <script src="/js/sound.js" type="text/javascript" charset="utf-8"></script>
     <script src="/js/chat.js" type="text/javascript" charset="utf-8"></script>
     <script src="/js/diluvia.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+      var SOCKET_URI = "<%=SOCKET_URI%>";
+    </script>
   </head>
   <body>
     <% if(flash && flash.error) { %>
@@ -28,9 +31,17 @@
     <header>
       <a href="/"><img src="/images/logo.png" alt="Diluvia" id="logo"></a>
       <div class="header-item" id="user-login">
-        <% if (username) { %>
-          <span id="header-links"><a id="account" href="#"><%= username %></a> (<a class="logout" href="/logout">logout</a>) </span> 
+        <% if (everyauth.loggedIn) { %>
+          <span id="header-links"><a id="account" href="#"><%= everyauth.user._username %></a> (<a class="logout" href="/logout">logout</a>) </span> 
         <% } else { %>
+          <% if (false) { %>
+          <div style="float: left; margin-right: 10px; line-height: 15px;">
+            <a href='/auth/google' style='padding: 5px; border: solid 1px #DDDDDD; background: #444444; font-size: 12px;'>
+              Login via Google 
+              <img style='border: 0px' src='https://www.google.com/favicon.ico'/>
+            </a>
+          </div>
+          <% } %>
           <div class="fb_button" id="fb-login" style="float:left; background-position: left -188px">
             <a href="/auth/facebook" class="fb_button_medium">
               <span id="fb_login_text" class="fb_button_text">

@@ -17,7 +17,17 @@ var GameServer = module.exports = function(app) {
 GameServer.prototype = {
     _onWorldLoaded: function() {
         this._socket = io.listen(this._app);
-        this._socket.on("connection", _(this._onConnect).bind(this));
+        this._socket.enable('browser client minification');
+        this._socket.set('log level', 3);
+        this._socket.set('transports', [
+            'websocket'
+          // , 'flashsocket'
+          // , 'htmlfile'
+          // , 'xhr-polling'
+          // , 'jsonp-polling'
+        ]);
+        
+        this._socket.sockets.on("connection", _(this._onConnect).bind(this));
     },
     
     _onConnect: function(conn) {
@@ -42,7 +52,6 @@ GameServer.prototype = {
     
     initAccount: function(client, sessionId) {
         var self = this;
-
         Account.initFromSession(sessionId, function(account){
             // var alreadyLoggedInAccount = world.getAccountById(account.getId());
             // console.log(alreadyLoggedInAccount);
@@ -159,7 +168,7 @@ GameServer.prototype = {
           if ((zone !== undefined) && (zone.getAccountId() == account.getId())) {
               var editLayer = Defs[msg.layer];
               zone.getBoard().getLayer(editLayer).clearTile(msg.tile_idx);
-              zone.getBoard().getLayer(editLayer).pushTile(msg.tile_idx, [ msg.new_tile ]);
+              zone.getBoard().getLayer(editLayer).pushTile(msg.tile_idx, [ Number(msg.new_tile) ]);
               self.addUnsavedEdit(account.getId(), zoneId);
               client.sendZoneState(world.composeZoneStateFor(account, zone.getStateAttributes()));
           }

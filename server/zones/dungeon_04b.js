@@ -31,7 +31,7 @@
         "F":    { "class": "PortalTile", "options": { "zone": "zones:3", "image": "sprites.png:5,1", "dropAt": [ 9, 2 ] } }
     },
     
-    "baseMap":  [   
+    "LAYER_0":  [   
                     ".....",
                     ".....",
                     ".....",
@@ -39,7 +39,7 @@
                     "....."
                 ],
                      
-     "objectMap": [  
+     "LAYER_1": [  
                     "81112",
                     "7   3",
                     "7   3",

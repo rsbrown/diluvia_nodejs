@@ -627,9 +627,9 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         // });
         
         Zone.findAll(fence.tap(function(zones){
-            for (zid in zones) {
-                world.setZoneFromConfig(zones[zid]);
-            }
+          _(zones).each(function(zone){
+              world.setZoneFromConfig(zone);
+          });
         }));
     }
 });

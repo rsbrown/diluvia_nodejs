@@ -27,7 +27,7 @@
       </div>
       <div class="inline-menu" id="edit_menu">
         <span>
-          <a href="#" id="eraser_link" data-info="Erase Tiles from Current Layer"><img src="/images/icons/bullet_delete.png"/></a>
+          <a href="#" id="eraser_link" data-info="Erase Tiles from Current Layer"><img src="/images/icons/eraser.png"/></a>
           <a href="#" id="tile_chooser_link" data-info="Paint Tiles on Current Layer"><img src="/images/icons/paintbrush.png"/></a>
           <a href="#" id="layer_chooser_link" data-info="Choose Layer to Edit"><img src="/images/icons/layers.png"/></a>
           <a href="#" id="portal_edit_link" data-info="Create/Edit Portals"><img src="/images/icons/map_edit.png"/></a>
@@ -65,8 +65,6 @@
     $(document).ready(function() {
         var diluvia = new DiluviaController({
           mode:          "editor",
-          socket_host:   "<%=SOCKET_IO_HOSTNAME%>", 
-          socket_params: <%=SOCKET_IO_OPTIONS%>,
           on_connect:    function(){this.initWorldView();}
         });
         size_element($('#viewport_container'));

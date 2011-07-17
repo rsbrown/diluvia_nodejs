@@ -15,6 +15,17 @@ _.extend(PortalTile.prototype, Tile.prototype, {
         return true;
     },
     
+    serializable: function(){
+      return {
+        class: "PortalTile", 
+        options: { 
+          zone:   this._destZone, 
+          image:  this._image, 
+          dropAt: this._destCoords
+        }
+      };
+    },
+    
     moveInto: function(actor, tileIndex, tileData, layerIndex, world) {
         world.teleport(actor, this._destZone, this._destCoords);
     },

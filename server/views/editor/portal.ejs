@@ -6,6 +6,14 @@
 %>
 
 <div id="portal_form">
+  <fieldset>
+    <legend>
+    <% if (portal) { %>
+    Edit Existing Portal
+    <% } else { %>
+    Create New Portal
+    <% } %>
+    </legend>
     <form action="/editor/portal/<%=tileIdx%>" method="post">
         <div>
           Zone: 
@@ -42,6 +50,7 @@
             <input type="submit" value="save"/>
         </div>
     </form>
+</fieldset>
 </div>
 
 <div id="portal_form_tiles"></div>

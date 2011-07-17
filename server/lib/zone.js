@@ -31,16 +31,16 @@ var Zone = module.exports = function(options) {
 
     // initialize layers
     for (var i = 0; i < Defs.LAYER_COUNT; i++) {
-        this._board.addLayer(new BoardLayer());
+        this._board.addLayer(new BoardLayer(i));
     }
-    
-    for (var key in Defs.Tiles) {
-        var tile = this._tiles[key] = Tile.instanceFromDefinition(Defs.Tiles[key]);
-        tile.setZone(this);
+
+    for (key in Defs.Tiles) {
+      var tile = this._tiles[key] = Tile.instanceFromDefinition(Defs.Tiles[key]);
+      tile.setZone(this);
     }
 };
 
-Zone.MAP_LAYER_KEYS    = [ "baseMap", "objectMap" ];
+Zone.MAP_LAYER_KEYS    = [ "LAYER_0", "LAYER_1" ];
 
 Zone.findAllForAccount = function(account, callback) {
     var redis = Persistence.getRedis();
@@ -133,7 +133,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
             "account_id" : this.getAccountId(),
             "width"      : this._dimensions[0],
             "height"     : this._dimensions[1],
-            "config"     : this.getConfig()
+            "config"     : this.serializeConfig()
         });
     },
     
@@ -148,31 +148,25 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
     loadConfig: function(conf) {
       this.setConfig(conf);
       for (var mli = 0, mllen = Zone.MAP_LAYER_KEYS.length; mli < mllen; mli++) {
-          var confKey         = Zone.MAP_LAYER_KEYS[mli],
-              confMapLayer    = conf[confKey],
+          var confMapLayer    = conf[Zone.MAP_LAYER_KEYS[mli]],
               board           = this.getBoard(),
-              mapLayerStr     = confMapLayer.join(""),
               layer           = board.getLayer(mli);
+              
+          for (var idx = 0; idx < confMapLayer.length; idx++) {
+            var tileInfo = confMapLayer[idx];
+            if (tileInfo !== null) {
+                var tileId;
+                if (typeof tileInfo === "number") {
+                  tileId  = tileInfo;
+                }
+                else {
+                    var klass   = eval(tileInfo.class),
+                        tile    = new klass(tileInfo.options);
 
-          for (var i = 0, len = mapLayerStr.length; i < len; i++) {
-              var ch = mapLayerStr.charAt(i);
-
-              if (ch != " ") {
-                  var lookup  = conf.tiles[ch],
-                      tileId;
-
-                  if ((typeof lookup) == "string") {
-                      tileId = lookup;
-                  }
-                  else {
-                      var klass   = eval(lookup.class),
-                          tile    = new klass(lookup.options);
-
-                      tileId = this.addTile(tile, lookup.class);
-                  }
-
-                  layer.pushTile(i, [ tileId ]);
-              }
+                    tileId = this.addTile(tile, tileInfo.class);
+                }
+                layer.pushTile(idx, [ tileId ]);
+            }
           }
       }
 
@@ -183,6 +177,34 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
       if (conf.music) {
           this.setMusic(conf.music);
       }
+    },
+    
+    serializeConfig: function(callback) {
+      var zone    = this,
+          config  = {
+              "background":   this._background,
+              "music":        this._music };
+          
+      for (var layerIdx=0; layerIdx < Zone.MAP_LAYER_KEYS.length; layerIdx++) {
+        var layer = this._board.getLayer(layerIdx);
+        var layerKey = "LAYER_" + layerIdx;
+        var zoneSize = (this._dimensions[0]*this._dimensions[1]);
+        config[layerKey] = new Array(zoneSize);
+        for (idx in layer.getRenderAttributes()) {
+          var tileList = layer.getRenderAttributes()[idx];
+          for (tile in tileList) {
+            var tileId = tileList[tile][0];
+            if (typeof tileId === "number") {
+              config[layerKey][idx] = tileId;
+            } else {
+              var tileDef = this._tiles[tileId];
+              config[layerKey][idx] = tileDef.serializable();
+            }
+          }
+        }
+      }
+      
+      return config;
     },
 
     getNextTileId: function() {
@@ -227,9 +249,8 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         
         for (var key in this._tiles) {
             var tile = this._tiles[key];
-            
             if (tile.spawnTile) {
-                spawnTiles.push(key);
+                spawnTiles.push(Number(key));
             }
         }
         
@@ -239,7 +260,6 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
             layer.eachTile(function(tileIndex, tileStack) {
                 _(tileStack).each(function(tileData) {
                     var tileId = tileData[0];
-                    
                     if (spawnTiles.indexOf(tileId) != -1 && resIndex == -1) {
                         resIndex = tileIndex;
                     }                    
@@ -248,7 +268,6 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         }
         
         if(resIndex == -1) {resIndex = 0;}
-
         return resIndex;
     },
     
@@ -360,6 +379,26 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         }
     },
     
+    portalAtIndex: function(tileIndex, callback) {
+      var zone         = this,
+          returnVal    = null,
+          tileData     = null,
+          tilesAtIndex = this._board.getAllTilesFor(tileIndex);
+      _(tilesAtIndex).each(function(tilesAndLayer) {
+          var tiles       = tilesAndLayer[0],
+              layerIndex  = tilesAndLayer[1];
+
+          _(tiles).each(function(_tileData) {
+              var tile = zone.getTile(_tileData[0]);
+              if (tile && (layerIndex === Defs.OBJECT_LAYER) && tile.portalTile) {
+                  returnVal = tile;
+                  tileData  = _tileData;
+              }
+          });
+      });
+      callback(returnVal, tileData);
+    },
+    
     tileAtIndex: function(tileIndex, callback) {
         var zone         = this,
             tilesAtIndex = this._board.getAllTilesFor(tileIndex);
@@ -468,11 +507,17 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         var layer       = this._board.getLayer(Defs.ACTOR_LAYER),
             tileIndex   = player.getTileIndex(),
             tiles       = layer.getTiles(tileIndex),
-            tileData    = player.getTileDataFrom(tiles);
+            tileData    = player.getTileDataFrom(tiles),
+            orienMap    = {
+              "N": 1,
+              "S": 2,
+              "E": 3,
+              "W": 4
+            };
         
         if (tileData) {
             layer.popTile(tileIndex, tileData);
-            layer.pushTile(tileIndex, [ "PLAYER_" + orientation.toUpperCase(), tileData[1] ]);
+            layer.pushTile(tileIndex, [ orienMap[orientation.toUpperCase()], tileData[1] ]);
         }
     },
     
@@ -483,7 +528,6 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         for (var key in tiles) {
             tileData[key] = tiles[key].getRenderAttributes();
         }
-        
         return {
             "dimensions":   this.getDimensions(),
             "background":   this.getBackground(),

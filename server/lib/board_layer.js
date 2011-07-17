@@ -1,9 +1,10 @@
 var _       = require("underscore"),
     events  = require("events");
     
-var BoardLayer = module.exports = function(board) {
-    this._tiles     = {};
-    this._tileData  = {};
+var BoardLayer = module.exports = function(layerIndex) {
+    this._tiles      = {};
+    this._tileData   = {};
+    this._layerIndex = layerIndex;
     
     events.EventEmitter.call(this);
 };
@@ -46,17 +47,21 @@ _.extend(BoardLayer.prototype, events.EventEmitter.prototype, {
         this.emit("tileChange", tileIndex, tiles);
     },
     
+    getLayerIndex: function() {
+      return this._layerIndex;
+    },
+    
     getTiles: function(tileIndex) {
         return this._tiles[tileIndex];
     },
-        
+    
     eachTile: function(iterator) {
         for (var key in this._tiles) {
             iterator(key, this._tiles[key]);
         }
     },
     
-    getRenderAttributes: function() {    
+    getRenderAttributes: function() {
         return this._tiles;
     }
 });

@@ -19,7 +19,7 @@ var Canvas = function(controller, element) {
 };
 
 Canvas.prototype = {
-    paint: function(zoneData, zoneState) {        
+    paint: function(zoneData, zoneState) {
         var zoneDims        = zoneData.dimensions,
             viewCenterIdx   = zoneState.viewCenterIdx,
             layerCount      = zoneDims[2],
@@ -85,8 +85,7 @@ Canvas.prototype = {
                             var tileData    = tileSet[tsi],
                                 tileId      = tileData[0],
                                 tile        = zoneData.tiles[tileId];
-                            
-                            
+
                             if (tile) {
                               this._context.drawImage(
                                   this._controller.getImage(tile.imagePath),
@@ -154,7 +153,7 @@ Canvas.prototype = {
     },
     
     isPortalTile: function(tileId) {
-      return (tileId.indexOf("PortalTile") === 0);
+      return (typeof tileId !== "number");
     },
         
     recenter: function(zoneData, zoneState) {
@@ -170,7 +169,6 @@ Canvas.prototype = {
       this._canvasLeft      = vpCX - actorCanvasX,
       this._canvasTop       = vpCY - actorCanvasY;
       
-
       $(this._element).css({
           "left": this._canvasLeft + "px",
           "top":  this._canvasTop  + "px"

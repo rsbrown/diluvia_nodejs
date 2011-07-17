@@ -23,7 +23,7 @@ _.extend(Client.prototype, events.EventEmitter.prototype, {
     
     onMessage: function(msg) {
         if (msg) {
-            // console.log("MESSAGE: " + JSON.stringify(msg));
+            //console.log("MESSAGE: " + JSON.stringify(msg));
             
             if (this._handshake) {
                 if (msg.type == "StartGame") {
@@ -102,7 +102,7 @@ _.extend(Client.prototype, events.EventEmitter.prototype, {
     },
     
     sendMessage: function(type, attrs) {
-        this._conn.send({ "type": type, "attrs": attrs });
+        this._conn.json.send({ "type": type, "attrs": attrs });
     },
 });
 

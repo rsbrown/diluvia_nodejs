@@ -43,7 +43,7 @@ module.exports = function staticProvider(options){
     var cache, maxAge, root;
 
     // Support options object and root string
-    if (typeof options == 'string') {
+    if (typeof options === 'string') {
         root = options;
         maxAge = 0;
     } else {

@@ -5,10 +5,9 @@ var Tile = module.exports = function(options) {
     options             = options || {};
     
     this._image         = options.image         || "";
-    this._label         = options.label         || null;
+    this._label         = options.name          || "";
     this._type          = options.type          || "Tile";
     this._description   = options.description   || "Tile";
-    this._fps           = options.fps           || undefined;
 };
 
 Tile.instanceFromDefinition = function(tileDef) {
@@ -47,14 +46,13 @@ Tile.prototype = {
     getLabel:       function() { return this._label },
     getType:        function() { return this._type },
     getDescription: function() { return this._description },
-    getFPS:         function() { return this._fps },
     
     setImage:       function(img) { this._image = img; },
     
     getRenderAttributes: function() {
         return {
             "image":    this.getImage(),
-            "fps":      this.getFPS()
+            "label":    this.getLabel()
         }
     }
 };

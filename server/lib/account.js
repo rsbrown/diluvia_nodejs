@@ -8,6 +8,7 @@ var START_HITPOINTS = 100;
 var Account = module.exports = function(attributes) {
     events.EventEmitter.call(this);
     this._id                    = attributes["id"];
+    this.id                     = this._id;
     this._username              = attributes["username"];
     this._islandZoneId          = attributes["islandZoneId"];
     this._editorZoneId          = attributes["editorZoneId"] ? attributes["editorZoneId"] : this._islandZoneId;
@@ -33,7 +34,7 @@ Account.initFromSession = function(sessionId, callback) {
     });
 };
 
-Account.create = function(attributes, callback) {
+Account.createViaFacebook = function(attributes, callback) {
     var redis = Persistence.getRedis();
     redis.incr( 'pkid' , function( err, newUserId ) {
         var account = new Account({

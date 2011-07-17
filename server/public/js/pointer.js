@@ -92,6 +92,8 @@ Pointer.prototype = {
     
     $("#layer_chooser_link").click(function(ev) {
         ev.preventDefault();
+        $(this).parent().find("img.selected").removeClass("selected")
+        $("#tile_chooser_link").find("img").addClass("selected");
         self._controller.showLayerChooser();
     });
 
@@ -100,7 +102,6 @@ Pointer.prototype = {
         $(this).parent().find("img.selected").removeClass("selected")
         $(this).find("img").addClass("selected");
         self._controller.startPortalEditing();
-        // self._controller.showPortalEditor();
     });
     
   },

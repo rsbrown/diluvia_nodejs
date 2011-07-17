@@ -35,41 +35,17 @@ Web.prototype = {
     },
     
     loadUserSession: function(req, res, next) {
-        if (req.session.accountId) {
-            Account.findById(req.session.accountId, function(account){
-                if (account) {
-                  req.session.account  = account;
-                  req.session.username = account.getUsername();
-                  req.session.myIslandId = account.getIslandZoneId();
-                  req.session.isMusicOn = account.isMusicOn();
-                }
-                else {
-                  req.session.destroy();
-                }
-                next();
-            });
+        if (req.user) {
+          req.session.accountId  = req.user.getId();
+          req.session.myIslandId = req.user.getIslandZoneId();
+          req.session.isMusicOn  = req.user.isMusicOn();
+          next();
         } else {
-            req.session.isMusicOn = true;
-            next();
+          req.session.isMusicOn = true;
+          next();
         }
     },
 
-    getAccountFromFacebookAuth: function(authInfo, callback) {
-        var facebookUserId = authInfo["user"]["id"];
-        Account.findByFacebookId(facebookUserId, function(foundAccount){
-            if (foundAccount) {
-                callback(foundAccount);
-            } else {
-                Account.create({
-                    "facebookUserId": facebookUserId,
-                    "username": authInfo["user"]["name"]
-                }, function(newAccount){
-                    callback(newAccount);
-                });
-            }
-        });
-    },
-    
     getIslands: function(req, res, callback) {
         islands = [];
         Account.findAll(function(accounts) {
@@ -84,56 +60,46 @@ Web.prototype = {
     },
     
     createNewZone: function(req, res, callback) {
-        Zone.createNewZone(req.session.account, callback);
+        Zone.createNewZone(req.user, callback);
     },
     
     startNewIsland: function(req, res, callback) {
-        Zone.createNewIsland(req.session.account, callback);
+        Zone.createNewIsland(req.user, callback);
     },
     
     getPortalInfo: function(req, callback) {
-      var account = req.session.account;
+      var account = req.user;
       var portalTileIdx = req.params.portalTileIdx;
       var zone = this._gameServer.getWorld().getZone(account.getEditorZoneId());
       if (zone) {
-        var portalTile = null;
-        var fence = new Fence(function(){
+        zone.portalAtIndex(portalTileIdx, function(tile, tileData, layerIndex){
           Zone.findAll(function(zones) {
             Account.findAll(function(accounts) {
-              if (portalTile) {
-                callback(portalTile, portalTileIdx, zones, accounts);
+              if (tile) {
+                callback(tile, portalTileIdx, zones, accounts);
               } else {
                 callback(null, portalTileIdx, zones, accounts);
               }
             });
           });
         });
-        zone.tileAtIndex(portalTileIdx, fence.tap(function(tile, tileData, layerIndex){
-          if (layerIndex === Defs.OBJECT_LAYER) {
-            if (tile.portalTile) {
-              portalTile = tile;
-            }
-          }
-        }));
       }
     },
     
     setPortalInfo: function(req, callback) {
-      var account = req.session.account;
+      var account = req.user;
       var server = this._gameServer;
       var portalTileIdx = req.params.portalTileIdx;
       var zoneId = account.getEditorZoneId();
       var zone = server.getWorld().getZone(zoneId);
       if (zone && (zone.getAccountId() == account.getId())) {
-        var portalTile = null;
         var newCoords = null;
         if (req.body.portal.dest_coords && req.body.portal.dest_coords !== "") {
           var editCoords = req.body.portal.dest_coords.split(",");
           newCoords = [Number(editCoords[0]), Number(editCoords[1])];
         }
-        var fence = new Fence(function(){
+        zone.portalAtIndex(portalTileIdx, function(portalTile, tileData, layerIndex){
           if (portalTile == null) {
-              zone.getBoard().getLayer(Defs.OBJECT_LAYER).clearTile(portalTileIdx);
               portalTile = new PortalTile({"image": "sprites.png:1,12"});
               var newIdx = zone.addTile(portalTile, "PortalTile");
               zone.getBoard().getLayer(Defs.OBJECT_LAYER).pushTile(portalTileIdx, [ newIdx ]);
@@ -143,14 +109,7 @@ Web.prototype = {
           portalTile.setImage(req.body.portal.image);
           server.addUnsavedEdit(account.getId(), zoneId);
           callback();
-        });        
-        zone.tileAtIndex(portalTileIdx, fence.tap(function(tile, tileData, layerIndex){
-          if (layerIndex === Defs.OBJECT_LAYER) {
-            if (tile.portalTile) {
-              portalTile = tile;
-            }
-          }
-        }));
+        });
       }
     },
     
@@ -166,7 +125,7 @@ Web.prototype = {
           if (zone && (zone.getAccountId() == account.getId())) {
             zone.setName(zoneParams.name);
             zone.setDimensions(zoneParams.width, zoneParams.height);
-            server.addUnsavedEdit(account.getId(), zoneId);
+            zone.save();
           }
         });
     },
@@ -176,11 +135,10 @@ Web.prototype = {
       var zoneList = server.getUnsavedEdits(accountId);
       var fence = new Fence(callback);
       for (i in zoneList) {
-        var zoneId = zoneList[i];
-        Zone.findById(zoneId, fence.tap(function(zone) {
-          // SAVE ZONE
-          console.log("saved zone " + zone.getId());
-        }));
+        var zone = this._gameServer.getWorld().getZone(zoneList[i]);
+        zone.save(function(){
+          console.log("SAVED ZONE " + zone.getId());
+        });
       }
       server.clearUnsavedEdits(accountId);
     }

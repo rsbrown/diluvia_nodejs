@@ -1,23 +1,20 @@
 const RETRY_INTERVAL = 2000;
 var timeout;
 
-var Protocol = function(controller, server, options) {
+var Protocol = function(controller) {
     var self            = this;
     
     this._controller    = controller;
-    this._server        = server;
-    this._sock_options  = options;
-    this._socket        = new io.Socket(this._server, this._sock_options);
-    this._connected     = false;
+    this._socket        = io.connect(SOCKET_URI);
     this._zoneData      = {};
-
-    this._socket.connect();
 
     this._socket.on("connect", function() {
         self._handshake();
-        this._connected = true;
         clearTimeout(timeout);
-        $("#connection-lost").dialog('close');
+    });
+    
+    this._socket.on("reconnect", function() {
+      $("#connection-lost").dialog('close');
     });
 
     this._socket.on("message", function(msg) {
@@ -25,7 +22,6 @@ var Protocol = function(controller, server, options) {
     });
 
     this._socket.on("disconnect", function() {
-        connected = false;
         $("#connection-lost").dialog({
             resizable: false,
             modal: true,
@@ -35,7 +31,7 @@ var Protocol = function(controller, server, options) {
                 Cancel: function() {window.location.href = "/";}
             }
         });
-        self.retryConnectOnFailure(RETRY_INTERVAL);
+        // self.retryConnectOnFailure(RETRY_INTERVAL);
     });
 
 };
@@ -46,7 +42,7 @@ Protocol.prototype = {
     },
     
     send: function(msg) {
-        this._socket.send(msg);
+      this._socket.json.send(msg);
     },
     
     retryConnectOnFailure: function(retryInMilliseconds) {
@@ -54,7 +50,7 @@ Protocol.prototype = {
         
         setTimeout(function() {
             if (!connected) {
-                self._socket = new io.Socket(this._server, this._sock_options);
+                self._socket = io.connect(SOCKET_URI);
                 $.get('/ping', function(data) {
                     connected = true;
                     window.location.href = unescape(window.location.pathname);
