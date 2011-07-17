@@ -8,9 +8,9 @@
 <%    } %>
 <%  } %>
   <div id="islands">
-    <% for (id in islands) { %>
-      <a class="island" href="/play">
-        <div class="info"><%=islands[id].getUsername()%>'s Island</div>
+    <% for (id in users) { %>
+      <a class="island" href="/goto/<%=users[id].getIslandZoneId()%>">
+        <div class="info"><%=users[id].getUsername()%>'s Island</div>
         <div class="name">Play Now</div>
       </a>
     <%}%>  

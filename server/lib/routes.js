@@ -6,13 +6,13 @@ var Routes = module.exports = {
         middleware: ["loadUserSession"],
         exec:function(req, res){
             req.session["store_location"] = '/';
-            this.getIslands(req, res, function(islandList) {
+            this.getIslands(req, res, function(userList) {
                 res.render('index', {
                     locals: {
                         username:     req.session.username,
                         play_music:   req.session.isMusicOn,
                         account:      req.user,
-                        islands:      islandList,
+                        users:        userList,
                         flash:        req.flash()
                     }
                 });
@@ -29,14 +29,13 @@ var Routes = module.exports = {
       }
     },
 
-    // '/goto/:zoneid': {
-    //   get: {
-    //     middleware: ["loadUserSession"],
-    //     exec: function(req, res){
-    //     req.session.selectedZone = req.params.zoneid;
-    //     res.redirect("/play");
-    //   }}
-    // },
+    '/goto/:zoneid': {
+      get: {
+        middleware: ["loadUserSession", "setSelectedZone"],
+        exec: function(req, res){
+        res.redirect("/play");
+      }}
+    },
 
     '/play': {
       get: {
@@ -165,7 +164,9 @@ var Routes = module.exports = {
                 res.render('editor/zone', {
                   layout: false,
                   locals: {
-                    editingZone: this._gameServer.getWorld().getZone(editingZoneId)
+                    editingZone: this._gameServer.getWorld().getZone(editingZoneId),
+                    backgrounds: ["island1.png", "island2.png"],
+                    musics: ["seiomaccorgo", "leyenda", "dungeon_music"]
                   }
                 });
               } else {

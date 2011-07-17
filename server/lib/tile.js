@@ -51,8 +51,9 @@ Tile.prototype = {
     
     getRenderAttributes: function() {
         return {
-            "image":    this.getImage(),
-            "label":    this.getLabel()
+            "image"    :    this.getImage(),
+            "label"    :    this.getLabel(),
+            "passable" :    this.canMoveInto()
         }
     }
 };

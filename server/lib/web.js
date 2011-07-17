@@ -45,6 +45,15 @@ Web.prototype = {
           next();
         }
     },
+    
+    setSelectedZone:  function(req, res, next) {
+      if (req.user) {
+        req.user.getPlayer().setZoneId(req.params.zoneid);
+        req.user.getPlayer().setTileIndex(null);
+        req.user.save();
+      }
+      next();
+    },
 
     getIslands: function(req, res, callback) {
         islands = [];
@@ -104,8 +113,14 @@ Web.prototype = {
               var newIdx = zone.addTile(portalTile, "PortalTile");
               zone.getBoard().getLayer(Defs.OBJECT_LAYER).pushTile(portalTileIdx, [ newIdx ]);
           }
-          portalTile.setDestinationZone(req.body.portal.zone);
-          portalTile.setDestinationCoords(newCoords);
+          Zone.findById(req.body.portal.zone, function(zone) {
+            if (zone) {
+              portalTile.setDestinationZone(zone.getId());
+              if ( (newCoords[0] <= zone.getDimensions()[0]) && (newCoords[1] <= zone.getDimensions()[1])) {
+                portalTile.setDestinationCoords(newCoords);
+              }
+            }
+          });
           portalTile.setImage(req.body.portal.image);
           server.addUnsavedEdit(account.getId(), zoneId);
           callback();
@@ -121,13 +136,14 @@ Web.prototype = {
 
     updateZone: function(account, zoneId, zoneParams) {
         var server = this._gameServer;
-        Zone.findById(zoneId, function(zone) {
-          if (zone && (zone.getAccountId() == account.getId())) {
-            zone.setName(zoneParams.name);
-            zone.setDimensions(zoneParams.width, zoneParams.height);
-            zone.save();
-          }
-        });
+        var zone = this._gameServer.getWorld().getZone(zoneId);
+        if (zone && (zone.getAccountId() == account.getId())) {
+          zone.setName(zoneParams.name);
+          zone.setBackground(zoneParams.background);
+          zone.setMusic(zoneParams.music);
+          zone.setDimensions(zoneParams.width, zoneParams.height);
+          zone.save();
+        }
     },
     
     saveEditorState: function(accountId, callback) {

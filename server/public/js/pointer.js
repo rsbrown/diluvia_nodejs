@@ -1,6 +1,7 @@
+var pointerTimeout;
+
 var Pointer = function(controller) {
     var keysDown     = {},
-        timeout,
         self         = this;
     this._mouseX     = null;
     this._mouseY     = null;
@@ -117,7 +118,7 @@ Pointer.prototype = {
     $("canvas").mousedown(function(ev) {
         if (ev.which != 1) return true;
 
-        timeout = setInterval(function(){
+        pointerTimeout = setInterval(function(){
             self.movePlayer();
         }, 100);
 
@@ -131,7 +132,7 @@ Pointer.prototype = {
     });
 
     $(document).mouseup(function(){
-        clearInterval(timeout);
+        clearInterval(pointerTimeout);
         return false;
     });
   }

@@ -51,7 +51,7 @@ Sound.prototype = {
                 soundManager.onready(function() {
                     var audio = soundManager.createSound({
                         id:         src, 
-                        url:        src,
+                        url:        Diluvia.MUSIC_BASE_PATH + src + ".mp3",
                         autoPlay:   false,
                         autoLoad:   true
                     });

@@ -16,14 +16,14 @@ var GameServer = module.exports = function(app) {
 
 GameServer.prototype = {
     _onWorldLoaded: function() {
-        this._socket = io.listen(this._app);
+        this._socket = io.listen(this._app, {timeout: 1000});
         this._socket.enable('browser client minification');
         this._socket.set('log level', 3);
         this._socket.set('transports', [
             'websocket'
           // , 'flashsocket'
           // , 'htmlfile'
-          // , 'xhr-polling'
+          , 'xhr-polling'
           // , 'jsonp-polling'
         ]);
         
@@ -137,7 +137,9 @@ GameServer.prototype = {
             self    = this,
             world   = this._world,
             zone    = world.getZone(account.getEditorZoneId());
+
         console.log("INIT EDITOR SESSION FOR USER " + account.getUsername());
+
         account.setEditorViewTileIndex(zone.getDefaultSpawnPointIndex());
         client.sendZoneData(zone);
         client.sendZoneState(world.composeZoneStateFor(account, zone.getStateAttributes()));

@@ -27,6 +27,8 @@ var Zone = module.exports = function(options) {
     this._active            = [];
     this._shouldBeInactive  = [];
     this._actors            = [];
+    this._background        = options["background"];
+    this._music             = options["music"];
     this._tileUid           = (new Date()).getTime();
 
     // initialize layers
@@ -94,7 +96,14 @@ Zone.createNewZone = function(account, callback) {
     redis.incr( 'pkid' , function( err, newZoneId ) {
         fs.readFile("zones/dungeon_01.js", function(err, data) {
             var conf = JSON.parse(data);
-            var zone = new Zone({id: newZoneId, name:  "New Zone", account_id: account.getId(), width: conf.dimensions[0] || 64, height: conf.dimensions[1] || 64});
+            var zone = new Zone({
+              id: newZoneId, 
+              name:  "New Zone",
+              music: "dungeon_music",
+              account_id: account.getId(), 
+              width: conf.dimensions[0] || 64, 
+              height: conf.dimensions[1] || 64
+            });
             zone.loadConfig(conf);
             zone.save(function(){
                 account.setEditorZoneId(newZoneId);
@@ -109,7 +118,15 @@ Zone.createNewIsland = function(account, callback) {
     redis.incr( 'pkid' , function( err, newZoneId ) {
         fs.readFile("zones/default_island.js", function(err, data) {
             var conf = JSON.parse(data);
-            var zone = new Zone({id: newZoneId, name:  "New Zone", account_id: account.getId(), width: conf.dimensions[0] || 64, height: conf.dimensions[1] || 64});
+            var zone = new Zone({
+              id: newZoneId, 
+              name:  "My Island", 
+              music: "seiomaccorgo",
+              background: "island1.png",
+              account_id: account.getId(), 
+              width: conf.dimensions[0] || 64, 
+              height: conf.dimensions[1] || 64
+            });
             zone.loadConfig(conf);
             zone.save(function(){
                 account.setIslandZoneId(newZoneId);
@@ -131,6 +148,8 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
             "id"         : this._id,
             "name"       : this.getName(),
             "account_id" : this.getAccountId(),
+            "background" : this.getBackground(),
+            "music"      : this.getMusic(),
             "width"      : this._dimensions[0],
             "height"     : this._dimensions[1],
             "config"     : this.serializeConfig()
@@ -169,21 +188,12 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
             }
           }
       }
-
-      if (conf.background) {
-          this.setBackground(conf.background);
-      }
-
-      if (conf.music) {
-          this.setMusic(conf.music);
-      }
     },
     
     serializeConfig: function(callback) {
       var zone    = this,
-          config  = {
-              "background":   this._background,
-              "music":        this._music };
+          config  = { "background":   this._background,
+                      "music":        this._music };
           
       for (var layerIdx=0; layerIdx < Zone.MAP_LAYER_KEYS.length; layerIdx++) {
         var layer = this._board.getLayer(layerIdx);
@@ -240,7 +250,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
     },
     
     setDimensions: function(width, height) {
-      this._dimensions = [width, height];
+      this._dimensions = [width, height, Defs.LAYER_COUNT];
     },
     
     getDefaultSpawnPointIndex: function() {

@@ -1,11 +1,14 @@
 var Diluvia = {
+    MUSIC_BASE_PATH:        "/media/music/",
     IMAGE_BASE_PATH:        "/images/",
+    BG_REL_PATH:            "backgrounds/",
+    HL_REL_PATH:            "highlights/",
     TILE_DIMS:              [64, 64],
     CANVAS_ID:              "viewport",
     INTERVAL_DELAY:         10,
     FLASH_DURATION:         250,
     
-    BASE_EMPTY_TILE:        7,
+    BASE_EMPTY_TILE:        [7, "Empty Tile"],
     
     rowColToPixels: function(row, col) {
         return [row * Diluvia.TILE_DIMS[0], col * Diluvia.TILE_DIMS[1]];
@@ -90,7 +93,9 @@ DiluviaController.prototype = {
     },
     
     appendElementsFor_editor: function() {
-      this.preloadImage("tile_highlight.png");
+      this.preloadImage(Diluvia.HL_REL_PATH + "highlight_portal.png");
+      this.preloadImage(Diluvia.HL_REL_PATH + "highlight_spawn.png");
+      this.preloadImage(Diluvia.HL_REL_PATH + "highlight_wall.png");
       this.preloadImage("tile_target.png");
       $("#eraser_link img").addClass("selected");
       this._infoContainer.html("Painting ");
@@ -98,12 +103,12 @@ DiluviaController.prototype = {
       this._infoContainer.append(" on ");
       this._infoContainer.append(this._selectedLayerContainer);
       $(document.body).append(this._infoContainer);
-      this._selectedTileContainer.html("BASE_EMPTY_TILE");
+      this._selectedTileContainer.html(this._editState[this._editState.selectedLayer][1]);
       this._selectedLayerContainer.html(this._editState.selectedLayer);
     },
     
     getSelectedEditTile: function() {
-      return this._editState[this._editState.selectedLayer];
+      return this._editState[this._editState.selectedLayer][0];
     },
        
     isLoadingImages: function() {
@@ -176,7 +181,7 @@ DiluviaController.prototype = {
     selectEraser: function() {
       this._editState.selectedMode = "paint";
       this._editState[this._editState.selectedLayer] = Diluvia.BASE_EMPTY_TILE;
-      this._selectedTileContainer.html("BASE_EMPTY_TILE");
+      this._selectedTileContainer.html(this._editState[this._editState.selectedLayer][1]);
     },
     
     switchZone: function(zoneId) {
@@ -193,8 +198,8 @@ DiluviaController.prototype = {
       });
       this.loadTileChooser($("#chooser"), function(newTileId, newTileName, newTileInfo) {
         self._editState.selectedMode = "paint";
-        self._editState[self._editState.selectedLayer] = newTileId;
-        self._selectedTileContainer.html(newTileName);
+        self._editState[self._editState.selectedLayer] = [newTileId, newTileName];
+        self._selectedTileContainer.html(self._editState[self._editState.selectedLayer][1]);
         $("#chooser").dialog("close");
       });
     },
@@ -233,7 +238,7 @@ DiluviaController.prototype = {
            self._editState.selectedMode = "paint";
            self._editState.selectedLayer = $(this).attr("id");
            self._selectedLayerContainer.html(self._editState.selectedLayer);
-           self._selectedTileContainer.html(self._editState[self._editState.selectedLayer]);
+           self._selectedTileContainer.html(self._editState[self._editState.selectedLayer][1]);
            $("#chooser").dialog("close");
          });
       }).dialog({
@@ -279,7 +284,7 @@ DiluviaController.prototype = {
           modal: true,
           closeOnEscape: true,
           width: 610,
-          height: 600
+          height: 300
       });
     },
     

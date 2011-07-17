@@ -28,18 +28,18 @@ Canvas.prototype = {
             bgImg;
 
         if (zoneData.background) {
-            bgImg = this._controller.getImage(zoneData.background);
+            bgImg = this._controller.getImage(Diluvia.BG_REL_PATH + zoneData.background);
         }
         
         if (zoneData.music != this._lastMusic) {
             this._controller.changeMusic(zoneData.music);
             this._lastMusic = zoneData.music;
         }
-            
+        
         if (zoneDims[0] != this._lastDims[0] || zoneDims[1] != this._lastDims[1]) {
             this._element.width = this._element.width;            
-            this._element.setAttribute("width",     zoneDims[0] * tileWidth);
-            this._element.setAttribute("height",    zoneDims[1] * tileHeight);
+            this._element.setAttribute("width",   zoneDims[0] * tileWidth);
+            this._element.setAttribute("height",  zoneDims[1] * tileHeight);
         }
         
         this._lastDims = zoneDims;
@@ -59,8 +59,7 @@ Canvas.prototype = {
                 col             = Math.floor(layerKey / zoneDims[0]),
                 row             = layerKey % zoneDims[0],
                 destPixelCoords = Diluvia.rowColToPixels(row, col);
-            
-            if (bgImg) {
+            if (bgImg && (bgImg.width >= (destPixelCoords[0] + Diluvia.TILE_DIMS[0])) && (bgImg.height >= (destPixelCoords[1] + Diluvia.TILE_DIMS[1])) ) {
                 this._context.drawImage(
                     bgImg,
                     destPixelCoords[0],
@@ -141,19 +140,34 @@ Canvas.prototype = {
     },
     
     hookEditorTiles: function(tile, tileId, destPixelCoords) {
-      if(this.isPortalTile(tileId)) {
+      var highlight_img = null;
+      if(this.isPortalTile(tile, tileId)) {
+        highlight_img = Diluvia.HL_REL_PATH + "highlight_portal.png";
+      } else if (this.isSpawnTile(tile)) {
+        highlight_img = Diluvia.HL_REL_PATH + "highlight_spawn.png";
+      } else if (this.isNotPassable(tile)) {
+        highlight_img = Diluvia.HL_REL_PATH + "highlight_wall.png";
+      }
+      
+      if (highlight_img) {
         this._context.drawImage(
-          this._controller.getImage("tile_highlight.png"),
-          destPixelCoords[0],
-          destPixelCoords[1],
-          Diluvia.TILE_DIMS[0],
-          Diluvia.TILE_DIMS[1]
+          this._controller.getImage(highlight_img), 
+          destPixelCoords[0], destPixelCoords[1],
+          Diluvia.TILE_DIMS[0], Diluvia.TILE_DIMS[1]
         );
       }
     },
     
-    isPortalTile: function(tileId) {
-      return (typeof tileId !== "number");
+    isPortalTile: function(tile, tileId) {
+      return (tile.label.toUpperCase().indexOf("PORTAL") !== -1);
+    },
+        
+    isSpawnTile: function(tile) {
+      return (tile.label.toUpperCase().indexOf("SPAWN") !== -1);
+    },
+    
+    isNotPassable: function(tile) {
+      return !tile.passable;
     },
         
     recenter: function(zoneData, zoneState) {

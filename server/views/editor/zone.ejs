@@ -1,8 +1,39 @@
 <form action="/editor/zone" method="post">
   <div class="inline-menu">
     <div>
-      <label for="zone[name]">Name:</label><input type="text" name="zone[name]" value="<%=editingZone.getName()%>" />,
-      <label for="zone[width]">W</label><input type="text" name="zone[width]" size="4" value="<%=editingZone.getDimensions()[0]%>"/> x <label for="zone[height]">H</label><input type="text" name="zone[height]" size="4" value="<%=editingZone.getDimensions()[1]%>"/>
+      <label for="zone[name]">Name:</label><input type="text" name="zone[name]" value="<%=editingZone.getName()%>" />
+    </div>
+    <div>
+    <label for="zone[background]">Background:</label>
+    <select name="zone[background]" id="zone-bg-selector">
+        <option value="">-- none --</option>
+      <% for (i in backgrounds) { %>
+         <% if (backgrounds[i] === editingZone.getBackground()) { %>
+         <option value="<%=backgrounds[i]%>" selected="true"><%=backgrounds[i]%></option>
+         <% } else { %>
+         <option value="<%=backgrounds[i]%>"><%=backgrounds[i]%></option>
+         <% } %>
+      <% } %>
+    </select>
+    <label for="zone[music]">Music:</label>
+    <select name="zone[music]" id="zone-bg-selector">
+        <option value="">-- none --</option>
+      <% for (i in musics) { %>
+         <% if (musics[i] === editingZone.getMusic()) { %>
+         <option value="<%=musics[i]%>" selected="true"><%=musics[i]%></option>
+         <% } else { %>
+         <option value="<%=musics[i]%>"><%=musics[i]%></option>
+         <% } %>
+      <% } %>
+    </select>
+    </div>
+    <div>
+      <label for="zone[width]">Width</label>
+      <input type="text" name="zone[width]" size="3" value="<%=editingZone.getDimensions()[0]%>"/>
+    </div>
+    <div>
+      <label for="zone[height]">Height</label>
+      <input type="text" name="zone[height]" size="3" value="<%=editingZone.getDimensions()[1]%>"/>
       <input type="submit" value="save"/>
     </div>
   </div>

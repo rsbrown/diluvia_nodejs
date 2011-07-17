@@ -315,7 +315,9 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
             world.accountRemove(account);
         });
         
+        console.log("\n\n\n\n\nhere:" + account.getPlayer().getZoneId());
         var zone = world.getZone(account.getPlayer().getZoneId());
+        console.log(zone);
         world.accountSpawn(account, zone, account.getPlayer().getTileIndex());
         client.sendChat(Defs.CHAT_ALERT, "Find the skull to become the assassin!");
     },
@@ -612,20 +614,7 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
     _loadZones: function(callback) {
         var world   = this,
             fence   = new Fence(callback);
-        
-        // fs.readdir("zones", function(err, files) {
-        //     if (err) {
-        //         console.log("Could not find zone config directory!");
-        //     }
-        //     else {
-        //         _(files).each(function(filename) {
-        //             fs.readFile("zones/" + filename, fence.tap(function(err, data) {
-        //                 world.createZoneFromConfig(JSON.parse(data));
-        //             }));
-        //         });
-        //     }
-        // });
-        
+
         Zone.findAll(fence.tap(function(zones){
           _(zones).each(function(zone){
               world.setZoneFromConfig(zone);

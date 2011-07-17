@@ -1,16 +1,25 @@
-const RETRY_INTERVAL = 2000;
-var timeout;
+const SOCKET_OPTIONS = {
+  'connect timeout': 2000,
+  'transports': [ 
+                    'websocket'
+                   ,'flashsocket'
+                   // ,'htmlfile'
+                   // ,'xhr-multipart' 
+                   ,'xhr-polling'
+                   // ,'jsonp-polling'
+                  ],
+  'try multiple transports': true
+};
 
 var Protocol = function(controller) {
     var self            = this;
     
     this._controller    = controller;
-    this._socket        = io.connect(SOCKET_URI);
+    this._socket        = io.connect(SOCKET_URI, SOCKET_OPTIONS);
     this._zoneData      = {};
 
     this._socket.on("connect", function() {
         self._handshake();
-        clearTimeout(timeout);
     });
     
     this._socket.on("reconnect", function() {
@@ -31,7 +40,6 @@ var Protocol = function(controller) {
                 Cancel: function() {window.location.href = "/";}
             }
         });
-        // self.retryConnectOnFailure(RETRY_INTERVAL);
     });
 
 };
@@ -45,21 +53,6 @@ Protocol.prototype = {
       this._socket.json.send(msg);
     },
     
-    retryConnectOnFailure: function(retryInMilliseconds) {
-        var self = this;
-        
-        setTimeout(function() {
-            if (!connected) {
-                self._socket = io.connect(SOCKET_URI);
-                $.get('/ping', function(data) {
-                    connected = true;
-                    window.location.href = unescape(window.location.pathname);
-                });
-                self.retryConnectOnFailure(retryInMilliseconds);
-            }
-        }, retryInMilliseconds);
-    },
-    
     parseMessage: function(msg) {
         var self = this;
         if (msg) {
@@ -68,7 +61,7 @@ Protocol.prototype = {
                     tileData = zoneData.tiles;
                 
                 if (zoneData.background) {
-                    self._controller.preloadImage(zoneData.background);
+                    self._controller.preloadImage(Diluvia.BG_REL_PATH + zoneData.background);
                 }
                 
                 for (var key in tileData) {

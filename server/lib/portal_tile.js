@@ -4,7 +4,8 @@ var Defs    = require("defs"),
 
 var PortalTile = module.exports = function(options) {
     Tile.apply(this, arguments);
-    
+
+    this._label         = "Portal";
     this._destZone      = options.zone   || 0;
     this._destCoords    = options.dropAt;
     this.portalTile     = true;

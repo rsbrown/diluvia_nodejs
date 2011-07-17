@@ -99,6 +99,7 @@ _.extend(Account.prototype, events.EventEmitter.prototype, {
     
     serialize: function() {
         var player = this.getPlayer();
+        console.log("\n\n\n\n\n\n" + player.getZoneId());
         return JSON.stringify({
             "id"                  : this._id,
             "musicOn"             : this._musicOn,
