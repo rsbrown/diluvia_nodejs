@@ -254,7 +254,9 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
     },
     
     getCenterTileIndex: function() {
-      return Math.floor((this.getDimensions()[0]*this.getDimensions()[1])/2);
+      var x = Math.floor(this.getDimensions()[0]/2);
+      var y = Math.floor(this.getDimensions()[1]/2);
+      return this.xyToIndex(x, y);
     },
     
     getDefaultSpawnPointIndex: function() {
