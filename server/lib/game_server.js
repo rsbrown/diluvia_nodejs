@@ -140,7 +140,7 @@ GameServer.prototype = {
 
         console.log("INIT EDITOR SESSION FOR USER " + account.getUsername());
 
-        account.setEditorViewTileIndex(zone.getDefaultSpawnPointIndex());
+        account.setEditorViewTileIndex(zone.getCenterTileIndex());
         client.sendZoneData(zone);
         client.sendZoneState(world.composeZoneStateFor(account, zone.getStateAttributes()));
         
@@ -156,8 +156,7 @@ GameServer.prototype = {
           var newZone = world.getZone(zoneId);
           if ((newZone !== undefined) && (newZone.getAccountId() == account.getId())) {
             account.setEditorZoneId(zoneId);
-            var middleTileIdx = Math.floor((newZone.getDimensions()[0]*newZone.getDimensions()[1])/2);
-            account.setEditorViewTileIndex(middleTileIdx);
+            account.setEditorViewTileIndex(newZone.getCenterTileIndex());
             account.save(function(){
               client.sendZoneData(newZone);
               client.sendZoneState(world.composeZoneStateFor(account, newZone.getStateAttributes()));

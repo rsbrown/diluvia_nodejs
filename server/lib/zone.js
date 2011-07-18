@@ -253,6 +253,10 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
       this._dimensions = [width, height, Defs.LAYER_COUNT];
     },
     
+    getCenterTileIndex: function() {
+      return Math.floor((this.getDimensions()[0]*this.getDimensions()[1])/2);
+    },
+    
     getDefaultSpawnPointIndex: function() {
         var spawnTiles  = [],
             resIndex    = -1;
