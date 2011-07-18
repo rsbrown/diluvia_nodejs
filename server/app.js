@@ -20,11 +20,9 @@ var express             = require("express"),
     Web                 = require("web"),
     util                = require("util"),
     spawn               = require("child_process").spawn,
-    staticProvider      = require("staticProvider"),
-    
-    
-    usersByAccountId    = {};
+    staticProvider      = require("staticProvider");
 
+    
 // Find the last commit ID for git
 var git = spawn("git", [ "rev-parse", "--short", "HEAD" ]);
 
@@ -47,14 +45,12 @@ everyauth.facebook
       var promise = this.Promise();
       Account.findByFacebookId(fbUserMetadata.id, function(foundAccount){
         if (foundAccount) {
-          usersByAccountId[foundAccount.id] = foundAccount;
           promise.fulfill(foundAccount);
         } else {
           Account.createViaFacebook({
               "facebookUserId": fbUserMetadata.id,
               "username": fbUserMetadata.name
           }, function(newAccount){
-            usersByAccountId[newAccount.id] = newAccount;
             promise.fulfill(newAccount);
           });
         }
@@ -73,14 +69,9 @@ var app = express.createServer(
     }),
     everyauth.middleware(),
     everyauth.everymodule.findUserById( function (userId, callback) {
-      if (usersByAccountId[userId]) {
-        callback(null, usersByAccountId[userId]);
-      } else {
-        Account.findById(userId, function(foundAccount){
-          usersByAccountId[userId] = foundAccount;
-          callback(null, foundAccount);
-        });
-      }
+      Account.findById(userId, function(foundAccount){
+        callback(null, foundAccount);
+      });
     }),
     express.static(STATIC_ROOT)
 );

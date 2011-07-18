@@ -100,23 +100,26 @@ Web.prototype = {
       var server = this._gameServer;
       var portalTileIdx = req.params.portalTileIdx;
       var zoneId = account.getEditorZoneId();
-      var zone = server.getWorld().getZone(zoneId);
-      if (zone && (zone.getAccountId() == account.getId())) {
+      console.log("adding to zone:" + zoneId);
+      var portalFromZone = server.getWorld().getZone(zoneId);
+      if (portalFromZone && (portalFromZone.getAccountId() == account.getId())) {
+        console.log("still adding to zone:" + portalFromZone.getId());
         var newCoords = null;
         if (req.body.portal.dest_coords && req.body.portal.dest_coords !== "") {
           var editCoords = req.body.portal.dest_coords.split(",");
           newCoords = [Number(editCoords[0]), Number(editCoords[1])];
         }
-        zone.portalAtIndex(portalTileIdx, function(portalTile, tileData, layerIndex){
+        portalFromZone.portalAtIndex(portalTileIdx, function(portalTile, tileData, layerIndex){
           if (portalTile == null) {
               portalTile = new PortalTile({"image": "sprites.png:1,12"});
-              var newIdx = zone.addTile(portalTile, "PortalTile");
-              zone.getBoard().getLayer(Defs.OBJECT_LAYER).pushTile(portalTileIdx, [ newIdx ]);
+              var newIdx = portalFromZone.addTile(portalTile, "PortalTile");
+              portalFromZone.getBoard().getLayer(Defs.OBJECT_LAYER).pushTile(portalTileIdx, [ newIdx ]);
+              console.log("pushed tile to zone:" + portalFromZone.getId());
           }
-          Zone.findById(req.body.portal.zone, function(zone) {
-            if (zone) {
-              portalTile.setDestinationZone(zone.getId());
-              if ( (newCoords[0] <= zone.getDimensions()[0]) && (newCoords[1] <= zone.getDimensions()[1])) {
+          Zone.findById(req.body.portal.zone, function(portalToZone) {
+            if (portalToZone) {
+              portalTile.setDestinationZone(portalToZone.getId());
+              if ( (newCoords[0] <= portalToZone.getDimensions()[0]) && (newCoords[1] <= portalToZone.getDimensions()[1])) {
                 portalTile.setDestinationCoords(newCoords);
               }
             }

@@ -234,7 +234,8 @@ DiluviaController.prototype = {
       var self = this;
       $("#chooser").load('/editor/layers',function(){
         $("#" + self._editState.selectedLayer).addClass("selected");
-        $("#layer_chooser p a").click(function(){
+        $("#layer_chooser p a").click(function(ev){
+           ev.preventDefault();
            self._editState.selectedMode = "paint";
            self._editState.selectedLayer = $(this).attr("id");
            self._selectedLayerContainer.html(self._editState.selectedLayer);

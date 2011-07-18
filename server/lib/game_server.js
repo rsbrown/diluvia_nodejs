@@ -156,7 +156,8 @@ GameServer.prototype = {
           var newZone = world.getZone(zoneId);
           if ((newZone !== undefined) && (newZone.getAccountId() == account.getId())) {
             account.setEditorZoneId(zoneId);
-            account.setEditorViewTileIndex(newZone.getDefaultSpawnPointIndex());
+            var middleTileIdx = Math.floor((newZone.getDimensions()[0]*newZone.getDimensions()[1])/2);
+            account.setEditorViewTileIndex(middleTileIdx);
             account.save(function(){
               client.sendZoneData(newZone);
               client.sendZoneState(world.composeZoneStateFor(account, newZone.getStateAttributes()));
