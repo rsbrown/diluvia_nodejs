@@ -26,6 +26,11 @@ Canvas.prototype = {
             tileWidth       = Diluvia.TILE_DIMS[0],
             tileHeight      = Diluvia.TILE_DIMS[1],
             bgImg;
+        
+        var canvasWidth = zoneDims[0] * tileWidth;
+        var canvasHeight = zoneDims[1] * tileHeight;
+        this._context.fillStyle = "rgba(0, 0, 0, 1.0)";
+        this._context.fillRect (0, 0, canvasWidth, canvasHeight);
 
         if (zoneData.background) {
             bgImg = this._controller.getImage(Diluvia.BG_REL_PATH + zoneData.background);
@@ -38,8 +43,8 @@ Canvas.prototype = {
         
         if (zoneDims[0] != this._lastDims[0] || zoneDims[1] != this._lastDims[1]) {
             this._element.width = this._element.width;            
-            this._element.setAttribute("width",   zoneDims[0] * tileWidth);
-            this._element.setAttribute("height",  zoneDims[1] * tileHeight);
+            this._element.setAttribute("width",  canvasWidth);
+            this._element.setAttribute("height", canvasHeight);
         }
         
         this._lastDims = zoneDims;
