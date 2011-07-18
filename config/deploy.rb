@@ -38,6 +38,8 @@ namespace(:deploy) do
     run <<-CMD
       cd #{release_path} &&
       ln -nfs #{shared_path}/config/env.js #{release_path}/server/lib/env.js
+      ln -nfs #{shared_path}/system/node_modules #{release_path}/server/node_modules
+      ln -nfs #{shared_path}/system/music #{release_path}/server/public/media/music
     CMD
   end
 
