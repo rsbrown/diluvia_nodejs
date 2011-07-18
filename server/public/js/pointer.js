@@ -6,46 +6,53 @@ var Pointer = function(controller) {
     this._mouseX     = null;
     this._mouseY     = null;
     this._painting   = false;
+    this._scrolling  = false;
     this._controller = controller;
     this[controller.getMode() + "MouseBindings"]();
 };
 
 Pointer.prototype = {
-  movePlayer: function() {
-      var self = this;
-      var clickX  = self._mouseX,
-          clickY  = self._mouseY;
+  
+  getDirectionFromMouse: function() {
+    var self = this,
+        cmd  = null,
+        clickX  = self._mouseX,
+        clickY  = self._mouseY;
 
-      var midX = $('#viewport').parent().width()/2,
-          midY = ($('#viewport').parent().height()/2)+$('header').height();
-      var slope = (clickY-midY)/(clickX-midX);
-      if (Math.abs(slope) > 1) {
-          if (clickY > midY) {cmd = 's';}
-          else               {cmd = 'n';}
-      } else {
-          if (clickX > midX) {cmd = 'e';}
-          else               {cmd = 'w';}
+    var midX = $('#viewport').parent().width()/2,
+        midY = ($('#viewport').parent().height()/2)+$('header').height();
+    var slope = (clickY-midY)/(clickX-midX);
+    if (Math.abs(slope) > 1) {
+        if (clickY > midY) {cmd = 's';}
+        else               {cmd = 'n';}
+    } else {
+        if (clickX > midX) {cmd = 'e';}
+        else               {cmd = 'w';}
 
-      }
-      self._controller.command(cmd);
+    }
+    return cmd;
   },
 
   editorMouseBindings: function() {
     var self = this;
+
     $("canvas").mousedown(function(ev) {
       if (ev.which != 1) return true;
       self._painting = true;
       return false;
     });
     
-    $(document).mousemove(function(ev){
+    $("canvas").mousemove(function(ev){
+      // self._mouseX = ev.pageX;
+      // self._mouseY = ev.pageY;
       if (self._painting) {
         self._controller.editTile(ev.pageX, ev.pageY);
+      } else {
+        self._controller.hoverTile(ev.pageX, ev.pageY);
       }
-      return false;
      });
     
-    $(document).mouseup(function(){
+    $("canvas").mouseup(function(){
       self._painting = false;
       return false;
     });
@@ -59,10 +66,6 @@ Pointer.prototype = {
       self._controller.editTile(ev.pageX, ev.pageY);
     });
     
-    $("canvas").mousemove(function(ev) {
-      self._controller.hoverTile(ev.pageX, ev.pageY);
-    });
-    
     $("#edit_menu a").hover(
       function() {
         $("#menu-info").html($(this).data("info"));
@@ -72,18 +75,18 @@ Pointer.prototype = {
       }
     );
     
+    $("#edit_zone_link").click(function(ev) {
+      ev.preventDefault();
+      self._controller.showZoneEditor();
+    });
+
     $("#eraser_link").click(function(ev){
       ev.preventDefault();
       $(this).parent().find("img.selected").removeClass("selected")
       $(this).find("img").addClass("selected");
       self._controller.selectEraser();
     });
-    
-    $("#edit_zone_link").click(function(ev) {
-      ev.preventDefault();
-      self._controller.showZoneEditor();
-    });
-      
+          
     $("#tile_chooser_link").click(function(ev) {
         ev.preventDefault();
         $(this).parent().find("img.selected").removeClass("selected")
@@ -105,6 +108,20 @@ Pointer.prototype = {
         self._controller.startPortalEditing();
     });
     
+    $("#spawn_edit_link").click(function(ev) {
+        ev.preventDefault();
+    });  
+
+    $("#zoom_out_link").click(function(ev) {
+        ev.preventDefault();
+        self._controller.zoomOutEditor();
+    });
+    
+    $("#zoom_in_link").click(function(ev) {
+        ev.preventDefault();
+        self._controller.zoomInEditor();
+    });
+    
   },
 
   gameMouseBindings: function() {
@@ -119,7 +136,7 @@ Pointer.prototype = {
         if (ev.which != 1) return true;
 
         pointerTimeout = setInterval(function(){
-            self.movePlayer();
+          self._controller.command(self.getDirectionFromMouse());
         }, 100);
 
         return false;

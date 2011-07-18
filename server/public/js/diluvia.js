@@ -8,11 +8,7 @@ var Diluvia = {
     INTERVAL_DELAY:         10,
     FLASH_DURATION:         250,
     
-    BASE_EMPTY_TILE:        [7, "Empty Tile"],
-    
-    rowColToPixels: function(row, col) {
-        return [row * Diluvia.TILE_DIMS[0], col * Diluvia.TILE_DIMS[1]];
-    }
+    BASE_EMPTY_TILE:        [7, "Empty Tile"]
 };
 
 var DiluviaController = function(options) {
@@ -128,6 +124,25 @@ DiluviaController.prototype = {
     },
     
     updateZoneData: function(zoneData) {
+        var tileData = zoneData.tiles;
+
+        this._protocol.setZoneData(zoneData);
+      
+        if (zoneData.background) {
+            this.preloadImage(Diluvia.BG_REL_PATH + zoneData.background);
+        }
+      
+        for (var key in tileData) {
+            var item        = tileData[key],
+                imgParts    = item.image.split(':'),
+                rowcol      = imgParts[1].split(',');
+                              
+            item.imagePath  = imgParts[0];
+            item.coords     = [parseInt(rowcol[0])*Diluvia.TILE_DIMS[0], 
+                               parseInt(rowcol[1])*Diluvia.TILE_DIMS[1]];
+          
+            this.preloadImage(item.imagePath);
+        }
         this._hasRecvData = true;
     },
     
@@ -289,6 +304,16 @@ DiluviaController.prototype = {
       });
     },
     
+    zoomOutEditor: function(){
+      this._canvas.zoomOut();
+      this.repaintCanvas();
+    },
+    
+    zoomInEditor: function(){
+      this._canvas.zoomIn();
+      this.repaintCanvas();
+    },
+
     hoverTile: function(x, y) {
       if (this.isInitialized()) {
         var tileIdx = this.pixelsToIndex(x, y);
@@ -343,8 +368,8 @@ DiluviaController.prototype = {
     },
     
     pixelsToIndex: function(x, y) {
-      var col = Math.floor((x-this._canvas._canvasLeft)/Diluvia.TILE_DIMS[0]);
-      var row = Math.floor((y-this._canvas._canvasTop-$("#editor_dashboard").height()-$('header').height())/Diluvia.TILE_DIMS[1]);
+      var col = Math.floor((x-this._canvas._canvasLeft)/this._canvas.getTileWidth());
+      var row = Math.floor((y-this._canvas._canvasTop-$("#editor_dashboard").height()-$('header').height())/this._canvas.getTileHeight());
       return this.rowColToIndex(row, col);
     },
     

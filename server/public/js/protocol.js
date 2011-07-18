@@ -57,25 +57,7 @@ Protocol.prototype = {
         var self = this;
         if (msg) {
             if (msg.type == "ZoneData") {
-                var zoneData = self._zoneData = msg.attrs,
-                    tileData = zoneData.tiles;
-                
-                if (zoneData.background) {
-                    self._controller.preloadImage(Diluvia.BG_REL_PATH + zoneData.background);
-                }
-                
-                for (var key in tileData) {
-                    var item        = tileData[key],
-                        imgParts    = item.image.split(':'),
-                        rowcol      = imgParts[1].split(',');
-                                        
-                    item.imagePath  = imgParts[0];
-                    item.coords     = Diluvia.rowColToPixels(parseInt(rowcol[0]), parseInt(rowcol[1]));
-                    
-                    self._controller.preloadImage(item.imagePath);
-                }
-                
-                self._controller.updateZoneData(zoneData);
+                self._controller.updateZoneData(msg.attrs);
             }
             else if (msg.type == "ZoneState")  {
                 self._controller.updateZoneState(msg.attrs);
@@ -106,5 +88,6 @@ Protocol.prototype = {
     },
     
     getZoneData: function() { return this._zoneData; },
+    setZoneData: function(d) { this._zoneData = d; },
     getZoneState: function() { return this._zoneState; },
 };

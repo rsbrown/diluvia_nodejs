@@ -3,19 +3,20 @@ var Canvas = function(controller, element) {
     
     this._element       = element;
     this._viewport      = $(element.parentNode);
-        
     this._context       = element.getContext("2d");
     this._controller    = controller;
-    
     this._lastDims      = [ 0, 0 ];
     this._lastMusic     = null;
-    
     this._canvasLeft    = -1;
     this._canvasTop     = -1;
-    
     this._clippedTile   = null;
-    
     this._element.style.position = "absolute";
+    this._zoomLevels    = [0.25, 0.5, 0.75, 1.0, 1.25];
+    this._zoom          = 3;
+    this._tileWidth     = Diluvia.TILE_DIMS[0] * this._zoomLevels[this._zoom];
+    this._tileHeight    = Diluvia.TILE_DIMS[1] * this._zoomLevels[this._zoom];
+    this._canvasWidth;
+    this._canvasHeight;
 };
 
 Canvas.prototype = {
@@ -23,31 +24,32 @@ Canvas.prototype = {
         var zoneDims        = zoneData.dimensions,
             viewCenterIdx   = zoneState.viewCenterIdx,
             layerCount      = zoneDims[2],
-            tileWidth       = Diluvia.TILE_DIMS[0],
-            tileHeight      = Diluvia.TILE_DIMS[1],
             bgImg;
 
-        var canvasWidth = zoneDims[0] * tileWidth;
-        var canvasHeight = zoneDims[1] * tileHeight;
-        
+        // Clear the old canvas wiht a filled black rectangle
         if (this._controller.getMode() === "editor") {
-          this._context.fillStyle   = "rgba(  0,   0,  0, 1.0)";
-          this._context.fillRect  (0, 0, canvasWidth, canvasHeight);
+          this._context.fillStyle = "rgba(  0,   0,  0, 1.0)";
+          this._context.fillRect(0, 0, this._canvasWidth, this._canvasHeight);
         }
         
+        // Set the new Canvas width/height (zoom level may have changed)
+        this._canvasWidth  = zoneDims[0] * this._tileWidth;
+        this._canvasHeight = zoneDims[1] * this._tileHeight;
+                
         if (zoneData.background) {
             bgImg = this._controller.getImage(Diluvia.BG_REL_PATH + zoneData.background);
         }
         
+        // Update music file if music has changed (TODO: get this out of canvas.js)
         if (zoneData.music != this._lastMusic) {
             this._controller.changeMusic(zoneData.music);
             this._lastMusic = zoneData.music;
         }
         
+        // Update HTML element width/height if they changed)
         if (zoneDims[0] != this._lastDims[0] || zoneDims[1] != this._lastDims[1]) {
-            this._element.width = this._element.width;            
-            this._element.setAttribute("width",  canvasWidth);
-            this._element.setAttribute("height", canvasHeight);
+            this._element.setAttribute("width",  this._canvasWidth);
+            this._element.setAttribute("height", this._canvasHeight);
         }
         
         this._lastDims = zoneDims;
@@ -66,18 +68,18 @@ Canvas.prototype = {
             var layerKey        = layerIndexes[i],
                 col             = Math.floor(layerKey / zoneDims[0]),
                 row             = layerKey % zoneDims[0],
-                destPixelCoords = Diluvia.rowColToPixels(row, col);
-            if (bgImg && (bgImg.width >= (destPixelCoords[0] + Diluvia.TILE_DIMS[0])) && (bgImg.height >= (destPixelCoords[1] + Diluvia.TILE_DIMS[1])) ) {
+                destPixelCoords = this.rowColToPixels(row, col);
+            if (bgImg && (bgImg.width >= (destPixelCoords[0] + this._tileWidth)) && (bgImg.height >= (destPixelCoords[1] + this._tileHeight)) ) {
                 this._context.drawImage(
                     bgImg,
-                    destPixelCoords[0],
-                    destPixelCoords[1],
+                    col * Diluvia.TILE_DIMS[0],
+                    row * Diluvia.TILE_DIMS[1],
                     Diluvia.TILE_DIMS[0],
                     Diluvia.TILE_DIMS[1],
-                    destPixelCoords[0],
                     destPixelCoords[1],
-                    Diluvia.TILE_DIMS[0],
-                    Diluvia.TILE_DIMS[1]
+                    destPixelCoords[0],
+                    this._tileWidth,
+                    this._tileHeight
                 );
             }
                     
@@ -102,8 +104,8 @@ Canvas.prototype = {
                                   Diluvia.TILE_DIMS[1],
                                   destPixelCoords[0],
                                   destPixelCoords[1],
-                                  Diluvia.TILE_DIMS[0],
-                                  Diluvia.TILE_DIMS[1]
+                                  this._tileWidth,
+                                  this._tileHeight
                               );
                               if (this._controller.getMode() === "editor") {this.hookEditorTiles(tile, tileId, destPixelCoords);}
                             }
@@ -126,14 +128,15 @@ Canvas.prototype = {
       var zoneDims        = zoneData.dimensions,
           col             = Math.floor(tileIndex / zoneDims[0]),
           row             = tileIndex % zoneDims[0],
-          destPixelCoords = Diluvia.rowColToPixels(row, col);
+          destPixelCoords = this.rowColToPixels(row, col);
       
       if (this._clippedTile) {
         this._context.putImageData(this._clippedTile.image, this._clippedTile.x, this._clippedTile.y);
       }
       
       this._clippedTile = {
-        image: this._context.getImageData(destPixelCoords[0], destPixelCoords[1], Diluvia.TILE_DIMS[0], Diluvia.TILE_DIMS[1]),
+        
+        image: this._context.getImageData(destPixelCoords[0], destPixelCoords[1], this._tileWidth, this._tileHeight),
         x:     destPixelCoords[0], 
         y:     destPixelCoords[1]
       }
@@ -142,8 +145,8 @@ Canvas.prototype = {
         this._controller.getImage("tile_target.png"),
         destPixelCoords[0],
         destPixelCoords[1],
-        Diluvia.TILE_DIMS[0],
-        Diluvia.TILE_DIMS[1]
+        this._tileWidth,
+        this._tileHeight
       );
     },
     
@@ -161,7 +164,7 @@ Canvas.prototype = {
         this._context.drawImage(
           this._controller.getImage(highlight_img), 
           destPixelCoords[0], destPixelCoords[1],
-          Diluvia.TILE_DIMS[0], Diluvia.TILE_DIMS[1]
+          this._tileWidth, this._tileHeight
         );
       }
     },
@@ -181,12 +184,10 @@ Canvas.prototype = {
     recenter: function(zoneData, zoneState) {
       var zoneDims              = zoneData.dimensions,
           viewCenterIdx         = zoneState.viewCenterIdx,
-          tileWidth             = Diluvia.TILE_DIMS[0],
-          tileHeight            = Diluvia.TILE_DIMS[1],
           vpCX                  = this._viewport.width() / 2,
           vpCY                  = this._viewport.height() / 2,
-          actorCanvasX          = ((viewCenterIdx % zoneDims[0]) * tileWidth) + (tileWidth / 2),
-          actorCanvasY          = (Math.floor(viewCenterIdx / zoneDims[0]) * tileHeight) + (tileHeight / 2);
+          actorCanvasX          = ((viewCenterIdx % zoneDims[0]) * this._tileWidth) + (this._tileWidth / 2),
+          actorCanvasY          = (Math.floor(viewCenterIdx / zoneDims[0]) * this._tileHeight) + (this._tileHeight / 2);
 
       this._canvasLeft      = vpCX - actorCanvasX,
       this._canvasTop       = vpCY - actorCanvasY;
@@ -199,5 +200,37 @@ Canvas.prototype = {
     
     getCenterPixels: function() {
       return {"x": this._viewport.width() / 2, "y": this._viewport.height() / 2};
+    },
+    
+    getTileWidth: function() {
+      return this._tileWidth;
+    },
+    
+    getTileHeight: function() {
+      return this._tileHeight;
+    },
+    
+    zoomIn: function() {
+      if (this._zoom+1 < this._zoomLevels.length) {
+        this._zoom++;
+        this.setTileWidthHeight();
+      }
+    },
+    
+    zoomOut: function() {
+      if (this._zoom > 0) {
+        this._zoom--;
+        this.setTileWidthHeight();
+      }
+    },
+    
+    setTileWidthHeight: function() {
+      this._tileWidth     = Diluvia.TILE_DIMS[0] * this._zoomLevels[this._zoom];
+      this._tileHeight    = Diluvia.TILE_DIMS[1] * this._zoomLevels[this._zoom];
+      this._lastDims      = [ 0, 0 ];
+    },
+    
+    rowColToPixels: function(row, col) {
+        return [row * this._tileHeight, col * this._tileWidth];
     }
 }
