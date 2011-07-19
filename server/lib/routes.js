@@ -31,8 +31,9 @@ var Routes = module.exports = {
 
     '/goto/:zoneid': {
       get: {
-        middleware: ["loadUserSession", "setSelectedZone"],
+        middleware: ["loadUserSession"],
         exec: function(req, res){
+        req.session.startZoneId = req.params.zoneid;
         res.redirect("/play");
       }}
     },

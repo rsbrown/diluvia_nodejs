@@ -3,3 +3,4 @@ server/lib/env.js
 *.gz
 .DS_Store
 dump.rdb
+server/public/media/music

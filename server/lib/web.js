@@ -46,15 +46,6 @@ Web.prototype = {
         }
     },
     
-    setSelectedZone:  function(req, res, next) {
-      if (req.user) {
-        req.user.getPlayer().setZoneId(req.params.zoneid);
-        req.user.getPlayer().setTileIndex(null);
-        req.user.save();
-      }
-      next();
-    },
-
     getIslands: function(req, res, callback) {
         islands = [];
         Account.findAll(function(accounts) {
@@ -100,10 +91,8 @@ Web.prototype = {
       var server = this._gameServer;
       var portalTileIdx = req.params.portalTileIdx;
       var zoneId = account.getEditorZoneId();
-      console.log("adding to zone:" + zoneId);
       var portalFromZone = server.getWorld().getZone(zoneId);
       if (portalFromZone && (portalFromZone.getAccountId() == account.getId())) {
-        console.log("still adding to zone:" + portalFromZone.getId());
         var newCoords = null;
         if (req.body.portal.dest_coords && req.body.portal.dest_coords !== "") {
           var editCoords = req.body.portal.dest_coords.split(",");
@@ -114,7 +103,6 @@ Web.prototype = {
               portalTile = new PortalTile({"image": "sprites.png:1,12"});
               var newIdx = portalFromZone.addTile(portalTile, "PortalTile");
               portalFromZone.getBoard().getLayer(Defs.OBJECT_LAYER).pushTile(portalTileIdx, [ newIdx ]);
-              console.log("pushed tile to zone:" + portalFromZone.getId());
           }
           Zone.findById(req.body.portal.zone, function(portalToZone) {
             if (portalToZone) {

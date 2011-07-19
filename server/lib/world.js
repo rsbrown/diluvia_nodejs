@@ -107,6 +107,7 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         var world = this;
         
         if (this._stateQueue.length > 0) {
+          
             var zoneStates  = {};
         
             for (var i = 0, len = this._stateQueue.length; i < len; i++) {
@@ -131,7 +132,7 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
             for (var zoneId in zoneStates) {
                 var state   = zoneStates[zoneId],
                     zone    = world.getZone(zoneId);
-                        
+                
                 _(this.getAccountsForZone(zone)).each(function(account) {
                     account.getClient().sendZoneState(
                         world.composeZoneStateFor(account, state)
@@ -315,9 +316,7 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
             world.accountRemove(account);
         });
         
-        console.log("\n\n\n\n\nhere:" + account.getPlayer().getZoneId());
         var zone = world.getZone(account.getPlayer().getZoneId());
-        console.log(zone);
         world.accountSpawn(account, zone, account.getPlayer().getTileIndex());
         client.sendChat(Defs.CHAT_ALERT, "Find the skull to become the assassin!");
     },

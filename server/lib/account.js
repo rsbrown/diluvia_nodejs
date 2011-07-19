@@ -23,12 +23,16 @@ Account.initFromSession = function(sessionId, callback) {
     redis.get(sessionId, function(err, data) {
         var sessionData = JSON.parse(data);
         if (sessionData.accountId) {
-            account = Account.findById(sessionData.accountId, callback);
+            Account.findById(sessionData.accountId, function(account){
+              account.startInZone(sessionData.startZoneId);
+              callback(account);
+            });
         } else {
             var guestUsername = "guest_" + sessionId.toString().substring(0,3);
             account = new Account({
                 "username": guestUsername
             });
+            account.startInZone(sessionData.startZoneId);
             callback(account);
         }
     });
@@ -99,7 +103,6 @@ _.extend(Account.prototype, events.EventEmitter.prototype, {
     
     serialize: function() {
         var player = this.getPlayer();
-        console.log("\n\n\n\n\n\n" + player.getZoneId());
         return JSON.stringify({
             "id"                  : this._id,
             "musicOn"             : this._musicOn,
@@ -179,6 +182,13 @@ _.extend(Account.prototype, events.EventEmitter.prototype, {
     
     kick: function() {
       this._client.onDisconnect();
+    },
+    
+    startInZone: function(zoneId) {
+      if (zoneId) {
+        this.getPlayer().setZoneId(zoneId);
+        this.getPlayer().setTileIndex(null);
+      }
     },
     
     addScore: function(amount) {

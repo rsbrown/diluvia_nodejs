@@ -2,7 +2,7 @@ var _       = require("underscore"),
     events  = require("events");
     
 var BoardLayer = module.exports = function(layerIndex) {
-    this._tiles      = {};
+    this._tiles      = [];
     this._tileData   = {};
     this._layerIndex = layerIndex;
     
