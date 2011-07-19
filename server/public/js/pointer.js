@@ -144,7 +144,7 @@ Pointer.prototype = {
 
     $("canvas").click(function(ev) {
         ev.preventDefault();
-        self.movePlayer();
+        self._controller.command(self.getDirectionFromMouse());
         return false;
     });
 

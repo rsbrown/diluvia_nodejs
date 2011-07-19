@@ -58,63 +58,53 @@ Canvas.prototype = {
         
         for (var li = 0; li < layerCount; li++) {
             var layer = zoneState.layers[li];
-            
-            for (var layerKey in layer) {
-                layerIndexes.push(layerKey);
-            }
-        }
-                
-        for (var i = 0, len = layerIndexes.length; i < len; i++) {
-            var layerKey        = layerIndexes[i],
-                col             = Math.floor(layerKey / zoneDims[0]),
-                row             = layerKey % zoneDims[0],
-                destPixelCoords = this.rowColToPixels(row, col);
-            if (bgImg && (bgImg.width >= (destPixelCoords[0] + this._tileWidth)) && (bgImg.height >= (destPixelCoords[1] + this._tileHeight)) ) {
-                this._context.drawImage(
-                    bgImg,
-                    col * Diluvia.TILE_DIMS[0],
-                    row * Diluvia.TILE_DIMS[1],
-                    Diluvia.TILE_DIMS[0],
-                    Diluvia.TILE_DIMS[1],
-                    destPixelCoords[1],
-                    destPixelCoords[0],
-                    this._tileWidth,
-                    this._tileHeight
-                );
-            }
-                    
-            for (var li = 0; li < layerCount; li++) {
-                var layer = zoneState.layers[li];
-            
-                if (layer) {
-                    var tileSet = layer[layerKey];
-                    
-                    if (tileSet) {
-                        for (var tsi = 0, tslen = tileSet.length; tsi < tslen; tsi++) {
-                            var tileData    = tileSet[tsi],
-                                tileId      = tileData[0],
-                                tile        = zoneData.tiles[tileId];
 
-                            if (tile) {
-                              this._context.drawImage(
-                                  this._controller.getImage(tile.imagePath),
-                                  tile.coords[0],
-                                  tile.coords[1],
-                                  Diluvia.TILE_DIMS[0],
-                                  Diluvia.TILE_DIMS[1],
-                                  destPixelCoords[0],
-                                  destPixelCoords[1],
-                                  this._tileWidth,
-                                  this._tileHeight
-                              );
-                              if (this._controller.getMode() === "editor") {this.hookEditorTiles(tile, tileId, destPixelCoords);}
-                            }
-                            else {
-                                console.log("COULD NOT DRAW " + JSON.stringify(tileId));
-                            }
-                        }
-                    }
-                }
+            for (var layerIdx in layer) {
+              var row             = Math.floor(layerIdx / zoneDims[0]),
+                  col             = layerIdx % zoneDims[0],
+                  destPixelCoords = this.rowColToPixels(row, col);
+
+              if (bgImg && (bgImg.width >= (destPixelCoords.x + this._tileWidth)) && (bgImg.height >= (destPixelCoords.y + this._tileHeight)) ) {
+                  this._context.drawImage(
+                      bgImg,
+                      col * Diluvia.TILE_DIMS[0],
+                      row * Diluvia.TILE_DIMS[1],
+                      Diluvia.TILE_DIMS[0],
+                      Diluvia.TILE_DIMS[1],
+                      destPixelCoords.x,
+                      destPixelCoords.y,
+                      this._tileWidth,
+                      this._tileHeight
+                  );
+              }
+              
+              var tileSet = layer[layerIdx];
+              
+              if (tileSet) {
+                  for (var tsi = 0, tslen = tileSet.length; tsi < tslen; tsi++) {
+                      var tileData    = tileSet[tsi],
+                          tileId      = tileData[0],
+                          tile        = zoneData.tiles[tileId];
+
+                      if (tile) {
+                        this._context.drawImage(
+                            this._controller.getImage(tile.imagePath),
+                            tile.coords[0],
+                            tile.coords[1],
+                            Diluvia.TILE_DIMS[0],
+                            Diluvia.TILE_DIMS[1],
+                            destPixelCoords.x,
+                            destPixelCoords.y,
+                            this._tileWidth,
+                            this._tileHeight
+                        );
+                        if (this._controller.getMode() === "editor") {this.hookEditorTiles(tile, tileId, destPixelCoords);}
+                      }
+                      else {
+                          console.log("COULD NOT DRAW " + JSON.stringify(tileId));
+                      }
+                  }
+              }
             }
         }
         this.recenter(zoneData, zoneState);
@@ -126,8 +116,8 @@ Canvas.prototype = {
     
     drawTargetTile: function(zoneData, tileIndex) {
       var zoneDims        = zoneData.dimensions,
-          col             = Math.floor(tileIndex / zoneDims[0]),
-          row             = tileIndex % zoneDims[0],
+          row             = Math.floor(tileIndex / zoneDims[0]),
+          col             = tileIndex % zoneDims[0],
           destPixelCoords = this.rowColToPixels(row, col);
       
       if (this._clippedTile) {
@@ -135,16 +125,15 @@ Canvas.prototype = {
       }
       
       this._clippedTile = {
-        
-        image: this._context.getImageData(destPixelCoords[0], destPixelCoords[1], this._tileWidth, this._tileHeight),
-        x:     destPixelCoords[0], 
-        y:     destPixelCoords[1]
+        image: this._context.getImageData(destPixelCoords.x, destPixelCoords.y, this._tileWidth, this._tileHeight),
+        x:     destPixelCoords.x,
+        y:     destPixelCoords.y
       }
   
       this._context.drawImage(
         this._controller.getImage("tile_target.png"),
-        destPixelCoords[0],
-        destPixelCoords[1],
+        destPixelCoords.x,
+        destPixelCoords.y,
         this._tileWidth,
         this._tileHeight
       );
@@ -163,7 +152,7 @@ Canvas.prototype = {
       if (highlight_img) {
         this._context.drawImage(
           this._controller.getImage(highlight_img), 
-          destPixelCoords[0], destPixelCoords[1],
+          destPixelCoords.x, destPixelCoords.y,
           this._tileWidth, this._tileHeight
         );
       }
@@ -231,6 +220,6 @@ Canvas.prototype = {
     },
     
     rowColToPixels: function(row, col) {
-        return [row * this._tileHeight, col * this._tileWidth];
+      return {x: col * this._tileWidth, y: row * this._tileHeight};
     }
 }
