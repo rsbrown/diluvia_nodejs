@@ -44,6 +44,9 @@ _.extend(Client.prototype, events.EventEmitter.prototype, {
                 else if (msg.type == "EditTile") {
                     this.emit("editTile", msg);
                 }
+                else if (msg.type == "SaveZone") {
+                    this.emit("saveZone", msg.zoneId, msg.zoneData);
+                }
                 else if (msg.type == "Chat") {
                     this.emit("receivedChat", msg.text);
                 }

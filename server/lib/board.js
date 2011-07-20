@@ -43,7 +43,7 @@ _(Board.prototype).extend(events.EventEmitter.prototype, {
     },
         
     getRenderAttributes: function() {
-        var state = {};
+        var state = [];
         
         for (var i = 0, len = this._layers.length; i < len; i++) {
             state[i] = this._layers[i].getRenderAttributes();

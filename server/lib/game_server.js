@@ -3,6 +3,7 @@ var io          = require("socket.io"),
     Defs        = require("defs"),
     Client      = require("client"),
     World       = require("world"),
+    Zone        = require("zone"),
     Account     = require("account"),
     PortalTile  = require("portal_tile"),
     Routes      = require("routes");
@@ -10,7 +11,6 @@ var io          = require("socket.io"),
 var GameServer = module.exports = function(app) {
     this._app          = app;
     this._world        = new World();
-    this._unsavedEdits = {};
     this._world.on("loaded", _(this._onWorldLoaded).bind(this));
 };
 
@@ -136,10 +136,10 @@ GameServer.prototype = {
         var client  = account.getClient(),
             self    = this,
             world   = this._world,
-            zone    = world.getZone(account.getEditorZoneId());
+            zone    = world.getZone(account.getEditorZoneId()) || world.getZone(account.getIslandZoneId());
 
         console.log("INIT EDITOR SESSION FOR USER " + account.getUsername());
-
+        
         account.setEditorViewTileIndex(zone.getCenterTileIndex());
         client.sendZoneData(zone);
         client.sendZoneState(world.composeZoneStateFor(account, zone.getStateAttributes()));
@@ -164,32 +164,40 @@ GameServer.prototype = {
           }
         });
         
-        client.on("editTile", function(msg) {
-          var zoneId = account.getEditorZoneId();
-          var zone = world.getZone(zoneId);
-          if ((zone !== undefined) && (zone.getAccountId() == account.getId())) {
-              var editLayer = Defs[msg.layer];
-              zone.getBoard().getLayer(editLayer).clearTile(msg.tile_idx);
-              zone.getBoard().getLayer(editLayer).pushTile(msg.tile_idx, [ Number(msg.new_tile) ]);
-              self.addUnsavedEdit(account.getId(), zoneId);
-              client.sendZoneState(world.composeZoneStateFor(account, zone.getStateAttributes()));
-          }
+        client.on("saveZone", function(zoneId, zoneData) {
+          var updatedConfig = {};
+          Zone.findById(zoneId, function(zone){
+            if (zone && (zone.getAccountId() == account.getId())) {
+              updatedConfig.background = zone.getBackground();
+              updatedConfig.music = zone.getMusic();
+              for (i in Zone.MAP_LAYER_KEYS) {
+                var layerLabel = Zone.MAP_LAYER_KEYS[i];
+                updatedConfig[layerLabel] = [];
+                for (j in zoneData.layers[i]) {
+                  var tile = zoneData.layers[i][j];
+                  if (tile) {
+                    var tileId = zoneData.layers[i][j][0][0];
+                    if (isNaN(tileId)) {
+                      // console.log("->"+tileId+"<-");
+                      var tileDef = world.getZone(zoneId).getTile(tileId);
+                      // console.log(tileDef);
+                      updatedConfig[layerLabel][j] = tileDef.serializable();
+                    } else {
+                      updatedConfig[layerLabel][j] = parseInt(tileId);
+                    }
+                  } else {
+                    updatedConfig[layerLabel][j] = null;
+                  }
+                }
+              }
+              zone.setConfig(updatedConfig);
+              zone.save(function(){
+                console.log("SAVED ZONE " + zone.getId());
+              });
+            }
+          });
         });
-    },
-    
-    addUnsavedEdit: function(accountId, zoneId) {
-      if (this._unsavedEdits[accountId] === undefined) { this._unsavedEdits[accountId] = [];}
-      if (this._unsavedEdits[accountId].indexOf(zoneId) == -1) {
-        this._unsavedEdits[accountId].push(zoneId);
-      }
-    },
-    
-    getUnsavedEdits: function(accountId) {
-      return this._unsavedEdits[accountId];
-    },
-    
-    clearUnsavedEdits: function(accountId) {
-      this._unsavedEdits[accountId] = [];
+        
     },
     
     getWorld: function() {

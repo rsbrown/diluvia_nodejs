@@ -12,7 +12,7 @@ var Canvas = function(controller, element) {
     this._clippedTile   = null;
     this._element.style.position = "absolute";
     this._zoomLevels    = [0.25, 0.5, 0.75, 1.0, 1.25];
-    this._zoom          = 3;
+    this._zoom          = 2;
     this._tileWidth     = Diluvia.TILE_DIMS[0] * this._zoomLevels[this._zoom];
     this._tileHeight    = Diluvia.TILE_DIMS[1] * this._zoomLevels[this._zoom];
     this._canvasWidth;
@@ -26,8 +26,9 @@ Canvas.prototype = {
             layerCount      = zoneDims[2],
             bgImg;
 
-        // Clear the old canvas wiht a filled black rectangle
-        if (this._controller.getMode() === "editor") {
+        // Clear the old canvas with a filled black rectangle.
+        // This is necessary when erasing tiles in edit mode.
+        if (this._controller.isEditMode()) {
           this._context.fillStyle = "rgba(  0,   0,  0, 1.0)";
           this._context.fillRect(0, 0, this._canvasWidth, this._canvasHeight);
         }
@@ -56,12 +57,15 @@ Canvas.prototype = {
         
         var layerIndexes = [];
         
-        for (var li = 0; li < layerCount; li++) {
-            var layer = zoneState.layers[li];
+        for (var layerIdx = 0; layerIdx < layerCount; layerIdx++) {
+            var layer = zoneState.layers[layerIdx];
+            
+            // Only draw the selected layer and below in edit mode.
+            if (this._controller.isEditMode() && layerIdx > this._controller.getSelectedEditLayer()) break;
 
-            for (var layerIdx in layer) {
-              var row             = Math.floor(layerIdx / zoneDims[0]),
-                  col             = layerIdx % zoneDims[0],
+            for (var tileIdx in layer) {
+              var row             = Math.floor(tileIdx / zoneDims[0]),
+                  col             = tileIdx % zoneDims[0],
                   destPixelCoords = this.rowColToPixels(row, col);
 
               if (bgImg && (bgImg.width >= (destPixelCoords.x + this._tileWidth)) && (bgImg.height >= (destPixelCoords.y + this._tileHeight)) ) {
@@ -78,14 +82,13 @@ Canvas.prototype = {
                   );
               }
               
-              var tileSet = layer[layerIdx];
+              var tileSet = layer[tileIdx];
               
               if (tileSet) {
                   for (var tsi = 0, tslen = tileSet.length; tsi < tslen; tsi++) {
                       var tileData    = tileSet[tsi],
                           tileId      = tileData[0],
                           tile        = zoneData.tiles[tileId];
-
                       if (tile) {
                         this._context.drawImage(
                             this._controller.getImage(tile.imagePath),
@@ -98,7 +101,7 @@ Canvas.prototype = {
                             this._tileWidth,
                             this._tileHeight
                         );
-                        if (this._controller.getMode() === "editor") {this.hookEditorTiles(tile, tileId, destPixelCoords);}
+                        if (this._controller.isEditMode()) {this.hookEditorTiles(tile, tileId, destPixelCoords);}
                       }
                       else {
                           console.log("COULD NOT DRAW " + JSON.stringify(tileId));

@@ -10,7 +10,7 @@ var BoardLayer = module.exports = function(layerIndex) {
 };
 
 _.extend(BoardLayer.prototype, events.EventEmitter.prototype, {
-    pushTile: function(tileIndex, tileData) {        
+    pushTile: function(tileIndex, tileData) {
         if (!this._tiles[tileIndex]) {
             this._tiles[tileIndex] = [];
         }

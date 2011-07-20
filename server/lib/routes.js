@@ -86,23 +86,6 @@ var Routes = module.exports = {
         }
     },
     
-    '/editor/save': {
-      get: {
-        middleware: ["loadUserSession"],
-        exec: function(req, res) {
-          var account = req.user;
-          if (account) {
-            this.saveEditorState(account.getId(), function(){
-              res.send("SUCCESS");
-            });
-          } else {
-            req.flash("error", "You must login to build your island.");
-            res.redirect("/login");
-          }
-        }
-      }
-    },
-    
     '/edit/:zoneid': {
       get: {
         middleware: ["loadUserSession"],

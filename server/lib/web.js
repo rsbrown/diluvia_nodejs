@@ -113,7 +113,7 @@ Web.prototype = {
             }
           });
           portalTile.setImage(req.body.portal.image);
-          server.addUnsavedEdit(account.getId(), zoneId);
+          // server.addUnsavedEdit(account.getId(), zoneId);
           callback();
         });
       }
@@ -135,19 +135,6 @@ Web.prototype = {
           zone.setDimensions(zoneParams.width, zoneParams.height);
           zone.save();
         }
-    },
-    
-    saveEditorState: function(accountId, callback) {
-      var server = this._gameServer;
-      var zoneList = server.getUnsavedEdits(accountId);
-      var fence = new Fence(callback);
-      for (i in zoneList) {
-        var zone = this._gameServer.getWorld().getZone(zoneList[i]);
-        zone.save(function(){
-          console.log("SAVED ZONE " + zone.getId());
-        });
-      }
-      server.clearUnsavedEdits(accountId);
     }
     
 };

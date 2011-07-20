@@ -3,28 +3,73 @@
     PLAY_MUSIC      = <%=play_music%>;
 </script>
 
-<div id="loading"><img src="/images/icons/loading_b.gif" /></div>
-<div id="connection-lost">Connection lost. Retrying... <img src='/images/icons/loading_w.gif' /></div>
-<div id="viewport_container">
-    <canvas id="viewport" height="4096" width="4096"></canvas>
+<header class="world">
+  <a href="/"><img src="/images/logo.png" alt="Diluvia" id="logo"></a>
+  <div class="header-item" id="user-login">
+    <% if (everyauth.loggedIn) { %>
+      <span id="header-links"><a id="account" href="#"><%= everyauth.user._username %></a> (<a class="logout" href="/logout">logout</a>) </span> 
+    <% } else { %>
+      <% if (false) { %>
+      <div style="float: left; margin-right: 10px; line-height: 15px;">
+        <a href='/auth/google' style='padding: 5px; border: solid 1px #DDDDDD; background: #444444; font-size: 12px;'>
+          Login via Google 
+          <img style='border: 0px' src='https://www.google.com/favicon.ico'/>
+        </a>
+      </div>
+      <% } %>
+      <div class="fb_button" id="fb-login" style="float:left; background-position: left -188px">
+        <a href="/auth/facebook" class="fb_button_medium">
+          <span id="fb_login_text" class="fb_button_text">
+            Connect with Facebook
+          </span>
+        </a>
+      </div>
+    <% } %>
+    <% if (account && account.getIslandZoneId() !== undefined) { %>
+      <div><a href='/edit'>Edit Mode</a></div>
+    <% } %>
+  </div>
+  <div class="header-item" id="play-btns">
+      <div id='help'><a href='#'><img src='/images/icons/help.png'/></a></div>
+      <div id='audio-pause'><a href='#'><img src='/images/icons/pause.png'/></a></div>
+      <div id='audio-play'><a href='#'><img src='/images/icons/play.png'/></a></div>
+  </div>
+</header>
+
+<div id="main">
+    <div id="loading"><img src="/images/icons/loading_b.gif" /></div>
+    <div id="connection-lost">Connection lost. Retrying... <img src='/images/icons/loading_w.gif' /></div>
+    <div id="viewport_container">
+        <canvas id="viewport" height="4096" width="4096"></canvas>
+        <div id="info_area"></div>
+    </div>
 </div>
+
+<div id="info-bar">Score: <div id="score_number">0</div></div>
+<div id="scoreboard">
+    <table cellspacing="0" cellpadding="0" border="0">
+        <thead><th>User</th><th>Score</th>
+        <tbody></tbody>
+    </table>
+</div>
+<input id="chat_box" />
 
 <script type="text/javascript" charset="utf-8">
     document.style      = "height: 100%; width: 100%";
-    
+
     function size_element(element) {
       element.css({
           'width': $(window).width() + "px",
           'height': $(window).height() - $('header').outerHeight() + "px"
       });
     }
-    
+
     $(document).ready(function() {
         var diluvia = new DiluviaController({
           mode:          "game",
           on_connect:    function(){this.startPlaying();}
         });
-        
+    
         var $helpDialog = $('<div></div>')
           .html(
             '<div>rules of the game:<br/><br/> \
@@ -48,28 +93,16 @@
           width: 500,
           title: 'Diluvia'
         });
-        
+    
         size_element($('#viewport_container'));
         size_element($('#main'));
-        
+    
         $(window).resize(function() {
           size_element($('#viewport_container'));
           size_element($('#main'));
           diluvia.repaintCanvas();
         });
-        
-        $("div#welcome").html(
-          "<div id='audio-controls'>                                                         \
-            <div id='help'><a href='#'><img src='/images/icons/help.png'/></a></div>         \
-            <div id='audio-pause'><a href='#'><img src='/images/icons/pause.png'/></a></div> \
-            <div id='audio-play'><a href='#'><img src='/images/icons/play.png'/></a></div>   \
-          </div>"
-        );
-
-        <% if (account && account.getIslandZoneId() !== undefined) { %>
-          $("div#welcome").append("<div><a href='/edit'>Edit Mode</a></div>");
-        <% } %>        
-        
+    
         $("#audio-pause a").click(function(e){
           e.preventDefault();
           diluvia.stopMusic();
@@ -83,13 +116,13 @@
           $("#audio-play").hide();
           $("#audio-pause").show();
         });
-        
+    
         $("#help a").click(function(e){
           e.preventDefault();
           $helpDialog.dialog('open');
           return false;
         });
-        
+    
         <% if (play_music) {%>
           $("#audio-play").hide();
         <% } else { %>

@@ -22,7 +22,7 @@ Account.initFromSession = function(sessionId, callback) {
     var redis = Persistence.getRedis();
     redis.get(sessionId, function(err, data) {
         var sessionData = JSON.parse(data);
-        if (sessionData.accountId) {
+        if (sessionData && sessionData.accountId) {
             Account.findById(sessionData.accountId, function(account){
               account.startInZone(sessionData.startZoneId);
               callback(account);

@@ -152,7 +152,8 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
             "music"      : this.getMusic(),
             "width"      : this._dimensions[0],
             "height"     : this._dimensions[1],
-            "config"     : this.serializeConfig()
+            // "config"     : this.serializeConfig()
+            "config"     : this.getConfig()
         });
     },
     
@@ -545,6 +546,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
             tileData[key] = tiles[key].getRenderAttributes();
         }
         return {
+            "id":           this.getId(),
             "dimensions":   this.getDimensions(),
             "background":   this.getBackground(),
             "music":        this.getMusic(),

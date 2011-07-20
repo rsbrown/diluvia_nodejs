@@ -4,55 +4,70 @@
     $("div#welcome").html("<div><a href='/play'>Play Mode</a></div>");
 </script>
 
-<div id="editor_dashboard">
-  <div class="editzone">
-    <form action="/zones/save" method="post">
-      <div class="inline-menu">
-          Zone:
-          <select name="zone[id]" id="zone-selector">
-             <% var editingZone;%>
-             <% for (zid in zones) { %>
-               <% if (zones[zid].id == editingZoneId) { 
-                    editingZone = zones[zid];
-                %>
-               <option value="<%=zones[zid].id%>" selected="true"><%=zones[zid].name%></option>
-               <% } else { %>
-               <option value="<%=zones[zid].id%>"><%=zones[zid].name%></option>
-               <% } %>
-             <%}%>
-          </select>
-          <span><a href="#" id="edit_zone_link">Edit Zone Info</a></span>
-          <span><a href="/zones/new">Add new zone</a></span>
-          <div><form action="/editor/save"><input type="submit" id="save-button" value="save your changes"/></form><span id="save-msg"></span></div>
+
+<header class="editor">
+  <div class="header-item"><a href="/"><img src="/images/logo.png" alt="Diluvia" id="logo"></a></div>
+  <div id="editor_dashboard">
+    <div class="inline-menu">
+        Zone:
+        <select name="zone[id]" id="zone-selector">
+           <% var editingZone;%>
+           <% for (zid in zones) { %>
+             <% if (zones[zid].id == editingZoneId) { 
+                  editingZone = zones[zid];
+              %>
+             <option value="<%=zones[zid].id%>" selected="true"><%=zones[zid].name%></option>
+             <% } else { %>
+             <option value="<%=zones[zid].id%>"><%=zones[zid].name%></option>
+             <% } %>
+           <%}%>
+        </select>
+        <span><a href="#" id="edit_zone_link">Edit Zone Info</a></span>
+        <span><a href="/zones/new">Add new zone</a></span>
+        <div><form action="/editor/save"><input type="submit" id="save-button" value="save your changes"/></form><span id="save-msg"></span></div>
+    </div>
+    <div class="inline-menu" id="edit_menu">
+      <span>
+        <a href="#" id="tile_edit_link" data-info="Edit Tiles"><img src="/images/icons/tile_edit.png"/></a>
+        <a href="#" id="object_edit_link" data-info="Edit Objects"><img src="/images/icons/object_edit.png"/></a>
+        <%if (false) {%><a href="#" id="actor_edit_link" data-info="Edit Actors"><img src="/images/icons/actor_edit.png"/></a><%}%>
+      </span>
+     </div>
+     <div class="inline-menu" id="edit_menu">
+        <a href="#" id="tile_chooser_link" data-info="Choose Item to Draw">
+          <div id="edit_tile_preview" class="tile_image_preview" style="background-image: url(/images/sprites.png); background-position: -640px -640px;">
+          </div>
+        </a>
+     </div>
+     <div class="inline-menu" id="edit_menu">
+      <div>
+        <a href="#" id="eraser_link" data-info="Erase Tiles from Current Layer"><img src="/images/icons/eraser.png"/></a>
+        <a href="#" id="portal_edit_link" data-info="Edit Portals"><img src="/images/icons/portal_edit.png"/></a>
+        <a href="#" id="spawn_edit_link" data-info="Set Spawn Point"><img src="/images/icons/spawn_edit.png"/></a>
+        <a href="#" id="zoom_out_link" data-info="Zoom Out"><img src="/images/icons/zoom_out.png"/></a>
+        <a href="#" id="zoom_in_link" data-info="Zoom In"><img src="/images/icons/zoom_in.png"/></a>
       </div>
-      <div class="inline-menu" id="edit_menu">
-        <span>
-          <a href="#" id="eraser_link" data-info="Erase Tiles from Current Layer"><img src="/images/icons/eraser.png"/></a>
-          <a href="#" id="tile_chooser_link" data-info="Paint Tiles on Current Layer"><img src="/images/icons/paintbrush.png"/></a>
-          <a href="#" id="layer_chooser_link" data-info="Choose Layer to Edit"><img src="/images/icons/layers.png"/></a>
-          <a href="#" id="portal_edit_link" data-info="Create/Edit Portals"><img src="/images/icons/portal_edit.png"/></a>
-          <a href="#" id="spawn_edit_link" data-info="Create/Move Spawn"><img src="/images/icons/spawn_edit.png"/></a>
-          <a href="#" id="zoom_out_link" data-info="Zoom Out"><img src="/images/icons/zoom_out.png"/></a>
-          <a href="#" id="zoom_in_link" data-info="Zoom In"><img src="/images/icons/zoom_in.png"/></a>
-        </span>
-        <span id="menu-info"></span>
-      </div>
-      <div style="clear: both;"></div>
-      <% if (false) { %>
-      <textarea rows="40" cols="150" name="zone[config]">
-      <%=JSON.stringify(zones[zid].config)%>
-      </textarea>
-      <% } %>
-    </form>
+      <div id="menu-info"></div>
+    </div>
+    <div style="clear: both;"></div>
+    <% if (false) { %>
+    <textarea rows="40" cols="150" name="zone[config]">
+    <%=JSON.stringify(zones[zid].config)%>
+    </textarea>
+    <% } %>
   </div>
-</div>
+  <div class="header-item" id="user-login">
+     <span id="header-links"><a id="account" href="#"><%= everyauth.user._username %></a> (<a class="logout" href="/logout">logout</a>) </span> 
+  </div>
+</header>
+<div id="main">
+    <div id="loading"><img src="/images/icons/loading_b.gif" /></div>
+    <div id="chooser"><canvas height="500" width="500"></canvas></div>
+    <div id="connection-lost">Connection lost. Retrying... <img src='/images/icons/loading_w.gif' /></div>
 
-<div id="loading"><img src="/images/icons/loading_b.gif" /></div>
-<div id="chooser"><canvas height="500" width="500"></canvas></div>
-<div id="connection-lost">Connection lost. Retrying... <img src='/images/icons/loading_w.gif' /></div>
-
-<div id="viewport_container">
-    <canvas id="viewport" height="4096" width="4096"></canvas>
+    <div id="viewport_container">
+        <canvas id="viewport" height="4096" width="4096"></canvas>
+    </div>
 </div>
 
 <script type="text/javascript" charset="utf-8">
@@ -60,8 +75,8 @@
     
     function size_element(element) {
       element.css({
-          'width':  ($(window).width() - 20) + "px",
-          'height': ($(window).height() - 140) + "px"
+          'width':  ($(window).width()) + "px",
+          'height': ($(window).height() - 80) + "px"
       });
     }
     
@@ -72,16 +87,6 @@
         });
         size_element($('#viewport_container'));
         size_element($('#main'));
-        
-        $("#save-button").click(function(ev){
-            ev.preventDefault();
-            $.ajax({
-                url: "/editor/save",
-                success: function() {
-                 $("#save-msg").html("saved").show().fadeOut(5000);
-                }
-            });
-        });
         
         $(window).resize(function() {
           size_element($('#main'));

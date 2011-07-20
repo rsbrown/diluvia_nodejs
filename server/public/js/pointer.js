@@ -43,8 +43,8 @@ Pointer.prototype = {
     });
     
     $("canvas").mousemove(function(ev){
-      // self._mouseX = ev.pageX;
-      // self._mouseY = ev.pageY;
+      self._mouseX = ev.pageX;
+      self._mouseY = ev.pageY;
       if (self._painting) {
         self._controller.editTile(ev.pageX, ev.pageY);
       } else {
@@ -82,34 +82,48 @@ Pointer.prototype = {
 
     $("#eraser_link").click(function(ev){
       ev.preventDefault();
-      $(this).parent().find("img.selected").removeClass("selected")
+      $("#editor_dashboard").find("img.selected").removeClass("selected")
       $(this).find("img").addClass("selected");
       self._controller.selectEraser();
     });
-          
+    
     $("#tile_chooser_link").click(function(ev) {
         ev.preventDefault();
-        $(this).parent().find("img.selected").removeClass("selected")
-        $(this).find("img").addClass("selected");
         self._controller.showTileChooser();
     });
     
-    $("#layer_chooser_link").click(function(ev) {
+    $("#tile_edit_link").click(function(ev) {
         ev.preventDefault();
-        $(this).parent().find("img.selected").removeClass("selected")
-        $("#tile_chooser_link").find("img").addClass("selected");
-        self._controller.showLayerChooser();
+        $("#editor_dashboard").find("img.selected").removeClass("selected")
+        $(this).find("img").addClass("selected");
+        self._controller.selectEditLayer(Diluvia.LAYERS.BASE);
     });
 
+    $("#object_edit_link").click(function(ev) {
+        ev.preventDefault();
+        $("#editor_dashboard").find("img.selected").removeClass("selected")
+        $(this).find("img").addClass("selected");
+        self._controller.selectEditLayer(Diluvia.LAYERS.OBJECT);
+    });
+
+    $("#actor_edit_link").click(function(ev) {
+        ev.preventDefault();
+        $("#editor_dashboard").find("img.selected").removeClass("selected")
+        $(this).find("img").addClass("selected");
+        self._controller.selectEditLayer(Diluvia.LAYERS.ACTOR);
+    });
+    
     $("#portal_edit_link").click(function(ev) {
         ev.preventDefault();
-        $(this).parent().find("img.selected").removeClass("selected")
+        $("#editor_dashboard").find("img.selected").removeClass("selected")
         $(this).find("img").addClass("selected");
         self._controller.startPortalEditing();
     });
     
     $("#spawn_edit_link").click(function(ev) {
         ev.preventDefault();
+        $("#editor_dashboard").find("img.selected").removeClass("selected")
+        $(this).find("img").addClass("selected");
     });  
 
     $("#zoom_out_link").click(function(ev) {

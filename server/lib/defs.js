@@ -74,7 +74,7 @@ Defs.Tiles =     {
   7: 
    { class: 'Tile',
      image: 'sprites.png:0,9',
-     name: 'BASE_EMPTY' },
+     name: 'Empty' },
   8: 
    { class: 'Tile',
      image: 'sprites.png:0,7',
@@ -82,7 +82,7 @@ Defs.Tiles =     {
   9: 
    { class: 'Tile',
      image: 'sprites.png:2,7',
-     name: 'BASE_GRASS' },
+     name: 'Grass' },
   10: 
    { class: 'Tile',
      image: 'sprites.png:4,7',
@@ -102,7 +102,7 @@ Defs.Tiles =     {
   14: 
    { class: 'Tile',
      image: 'sprites.png:0,6',
-     name: 'EMPTY_SPACE' },
+     name: 'Empty' },
   15: 
    { class: 'WallTile',
      image: 'sprites.png:3,2',
@@ -384,7 +384,7 @@ Defs.Tiles =     {
    { class: 'GoalTile',
      image: 'sprites.png:3,5',
      goalType: 'sword',
-     name: 'SWORD' } 
+     name: 'Sword' } 
 };
 
 Defs.SPELLS = {
