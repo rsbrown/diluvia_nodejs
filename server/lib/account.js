@@ -32,7 +32,7 @@ Account.initFromSession = function(sessionId, callback) {
             account = new Account({
                 "username": guestUsername
             });
-            account.startInZone(sessionData.startZoneId);
+            account.startInZone(sessionData ? sessionData.startZoneId : null);
             callback(account);
         }
     });

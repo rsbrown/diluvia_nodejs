@@ -38,7 +38,7 @@ var DiluviaController = function(options) {
       selectedMode:   "paint",
       selectedLayer:  Diluvia.LAYERS.OBJECT,
       0:              [9,  "Grass", "sprites.png:2,7"],
-      1:              [83, "Sword", "sprites.png:3,5"],
+      1:              [6,  "Rock", "sprites.png:3,4"],
       2:              [0,  "Dude",  "dude.png:0,0"],
       zoneData: {}
     };
@@ -76,8 +76,8 @@ DiluviaController.prototype = {
       this.preloadImage(Diluvia.HL_REL_PATH + "highlight_spawn.png");
       this.preloadImage(Diluvia.HL_REL_PATH + "highlight_wall.png");
       this.preloadImage("tile_target.png");
-      $("#tile_edit_link img").addClass("selected");
-      this.selectEditLayer(Diluvia.LAYERS.BASE);
+      $("#object_edit_link img").addClass("selected");
+      this.selectEditLayer(Diluvia.LAYERS.OBJECT);
 
       // async bindings
       var self = this;
@@ -154,8 +154,10 @@ DiluviaController.prototype = {
     },
     
     repaintCanvas: function() {
-      if (this._currentZoneState)
+      if (this.isEditMode()) {this._canvas.forgetHoverTile()};
+      if (this._currentZoneState){
         this._canvas.paint(this._protocol.getZoneData(), this._currentZoneState);
+      }
     },
 
     initWorldView: function() {
@@ -188,6 +190,7 @@ DiluviaController.prototype = {
     },
     
     selectEditLayer: function(layerId) {
+      this._editState.selectedMode = "paint";
       this._editState.selectedLayer = layerId;
       this.displayPreviewTile();
       this.repaintCanvas();
@@ -212,9 +215,7 @@ DiluviaController.prototype = {
     },
     
     selectEraser: function() {
-      this._editState.selectedMode = "paint";
-      this._editState[this._editState.selectedLayer] = [7, "Eraser", "sprites.png:0,6"];
-      this.displayPreviewTile();
+      this._editState.selectedMode = "erase";
     },
     
     switchZone: function(zoneId) {
@@ -230,7 +231,6 @@ DiluviaController.prototype = {
           height: 600
       });
       this.loadTileChooser($("#chooser"), function(newTileId, newTileName, newTileInfo) {
-        self._editState.selectedMode = "paint";
         self._editState[self._editState.selectedLayer] = [newTileId, newTileName, newTileInfo];
         self.displayPreviewTile();
         $("#chooser").dialog("close");
@@ -264,8 +264,8 @@ DiluviaController.prototype = {
     },
 
     startPortalEditing: function() {
-      this._editState.selectedMode = "portal";
       this.selectEditLayer(Diluvia.LAYERS.OBJECT);
+      this._editState.selectedMode = "portal";
     },
     
     bindPortalTileChooser: function() {
@@ -325,14 +325,16 @@ DiluviaController.prototype = {
     editTile: function(x, y) {
       var tileIdx = this.pixelsToIndex(x, y);
       if (this._editState.selectedMode === "paint") {
-        this._canvas.clearTarget();
-        // this._protocol.send({  "type": "EditTile", 
-        //                        "tile_idx": tileIdx, 
-        //                        "layer": this._editState.selectedLayer, 
-        //                        "new_tile": this.getSelectedEditTile() });
         var zoneState = this._editState.zoneData[this._protocol.getZoneData().id];
         var layer = zoneState.layers[this._editState.selectedLayer];
         layer[tileIdx] = [[this.getSelectedEditTile()]];
+        this._currentZoneState = zoneState;
+        this.repaintCanvas();
+      }
+      else if (this._editState.selectedMode === "erase") {
+        var zoneState = this._editState.zoneData[this._protocol.getZoneData().id];
+        var layer = zoneState.layers[this._editState.selectedLayer];
+        layer[tileIdx] = null;
         this._currentZoneState = zoneState;
         this.repaintCanvas();
       }

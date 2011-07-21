@@ -70,7 +70,7 @@ Defs.Tiles =     {
   6: 
    { class: 'WallTile',
      image: 'sprites.png:3,4',
-     name: 'ROCK' },
+     name: 'Rock' },
   7: 
    { class: 'Tile',
      image: 'sprites.png:0,9',

@@ -27,17 +27,17 @@
         <div><form action="/editor/save"><input type="submit" id="save-button" value="save your changes"/></form><span id="save-msg"></span></div>
     </div>
     <div class="inline-menu" id="edit_menu">
+       <a href="#" id="tile_chooser_link" data-info="Choose Item to Draw">
+         <div id="edit_tile_preview" class="tile_image_preview" style="background-image: url(/images/sprites.png); background-position: -640px -640px;">
+         </div>
+       </a>
+    </div>
+    <div class="inline-menu" id="edit_menu">
       <span>
         <a href="#" id="tile_edit_link" data-info="Edit Tiles"><img src="/images/icons/tile_edit.png"/></a>
         <a href="#" id="object_edit_link" data-info="Edit Objects"><img src="/images/icons/object_edit.png"/></a>
         <%if (false) {%><a href="#" id="actor_edit_link" data-info="Edit Actors"><img src="/images/icons/actor_edit.png"/></a><%}%>
       </span>
-     </div>
-     <div class="inline-menu" id="edit_menu">
-        <a href="#" id="tile_chooser_link" data-info="Choose Item to Draw">
-          <div id="edit_tile_preview" class="tile_image_preview" style="background-image: url(/images/sprites.png); background-position: -640px -640px;">
-          </div>
-        </a>
      </div>
      <div class="inline-menu" id="edit_menu">
       <div>

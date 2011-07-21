@@ -12,7 +12,7 @@ var Canvas = function(controller, element) {
     this._clippedTile   = null;
     this._element.style.position = "absolute";
     this._zoomLevels    = [0.25, 0.5, 0.75, 1.0, 1.25];
-    this._zoom          = 2;
+    this._zoom          = 3;
     this._tileWidth     = Diluvia.TILE_DIMS[0] * this._zoomLevels[this._zoom];
     this._tileHeight    = Diluvia.TILE_DIMS[1] * this._zoomLevels[this._zoom];
     this._canvasWidth;
@@ -113,7 +113,7 @@ Canvas.prototype = {
         this.recenter(zoneData, zoneState);
     },
     
-    clearTarget: function() {
+    forgetHoverTile: function() {
       this._clippedTile = null;
     },
     
