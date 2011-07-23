@@ -58,6 +58,13 @@ _.extend(Client.prototype, events.EventEmitter.prototype, {
             }
         }
     },
+    
+    composeZoneStateFor: function(zoneState) {
+        return {
+            "viewCenterIdx":    this._account.getCenterViewTileIndex(),
+            "layers":           zoneState
+        };
+    },
 
     completeHandshake: function(serverInfo) {
         this._handshake = true;
@@ -76,12 +83,16 @@ _.extend(Client.prototype, events.EventEmitter.prototype, {
         this.emit("disconnect");
     },
     
-    sendZoneData: function(zone) {
-        this.sendMessage("ZoneData", zone.getRenderAttributes());
+    initZoneData: function(zone) {
+        var initialZoneState = this.composeZoneStateFor(zone.getStateAttributes())
+        this.sendMessage("InitZoneData", {
+          "ZoneTiles":   zone.getRenderAttributes(),
+          "ZoneLayout":  initialZoneState
+        });
     },
     
-    sendZoneState: function(zoneState) {
-        this.sendMessage("ZoneState", zoneState);
+    updateZoneState: function(zoneState) {
+        this.sendMessage("ZoneState", this.composeZoneStateFor(zoneState));
     },
     
     sendScoreUpdate: function(score) {

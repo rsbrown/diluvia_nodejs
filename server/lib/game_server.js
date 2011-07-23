@@ -81,8 +81,7 @@ GameServer.prototype = {
         console.log("INIT GAMEPLAY SESSION FOR USER " + account.getUsername());
         world.broadcastMessage(Defs.CHAT_SYSTEM, account.getUsername() + " connected.");
         
-        client.sendZoneData(zone);
-        client.sendZoneState(world.composeZoneStateFor(account, zone.getStateAttributes()));
+        client.initZoneData(zone);
         client.sendScoreUpdate(account.getScore());
 
         account.on("changeScore", function(score) {
@@ -93,8 +92,7 @@ GameServer.prototype = {
             var zoneId = actor.getZoneId();
             if (zoneId) {
                 var zone = world.getZone(zoneId);
-                client.sendZoneData(zone);
-                client.sendZoneState(world.composeZoneStateFor(account, zone.getStateAttributes()));
+                client.initZoneData(zone);
             }
         });
         
@@ -141,8 +139,7 @@ GameServer.prototype = {
         console.log("INIT EDITOR SESSION FOR USER " + account.getUsername());
         
         account.setEditorViewTileIndex(zone.getCenterTileIndex());
-        client.sendZoneData(zone);
-        client.sendZoneState(world.composeZoneStateFor(account, zone.getStateAttributes()));
+        client.initZoneData(zone);
         
         client.on("centerEditorView", function(index) {
             var zoneId  = account.getEditorZoneId();
@@ -158,41 +155,18 @@ GameServer.prototype = {
             account.setEditorZoneId(zoneId);
             account.setEditorViewTileIndex(newZone.getCenterTileIndex());
             account.save(function(){
-              client.sendZoneData(newZone);
-              client.sendZoneState(world.composeZoneStateFor(account, newZone.getStateAttributes()));
+              client.initZoneData(newZone);
             });
           }
         });
         
         client.on("saveZone", function(zoneId, zoneData) {
-          var updatedConfig = {};
           Zone.findById(zoneId, function(zone){
             if (zone && (zone.getAccountId() == account.getId())) {
-              updatedConfig.background = zone.getBackground();
-              updatedConfig.music = zone.getMusic();
-              for (i in Zone.MAP_LAYER_KEYS) {
-                var layerLabel = Zone.MAP_LAYER_KEYS[i];
-                updatedConfig[layerLabel] = [];
-                for (j in zoneData.layers[i]) {
-                  var tile = zoneData.layers[i][j];
-                  if (tile) {
-                    var tileId = zoneData.layers[i][j][0][0];
-                    if (isNaN(tileId)) {
-                      // console.log("->"+tileId+"<-");
-                      var tileDef = world.getZone(zoneId).getTile(tileId);
-                      // console.log(tileDef);
-                      updatedConfig[layerLabel][j] = tileDef.serializable();
-                    } else {
-                      updatedConfig[layerLabel][j] = parseInt(tileId);
-                    }
-                  } else {
-                    updatedConfig[layerLabel][j] = null;
-                  }
-                }
-              }
-              zone.setConfig(updatedConfig);
+              zone.updateConfig(zoneData, world.getZone(zoneId));
               zone.save(function(){
-                console.log("SAVED ZONE " + zone.getId());
+                // world.setZone(zoneId, zone);
+                console.log("SAVED ZONE " + zoneId);
               });
             }
           });

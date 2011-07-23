@@ -134,9 +134,7 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
                     zone    = world.getZone(zoneId);
                 
                 _(this.getAccountsForZone(zone)).each(function(account) {
-                    account.getClient().sendZoneState(
-                        world.composeZoneStateFor(account, state)
-                    )
+                    account.getClient().updateZoneState(state);
                 });
             }
 
@@ -381,13 +379,6 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         zone.removeActor(player);
     },
     
-    composeZoneStateFor: function(account, zoneState) {
-        return {
-            "viewCenterIdx":    account.getCenterViewTileIndex(),
-            "layers":           zoneState
-        };
-    },
-    
     // TODO: this method is _WAY_ too big now
     otherCommand: function(account, zone, command) {
         var client      = account.getClient(),
@@ -418,7 +409,7 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
                     });
                 }
                 else if (goalInv) {                    
-                    var tile = zone.getTile(goalInv[0]);
+                    var tile = zone.getTile(goalInv);
                     
                     if (tile && tile.goalType == "sword") {
                         // TODO: this account search is going to be costly to do on each swing
@@ -442,7 +433,7 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         }
         else if (command == "drop") {            
             if (goalInv) {
-                var goalTile = zone.getTile(goalInv[0]);
+                var goalTile = zone.getTile(goalInv);
                 
                 if (goalTile.goalType == "skull") {
                     player.setRole(Defs.ROLE_ASSASSIN);                    
@@ -489,14 +480,14 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
                 continue;
             }
             
-            objLayer.pushTile(randTile, [ tileId ]);
+            objLayer.pushTile(randTile, tileId);
             break;
         }
     },
     
     spawnSword: function() {
         if (Defs.SPAWN_SWORD) {
-            this.randomSpawnGoal("SWORD");
+            this.randomSpawnGoal(83);
         }
     },
 

@@ -8,6 +8,10 @@ var WallTile = module.exports = function(options) {
 
 _.extend(WallTile.prototype, Tile.prototype, {
     canMoveInto: function(actor) {
-        return false;
-    }    
+      return false;
+    },
+    
+    isImpassable: function() {
+      return true;
+    }
 });

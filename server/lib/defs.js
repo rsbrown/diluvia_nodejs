@@ -43,10 +43,6 @@ var Tile            = require("tile"),
     Spell           = require("spell");
 
 Defs.Tiles =     { 
-  0: 
-   { class: 'ActorTile',
-     image: 'dude.png:0,0',
-     name: 'PLAYER' },
   1: 
    { class: 'ActorTile',
      image: 'dude.png:0,0',

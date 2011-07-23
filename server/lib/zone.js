@@ -124,7 +124,7 @@ Zone.createNewIsland = function(account, callback) {
               music: "seiomaccorgo",
               background: "island1.png",
               account_id: account.getId(), 
-              width: conf.dimensions[0] || 64, 
+              width: conf.dimensions[0] || 64,
               height: conf.dimensions[1] || 64
             });
             zone.loadConfig(conf);
@@ -171,27 +171,52 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
           var confMapLayer    = conf[Zone.MAP_LAYER_KEYS[mli]],
               board           = this.getBoard(),
               layer           = board.getLayer(mli);
-              
-          for (var idx = 0; idx < confMapLayer.length; idx++) {
+          
+          var zoneSize = this._dimensions[0]*this._dimensions[1];
+          for (var idx = 0; idx < zoneSize; idx++) {
+            var tileId = 0;
             var tileInfo = confMapLayer[idx];
-            if (tileInfo !== null) {
-                var tileId;
-                if (typeof tileInfo === "number") {
-                  tileId  = tileInfo;
+            if (tileInfo) {
+                if (isNaN(tileInfo)) {
+                  var klass   = eval(tileInfo.class),
+                      tile    = new klass(tileInfo.options);
+                  tileId = this.addTile(tile, tileInfo.class);
                 }
                 else {
-                    var klass   = eval(tileInfo.class),
-                        tile    = new klass(tileInfo.options);
-
-                    tileId = this.addTile(tile, tileInfo.class);
+                  tileId  = tileInfo;
                 }
-                layer.pushTile(idx, [ tileId ]);
             }
+            layer.pushTile(idx, tileId);
           }
       }
     },
     
-    serializeConfig: function(callback) {
+    updateConfig: function(zoneData, liveZone) {
+      var updatedConfig = {};
+      updatedConfig.background = this.getBackground();
+      updatedConfig.music = this.getMusic();
+      for (i in Zone.MAP_LAYER_KEYS) {
+        var layerLabel = Zone.MAP_LAYER_KEYS[i];
+        updatedConfig[layerLabel] = [];
+        for (j in zoneData.layers[i]) {
+          var tile = zoneData.layers[i][j];
+          if (tile) {
+            var tileId = zoneData.layers[i][j][0];
+            if (isNaN(tileId)) {
+              var tileDef = liveZone.getTile(tileId);
+              updatedConfig[layerLabel][j] = tileDef.serializable();
+            } else {
+              updatedConfig[layerLabel][j] = parseInt(tileId);
+            }
+          } else {
+            updatedConfig[layerLabel][j] = null;
+          }
+        }
+        this.setConfig(updatedConfig);
+      }
+    },
+    
+    _old_serializeConfig: function(callback) {
       var zone    = this,
           config  = { "background":   this._background,
                       "music":        this._music };
@@ -276,7 +301,8 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
             
             layer.eachTile(function(tileIndex, tileStack) {
                 _(tileStack).each(function(tileData) {
-                    var tileId = tileData[0];
+                    // var tileId = tileData[0];
+                    var tileId = tileData;
                     if (spawnTiles.indexOf(tileId) != -1 && resIndex == -1) {
                         resIndex = tileIndex;
                     }                    
@@ -325,7 +351,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
                         layerIndex  = tilesAndLayer[1];
 
                     _(tiles).each(function(_tileData) {
-                        var tile = zone.getTile(_tileData[0]);                    
+                        var tile = zone.getTile(_tileData);
 
                         if (tile) {
                             tile.moveOut(actor, tileIndex, _tileData, layerIndex, world);
@@ -346,7 +372,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
             var tiles = layer.getTiles(tileIndex);
             
             return _(layer.getTiles(tileIndex)).all(function(tileData) {
-                var tile = zone.getTile(tileData[0]);
+                var tile = zone.getTile(tileData);
                 return tile ? tile.canMoveInto(actor, tileIndex, tileData, board.getLayerIndexFor(layer)) : true;
             });
         });
@@ -362,7 +388,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         if (actor.setOrientation) {
             actor.setOrientation(direction);
         }
-        
+
         var prevTileIndex  = actor.getTileIndex(),
             nextTileIndex  = this.indexForDirectionalMove(prevTileIndex, direction);
                 
@@ -391,7 +417,9 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         }
         else {
             this.tileAtIndex(nextTileIndex, function(tile){
+              if(tile.isImpassable()) {
                 tile.bumpInto(actor);
+              }
             });
         }
     },
@@ -424,7 +452,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
                 layerIndex  = tilesAndLayer[1];
             
             _(tiles).each(function(_tileData) {
-                var tile = zone.getTile(_tileData[0]);
+                var tile = zone.getTile(_tileData);
                 if (tile) {
                     callback(tile, _tileData, layerIndex);
                 }
@@ -444,6 +472,9 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
     },
     
     getTile: function(idx) {
+        if (typeof idx === "object") {
+          idx = idx[0];
+        }
         return this._tiles[idx];
     },
     

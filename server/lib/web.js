@@ -102,7 +102,7 @@ Web.prototype = {
           if (portalTile == null) {
               portalTile = new PortalTile({"image": "sprites.png:1,12"});
               var newIdx = portalFromZone.addTile(portalTile, "PortalTile");
-              portalFromZone.getBoard().getLayer(Defs.OBJECT_LAYER).pushTile(portalTileIdx, [ newIdx ]);
+              portalFromZone.getBoard().getLayer(Defs.OBJECT_LAYER).pushTile(portalTileIdx, newIdx);
           }
           Zone.findById(req.body.portal.zone, function(portalToZone) {
             if (portalToZone) {

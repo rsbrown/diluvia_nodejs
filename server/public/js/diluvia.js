@@ -8,7 +8,21 @@ var Diluvia = {
     INTERVAL_DELAY:         10,
     FLASH_DURATION:         250,
     
-    LAYERS:                 { BASE: 0, OBJECT: 1, ACTOR: 2 }
+    LAYERS:                 { BASE: 0, OBJECT: 1, ACTOR: 2 },
+    
+    REL_DECODE: function(arr)
+    {
+      var result = new Array;
+      if(arr.length == 0) return result;
+      for(var i = 0; i < arr.length; i+=2)
+      {
+        var val = arr[i];
+        var count = arr[i+1];
+        for(var c = 0; c < count; c++)
+          result[result.length] = val;
+      }
+      return result;
+    }
 };
 
 var DiluviaController = function(options) {
@@ -23,7 +37,7 @@ var DiluviaController = function(options) {
     this._sound                    = new Sound();
     this._preload                  = [];
     this._imageCache               = {};
-    this._hasRecvData              = false;
+    this._hasRecvarr              = false;
     this._hasRecvState             = false;
     this._currentZoneState         = null;
     this._interval                 = setInterval(function() { self._onInterval(); }, Diluvia.INTERVAL_DELAY);
@@ -104,7 +118,12 @@ DiluviaController.prototype = {
         return this._sound;
     },
     
-    updateZoneData: function(zoneData) {
+    initZoneData: function(msg) {
+      this.initZoneTiles(msg.ZoneTiles);
+      this.initZoneState(msg.ZoneLayout);
+    },
+    
+    initZoneTiles: function(zoneData) {
         var tileData = zoneData.tiles;
 
         this._protocol.setZoneData(zoneData);
@@ -126,13 +145,21 @@ DiluviaController.prototype = {
         }
         this._hasRecvData = true;
     },
-    
-    updateZoneState: function(zoneState) {
+
+    initZoneState: function(zoneState) {
         this._hasRecvState = true;
+        for (l in zoneState.layers) {
+          zoneState.layers[l] = Diluvia.REL_DECODE(zoneState.layers[l]);
+        }
         this._stateQueue.push(zoneState);
         if (this.isEditMode()) {
           this._editState.zoneData[this._protocol.getZoneData().id] = zoneState;
         }
+    },
+    
+    updateZoneState: function(zoneState) {
+        this._hasRecvState = true;
+        this._stateQueue.push(zoneState);
     },
     
     isInitialized: function() {

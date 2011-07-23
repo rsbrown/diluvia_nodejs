@@ -17,28 +17,36 @@ var Canvas = function(controller, element) {
     this._tileHeight    = Diluvia.TILE_DIMS[1] * this._zoomLevels[this._zoom];
     this._canvasWidth;
     this._canvasHeight;
+    this._backGround;
 };
 
 Canvas.prototype = {
+    resizeCanvas: function(zoneDims) {
+      if (zoneDims[0] != this._lastDims[0] || zoneDims[1] != this._lastDims[1]) {
+          this._element.setAttribute("width",  this._canvasWidth);
+          this._element.setAttribute("height", this._canvasHeight);
+      }
+      this._lastDims = zoneDims;
+    },
+    
+    clearCanvas: function() {
+      this._context.fillStyle = "rgba(  0,   0,  0, 1.0)";
+      this._context.fillRect(0, 0, this._canvasWidth, this._canvasHeight);
+    },
+    
     paint: function(zoneData, zoneState) {
         var zoneDims        = zoneData.dimensions,
             viewCenterIdx   = zoneState.viewCenterIdx,
-            layerCount      = zoneDims[2],
-            bgImg;
+            layerCount      = zoneDims[2];
 
-        // Clear the old canvas with a filled black rectangle.
-        // This is necessary when erasing tiles in edit mode.
-        if (this._controller.isEditMode()) {
-          this._context.fillStyle = "rgba(  0,   0,  0, 1.0)";
-          this._context.fillRect(0, 0, this._canvasWidth, this._canvasHeight);
-        }
-        
         // Set the new Canvas width/height (zoom level may have changed)
         this._canvasWidth  = zoneDims[0] * this._tileWidth;
         this._canvasHeight = zoneDims[1] * this._tileHeight;
                 
         if (zoneData.background) {
-            bgImg = this._controller.getImage(Diluvia.BG_REL_PATH + zoneData.background);
+          this._backGround = this._controller.getImage(Diluvia.BG_REL_PATH + zoneData.background);
+        } else {
+          this._backGround = null;
         }
         
         // Update music file if music has changed (TODO: get this out of canvas.js)
@@ -47,30 +55,30 @@ Canvas.prototype = {
             this._lastMusic = zoneData.music;
         }
         
-        // Update HTML element width/height if they changed)
-        if (zoneDims[0] != this._lastDims[0] || zoneDims[1] != this._lastDims[1]) {
-            this._element.setAttribute("width",  this._canvasWidth);
-            this._element.setAttribute("height", this._canvasHeight);
+        this.resizeCanvas(zoneDims);
+
+        // Clear the old canvas with a filled black rectangle.
+        // This is necessary when erasing tiles in edit mode.
+        if (this._controller.isEditMode()) {
+          this.clearCanvas();
         }
-        
-        this._lastDims = zoneDims;
-        
+
         var layerIndexes = [];
         
         for (var layerIdx = 0; layerIdx < layerCount; layerIdx++) {
             var layer = zoneState.layers[layerIdx];
-            
+
             // Only draw the selected layer and below in edit mode.
-            if (this._controller.isEditMode() && layerIdx > this._controller.getSelectedEditLayer()) break;
+            if (this._controller.isEditMode() && layerIdx > this._controller.getSelectedEditLayer()) {break};
 
             for (var tileIdx in layer) {
               var row             = Math.floor(tileIdx / zoneDims[0]),
                   col             = tileIdx % zoneDims[0],
                   destPixelCoords = this.rowColToPixels(row, col);
 
-              if (bgImg && (bgImg.width >= (destPixelCoords.x + this._tileWidth)) && (bgImg.height >= (destPixelCoords.y + this._tileHeight)) ) {
+              if (this._backGround && (layerIdx == 0) && (this._backGround.width >= (destPixelCoords.x + this._tileWidth)) && (this._backGround.height >= (destPixelCoords.y + this._tileHeight)) ) {
                   this._context.drawImage(
-                      bgImg,
+                      this._backGround,
                       col * Diluvia.TILE_DIMS[0],
                       row * Diluvia.TILE_DIMS[1],
                       Diluvia.TILE_DIMS[0],
@@ -81,29 +89,31 @@ Canvas.prototype = {
                       this._tileHeight
                   );
               }
-              
+
               var tileSet = layer[tileIdx];
               
               if (tileSet) {
-                  for (var tsi = 0, tslen = tileSet.length; tsi < tslen; tsi++) {
-                      var tileData    = tileSet[tsi],
-                          tileId      = tileData[0],
-                          tile        = zoneData.tiles[tileId];
+                  for (var tsi = 0; tsi < tileSet.length; tsi++) {
+                      var tileId      = tileSet[tsi],
+                          tile        = null;
+
+                      if (typeof tileId === "object") {
+                        tile = zoneData.tiles[tileId[0]];
+                      } else {
+                        tile = zoneData.tiles[tileId];
+                      }
+
                       if (tile) {
                         this._context.drawImage(
                             this._controller.getImage(tile.imagePath),
-                            tile.coords[0],
-                            tile.coords[1],
-                            Diluvia.TILE_DIMS[0],
-                            Diluvia.TILE_DIMS[1],
-                            destPixelCoords.x,
-                            destPixelCoords.y,
-                            this._tileWidth,
-                            this._tileHeight
+                            tile.coords[0],tile.coords[1],
+                            Diluvia.TILE_DIMS[0],Diluvia.TILE_DIMS[1],
+                            destPixelCoords.x,destPixelCoords.y,
+                            this._tileWidth,this._tileHeight
                         );
                         if (this._controller.isEditMode()) {this.hookEditorTiles(tile, tileId, destPixelCoords);}
                       }
-                      else {
+                      else if (tileId) {
                           console.log("COULD NOT DRAW " + JSON.stringify(tileId));
                       }
                   }

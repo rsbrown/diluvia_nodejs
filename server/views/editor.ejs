@@ -1,7 +1,6 @@
 <script type="text/javascript" charset="utf-8">
     DILUVIA_SESSION = "<%= sessionId %>";
     PLAY_MUSIC = false;
-    $("div#welcome").html("<div><a href='/play'>Play Mode</a></div>");
 </script>
 
 
@@ -43,7 +42,7 @@
       <div>
         <a href="#" id="eraser_link" data-info="Erase Tiles from Current Layer"><img src="/images/icons/eraser.png"/></a>
         <a href="#" id="portal_edit_link" data-info="Edit Portals"><img src="/images/icons/portal_edit.png"/></a>
-        <a href="#" id="spawn_edit_link" data-info="Set Spawn Point"><img src="/images/icons/spawn_edit.png"/></a>
+        <% if (false) { %><a href="#" id="spawn_edit_link" data-info="Set Spawn Point"><img src="/images/icons/spawn_edit.png"/></a><% } %>
         <a href="#" id="zoom_out_link" data-info="Zoom Out"><img src="/images/icons/zoom_out.png"/></a>
         <a href="#" id="zoom_in_link" data-info="Zoom In"><img src="/images/icons/zoom_in.png"/></a>
       </div>
@@ -57,7 +56,8 @@
     <% } %>
   </div>
   <div class="header-item" id="user-login">
-     <span id="header-links"><a id="account" href="#"><%= everyauth.user._username %></a> (<a class="logout" href="/logout">logout</a>) </span> 
+     <span id="header-links"><a id="account" href="#"><%= everyauth.user._username %></a> (<a class="logout" href="/logout">logout</a>) </span>
+     <div><a href='/play'>Play Mode</a></div>
   </div>
 </header>
 <div id="main">

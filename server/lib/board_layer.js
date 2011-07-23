@@ -11,10 +11,10 @@ var BoardLayer = module.exports = function(layerIndex) {
 
 _.extend(BoardLayer.prototype, events.EventEmitter.prototype, {
     pushTile: function(tileIndex, tileData) {
+        if (!tileData) return;
         if (!this._tiles[tileIndex]) {
             this._tiles[tileIndex] = [];
         }
-        
         this._tiles[tileIndex].push(tileData);
         this.emit("tileChange", tileIndex, this._tiles[tileIndex]);
     },
@@ -62,8 +62,49 @@ _.extend(BoardLayer.prototype, events.EventEmitter.prototype, {
     },
     
     getRenderAttributes: function() {
-        return this._tiles;
+        return this.rleEncode(this._tiles);
+    },
+    
+    rleEncode: function(array)
+    {
+      var result = new Array;
+      if(array.length == 0) return result;
+
+      var count = 1;
+      var rIndex = 0;
+      for(var i = 0; i < (array.length - 1); i++)
+      {
+        if(!this.compareItems(array[i], array[i+1]))
+        {
+          result[rIndex] = array[i];
+          result[rIndex+1] = count;
+          count = 0;
+          rIndex +=2;
+        }
+        count++;
+      }
+      result[rIndex] = array[i];
+      result[rIndex+1] = count;
+
+      return result;
+    },
+    
+    compareItems: function(x, y) {
+        if (x === y) {
+            return true;
+        }
+        if((x == null) || (y == null)) {
+          return false;
+        }
+        if (x.length != y.length) {
+            return false;
+        }
+        for (key in x) {
+            if (x[key] !== y[key]) {
+                return false;
+            }
+        }
+        return true;
     }
+
 });
-
-

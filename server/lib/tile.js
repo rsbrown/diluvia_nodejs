@@ -30,6 +30,10 @@ Tile.prototype = {
         return true;
     },
     
+    isImpassable: function(){
+      return false;
+    },
+    
     setZone: function(zone) {
         this._zone = zone;
     },
@@ -53,7 +57,7 @@ Tile.prototype = {
         return {
             "image"    :    this.getImage(),
             "label"    :    this.getLabel(),
-            "passable" :    this.canMoveInto()
+            "passable" :    !this.isImpassable()
         }
     }
 };

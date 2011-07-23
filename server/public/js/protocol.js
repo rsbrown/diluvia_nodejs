@@ -56,8 +56,8 @@ Protocol.prototype = {
     parseMessage: function(msg) {
         var self = this;
         if (msg) {
-            if (msg.type == "ZoneData") {
-                self._controller.updateZoneData(msg.attrs);
+            if (msg.type == "InitZoneData") {
+                self._controller.initZoneData(msg.attrs);
             }
             else if (msg.type == "ZoneState")  {
                 self._controller.updateZoneState(msg.attrs);
