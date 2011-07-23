@@ -354,7 +354,7 @@ DiluviaController.prototype = {
       if (this._editState.selectedMode === "paint") {
         var zoneState = this._editState.zoneData[this._protocol.getZoneData().id];
         var layer = zoneState.layers[this._editState.selectedLayer];
-        layer[tileIdx] = [[this.getSelectedEditTile()]];
+        layer[tileIdx] = [this.getSelectedEditTile()];
         this._currentZoneState = zoneState;
         this.repaintCanvas();
       }
