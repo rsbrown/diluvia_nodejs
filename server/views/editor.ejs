@@ -23,7 +23,10 @@
         </select>
         <span><a href="#" id="edit_zone_link">Edit Zone Info</a></span>
         <span><a href="/zones/new">Add new zone</a></span>
-        <div><form action="/editor/save"><input type="submit" id="save-button" value="save your changes"/></form><span id="save-msg"></span></div>
+        <div>
+            <button class="disabled" id="save-button">saved</button>
+            <span id="save-msg"></span>
+        </div>
     </div>
     <div class="inline-menu" id="edit_menu">
        <a href="#" id="tile_chooser_link" data-info="Choose Item to Draw">
@@ -62,7 +65,7 @@
 </header>
 <div id="main">
     <div id="loading"><img src="/images/icons/loading_b.gif" /></div>
-    <div id="chooser"><canvas height="500" width="500"></canvas></div>
+    <div id="chooser"></div>
     <div id="connection-lost">Connection lost. Retrying... <img src='/images/icons/loading_w.gif' /></div>
 
     <div id="viewport_container">

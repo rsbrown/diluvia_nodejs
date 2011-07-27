@@ -97,8 +97,7 @@ DiluviaController.prototype = {
       var self = this;
       $("#save-button").click(function(ev){
         ev.preventDefault();
-        var zoneId = self._protocol.getZoneData().id;
-        self._protocol.send({ type: "SaveZone", zoneId: zoneId, zoneData: self._editState.zoneData[zoneId] });
+        self.saveZoneEdits();
       });
     },
     
@@ -151,10 +150,21 @@ DiluviaController.prototype = {
         for (l in zoneState.layers) {
           zoneState.layers[l] = Diluvia.REL_DECODE(zoneState.layers[l]);
         }
-        this._stateQueue.push(zoneState);
         if (this.isEditMode()) {
-          this._editState.zoneData[this._protocol.getZoneData().id] = zoneState;
+          var zoneId = this._protocol.getZoneData().id;
+          if (this._editState.zoneData[zoneId]) {
+            if (this._editState.zoneData[zoneId].unsaved) {
+              this.enableSaveButton();
+            } else { 
+              this.disableSaveButton();
+            }
+            zoneState = this._editState.zoneData[zoneId].data;
+          } else {
+            this._editState.zoneData[zoneId] = {unsaved: false, data: zoneState};
+            this.disableSaveButton();
+          }
         }
+        this._stateQueue.push(zoneState);
     },
     
     updateZoneState: function(zoneState) {
@@ -214,6 +224,42 @@ DiluviaController.prototype = {
     ************************/
     isEditMode: function() {
       return (this._mode == "editor");
+    },
+    
+    saveZoneEdits: function() {
+      var zoneId = this._protocol.getZoneData().id;
+      if (this._editState.zoneData[zoneId].unsaved) {
+        var unsavedData = this._editState.zoneData[zoneId].data;
+        delete this._editState.zoneData[zoneId];
+        this._protocol.send({ type: "SaveZone", zoneId: zoneId, zoneData: unsavedData });
+      }
+    },
+    
+    selectEditor: function(editorName) {
+      $("#editor_dashboard").find("img.selected").removeClass("selected")
+      $("#"+editorName+"_edit_link").find("img").addClass("selected");
+    },
+    
+    selectTileEditor: function() {
+      this.selectEditor("tile");
+      this.selectEditLayer(Diluvia.LAYERS.BASE);
+    },
+    
+    selectObjectEditor: function() {
+      this.selectEditor("object");
+      this.selectEditLayer(Diluvia.LAYERS.OBJECT);
+    },
+    
+    disableSaveButton: function() {
+      this._editState.zoneData[this._protocol.getZoneData().id].unsaved = false;
+      $("#save-button").html('saved');
+      $("#save-button").addClass('disabled');
+    },
+
+    enableSaveButton: function() {
+      this._editState.zoneData[this._protocol.getZoneData().id].unsaved = true;
+      $("#save-button").html('save changes');
+      $("#save-button").removeClass('disabled');
     },
     
     selectEditLayer: function(layerId) {
@@ -295,7 +341,7 @@ DiluviaController.prototype = {
       this._editState.selectedMode = "portal";
     },
     
-    bindPortalTileChooser: function() {
+    bindPortalEditActions: function(tileIdx) {
       var self = this;
       $("#portal_tile_chooser").click(function(ev) {
         ev.preventDefault();
@@ -313,12 +359,20 @@ DiluviaController.prototype = {
           $("#portal_tile_preview").css("background-position", "-" + bgX + "px -" + bgY + "px");
         });
       });
+      $('#portal-form').ajaxForm(function(res) {
+        var zoneState = self._editState.zoneData[self._protocol.getZoneData().id].data;
+        var layer = zoneState.layers[self._editState.selectedLayer];
+        layer[tileIdx] = [res.portalId];
+        self.enableSaveButton();
+        self.saveZoneEdits();
+        $("#chooser").dialog("close");
+      });
     },
 
     showPortalEditor: function(tileIdx) {
       var self = this;
       $("#chooser").load('/editor/portal/' + tileIdx, function(){
-        self.bindPortalTileChooser();
+        self.bindPortalEditActions(tileIdx);
       }).dialog({
           modal: true,
           closeOnEscape: true,
@@ -352,17 +406,19 @@ DiluviaController.prototype = {
     editTile: function(x, y) {
       var tileIdx = this.pixelsToIndex(x, y);
       if (this._editState.selectedMode === "paint") {
-        var zoneState = this._editState.zoneData[this._protocol.getZoneData().id];
+        var zoneState = this._editState.zoneData[this._protocol.getZoneData().id].data;
         var layer = zoneState.layers[this._editState.selectedLayer];
         layer[tileIdx] = [this.getSelectedEditTile()];
         this._currentZoneState = zoneState;
+        this.enableSaveButton();
         this.repaintCanvas();
       }
       else if (this._editState.selectedMode === "erase") {
-        var zoneState = this._editState.zoneData[this._protocol.getZoneData().id];
+        var zoneState = this._editState.zoneData[this._protocol.getZoneData().id].data;
         var layer = zoneState.layers[this._editState.selectedLayer];
         layer[tileIdx] = null;
         this._currentZoneState = zoneState;
+        this.enableSaveButton();
         this.repaintCanvas();
       }
       else if (this._editState.selectedMode === "portal") {
@@ -379,7 +435,7 @@ DiluviaController.prototype = {
     },
     
     settleEditorView: function(dir) {
-      // this._protocol.send({ "type": "CenterEditorView", "index": this._currentZoneState.viewCenterIdx });
+      this._protocol.send({ "type": "CenterEditorView", "index": this._currentZoneState.viewCenterIdx });
     },
     
     indexToRowCol: function(idx) {

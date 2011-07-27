@@ -294,3 +294,42 @@ header.editor {
 #play-btns a{
   border: none;
 }
+
+#save-button {
+  margin: 15px 5px;
+}
+
+button {
+  font-weight: bold;
+  background: #e4e5e9 url(/images/button-bg.png) repeat-x left top;
+  border: 1px solid #bec3cd;
+  border-bottom-color: #88909f;
+  padding: 0.15em 0.55em;
+  color: #394148;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+}
+
+button:focus, button:hover, button:active {
+  color: #27292b;
+  border-color: #a0a6b3 #a0a6b3 #5d6574;
+  background-image: url(/images/button-bg-hover.png);
+  cursor: pointer;
+}
+
+button:active {
+  background-color: #fff;
+  background-image: url(/images/button-bg-down.png);
+}
+
+button.disabled, button.disabled:focus, button.disabled:hover, button.disabled:active {
+  border-color: #bec3cd;
+  color: #394148;
+  background-color: #e4e5e9;
+  background-image: url(/images/button-bg.png);
+  cursor: default;
+  opacity: 0.5;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"; /* IE 8 */
+  filter: alpha(opacity=50); /* IE 6/7 */
+}

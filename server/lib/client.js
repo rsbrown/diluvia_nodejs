@@ -94,7 +94,7 @@ _.extend(Client.prototype, events.EventEmitter.prototype, {
     updateZoneState: function(zoneState) {
         this.sendMessage("ZoneState", this.composeZoneStateFor(zoneState));
     },
-    
+
     sendScoreUpdate: function(score) {
         this.sendMessage("ScoreUpdate", score);
     },

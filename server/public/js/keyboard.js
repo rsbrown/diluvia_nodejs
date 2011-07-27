@@ -20,6 +20,22 @@ var Keyboard = function(controller) {
 Keyboard.prototype = {
     editorKeyBindings: function() {
       var self = this;
+      
+      $(document).bind('keydown', 'ctrl+s meta+s', function(ev){
+        ev.preventDefault();
+        self._controller.saveZoneEdits();
+      });
+
+      $(document).bind('keydown', '1', function(ev){
+        ev.preventDefault();
+        self._controller.selectTileEditor();
+      });
+
+      $(document).bind('keydown', '2', function(ev){
+        ev.preventDefault();
+        self._controller.selectObjectEditor();
+      });
+
       $(window).keydown(function(ev) {
           var kc  = ev.keyCode,
               cmd = KEYCODE_MOVE_COMMANDS[kc];

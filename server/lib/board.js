@@ -1,9 +1,15 @@
-var _       = require("underscore"),
-    events  = require("events");
+var _            = require("underscore"),
+    Defs         = require("defs"),
+    BoardLayer   = require("board_layer");
+    events       = require("events");
     
 var Board = module.exports = function(zone) {
     this._layers    = [];
     this._zone      = zone;
+    
+    for (var i = 0; i < Defs.LAYER_COUNT; i++) {
+        this.addLayer(new BoardLayer(i));
+    }
     
     events.EventEmitter.call(this);
 };

@@ -38,7 +38,7 @@ Canvas.prototype = {
         var zoneDims        = zoneData.dimensions,
             viewCenterIdx   = zoneState.viewCenterIdx,
             layerCount      = zoneDims[2];
-
+        
         // Set the new Canvas width/height (zoom level may have changed)
         this._canvasWidth  = zoneDims[0] * this._tileWidth;
         this._canvasHeight = zoneDims[1] * this._tileHeight;
@@ -64,10 +64,9 @@ Canvas.prototype = {
         }
 
         var layerIndexes = [];
-        
         for (var layerIdx = 0; layerIdx < layerCount; layerIdx++) {
             var layer = zoneState.layers[layerIdx];
-
+        
             // Only draw the selected layer and below in edit mode.
             if (this._controller.isEditMode() && layerIdx > this._controller.getSelectedEditLayer()) {break};
 

@@ -72,14 +72,10 @@ Web.prototype = {
       var portalTileIdx = req.params.portalTileIdx;
       var zone = this._gameServer.getWorld().getZone(account.getEditorZoneId());
       if (zone) {
-        zone.portalAtIndex(portalTileIdx, function(tile, tileData, layerIndex){
+        zone.portalAtIndex(portalTileIdx, function(tile, tileData){
           Zone.findAll(function(zones) {
             Account.findAll(function(accounts) {
-              if (tile) {
-                callback(tile, portalTileIdx, zones, accounts);
-              } else {
-                callback(null, portalTileIdx, zones, accounts);
-              }
+              callback(tile, portalTileIdx, zones, accounts);
             });
           });
         });
@@ -91,30 +87,30 @@ Web.prototype = {
       var server = this._gameServer;
       var portalTileIdx = req.params.portalTileIdx;
       var zoneId = account.getEditorZoneId();
-      var portalFromZone = server.getWorld().getZone(zoneId);
-      if (portalFromZone && (portalFromZone.getAccountId() == account.getId())) {
+      var portalOriginZone = server.getWorld().getZone(zoneId);
+      if (portalOriginZone && (portalOriginZone.getAccountId() == account.getId())) {
         var newCoords = null;
         if (req.body.portal.dest_coords && req.body.portal.dest_coords !== "") {
           var editCoords = req.body.portal.dest_coords.split(",");
           newCoords = [Number(editCoords[0]), Number(editCoords[1])];
         }
-        portalFromZone.portalAtIndex(portalTileIdx, function(portalTile, tileData, layerIndex){
+        portalOriginZone.portalAtIndex(portalTileIdx, function(portalTile, tileData, layerIndex){
+          var tileId = tileData;
           if (portalTile == null) {
               portalTile = new PortalTile({"image": "sprites.png:1,12"});
-              var newIdx = portalFromZone.addTile(portalTile, "PortalTile");
-              portalFromZone.getBoard().getLayer(Defs.OBJECT_LAYER).pushTile(portalTileIdx, newIdx);
+              tileId = portalOriginZone.addTile(portalTile, "PortalTile");
+              portalOriginZone.getBoard().getLayer(Defs.OBJECT_LAYER).pushTile(portalTileIdx, tileId);
           }
-          Zone.findById(req.body.portal.zone, function(portalToZone) {
-            if (portalToZone) {
-              portalTile.setDestinationZone(portalToZone.getId());
-              if ( (newCoords[0] <= portalToZone.getDimensions()[0]) && (newCoords[1] <= portalToZone.getDimensions()[1])) {
+          Zone.findById(req.body.portal.zone, function(portalDestZone) {
+            if (portalDestZone) {
+              portalTile.setDestinationZone(portalDestZone.getId());
+              if ( (newCoords[0] <= portalDestZone.getDimensions()[0]) && (newCoords[1] <= portalDestZone.getDimensions()[1])) {
                 portalTile.setDestinationCoords(newCoords);
               }
             }
           });
           portalTile.setImage(req.body.portal.image);
-          // server.addUnsavedEdit(account.getId(), zoneId);
-          callback();
+          callback(tileId);
         });
       }
     },

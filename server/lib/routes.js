@@ -202,9 +202,8 @@ var Routes = module.exports = {
         middleware: ["loadUserSession"],
         exec: function(req, res) {
           if (req.user) {
-            this.setPortalInfo(req, function(){
-              req.flash("info", "Portal info updated.");
-              res.redirect("/edit");
+            this.setPortalInfo(req, function(tileId){
+              res.send({ portalId: tileId });
             });
           } else {
             req.flash("error", "You must login to build your island.");

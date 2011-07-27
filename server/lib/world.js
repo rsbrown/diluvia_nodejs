@@ -585,7 +585,6 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
     
     setZoneFromConfig: function(zoneConfig) {
         var zone = new Zone(zoneConfig);
-        zone.loadConfig(zoneConfig.config);
         this.setZone(zone.getId(), zone);
     },
     

@@ -133,13 +133,12 @@ GameServer.prototype = {
     bindEditorEvents: function(account){
         var client  = account.getClient(),
             self    = this,
-            world   = this._world,
-            zone    = world.getZone(account.getEditorZoneId()) || world.getZone(account.getIslandZoneId());
+            world   = this._world;
 
         console.log("INIT EDITOR SESSION FOR USER " + account.getUsername());
-        
-        account.setEditorViewTileIndex(zone.getCenterTileIndex());
-        client.initZoneData(zone);
+        var startZone = world.getZone(account.getEditorZoneId()) || world.getZone(account.getIslandZoneId())
+        account.setEditorViewTileIndex(startZone.getCenterTileIndex());
+        client.initZoneData(startZone);
         
         client.on("centerEditorView", function(index) {
             var zoneId  = account.getEditorZoneId();
@@ -149,29 +148,34 @@ GameServer.prototype = {
             }
         });
         
-        client.on("switchZone", function(zoneId) {
-          var newZone = world.getZone(zoneId);
-          if ((newZone !== undefined) && (newZone.getAccountId() == account.getId())) {
-            account.setEditorZoneId(zoneId);
-            account.setEditorViewTileIndex(newZone.getCenterTileIndex());
-            account.save(function(){
-              client.initZoneData(newZone);
-            });
-          }
+        client.on("switchZone", function(zoneId){
+          self.switchEditZone(account, zoneId, true);
         });
         
         client.on("saveZone", function(zoneId, zoneData) {
-          Zone.findById(zoneId, function(zone){
-            if (zone && (zone.getAccountId() == account.getId())) {
-              zone.updateConfig(zoneData, world.getZone(zoneId));
-              zone.save(function(){
-                // world.setZone(zoneId, zone);
-                console.log("SAVED ZONE " + zoneId);
+          Zone.findById(zoneId, function(updateZone){
+            if (updateZone && (updateZone.getAccountId() == account.getId())) {
+              updateZone.resetConfig(zoneData, world.getZone(zoneId));
+              updateZone.save(function(){
+                world.setZone(zoneId, updateZone);
+                self.switchEditZone(account, zoneId, false);
               });
             }
           });
         });
-        
+    },
+    
+    switchEditZone: function(account, zoneId, recenterView) {
+      var newZone = this._world.getZone(zoneId);
+      if ((newZone !== undefined) && (newZone.getAccountId() == account.getId())) {
+        account.setEditorZoneId(zoneId);
+        if (recenterView) {
+          account.setEditorViewTileIndex(newZone.getCenterTileIndex());
+        }
+        account.save(function(){
+          account.getClient().initZoneData(newZone);
+        });
+      }
     },
     
     getWorld: function() {

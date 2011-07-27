@@ -32,7 +32,7 @@ Pointer.prototype = {
     }
     return cmd;
   },
-
+  
   editorMouseBindings: function() {
     var self = this;
 
@@ -94,23 +94,17 @@ Pointer.prototype = {
     
     $("#tile_edit_link").click(function(ev) {
         ev.preventDefault();
-        $("#editor_dashboard").find("img.selected").removeClass("selected")
-        $(this).find("img").addClass("selected");
-        self._controller.selectEditLayer(Diluvia.LAYERS.BASE);
+        self._controller.selectTileEditor();
     });
 
     $("#object_edit_link").click(function(ev) {
         ev.preventDefault();
-        $("#editor_dashboard").find("img.selected").removeClass("selected")
-        $(this).find("img").addClass("selected");
-        self._controller.selectEditLayer(Diluvia.LAYERS.OBJECT);
+        self._controller.selectObjectEditor();
     });
 
     $("#actor_edit_link").click(function(ev) {
         ev.preventDefault();
-        $("#editor_dashboard").find("img.selected").removeClass("selected")
-        $(this).find("img").addClass("selected");
-        self._controller.selectEditLayer(Diluvia.LAYERS.ACTOR);
+        self._controller.selectActorEditor();
     });
     
     $("#portal_edit_link").click(function(ev) {

@@ -30,16 +30,14 @@ var Zone = module.exports = function(options) {
     this._background        = options["background"];
     this._music             = options["music"];
     this._tileUid           = (new Date()).getTime();
-
-    // initialize layers
-    for (var i = 0; i < Defs.LAYER_COUNT; i++) {
-        this._board.addLayer(new BoardLayer(i));
-    }
-
+    this._config            = options["config"];
+    
     for (key in Defs.Tiles) {
       var tile = this._tiles[key] = Tile.instanceFromDefinition(Defs.Tiles[key]);
       tile.setZone(this);
     }
+    
+    this.loadConfig();
 };
 
 Zone.MAP_LAYER_KEYS    = [ "LAYER_0", "LAYER_1" ];
@@ -85,7 +83,6 @@ Zone.findById = function(id, callback) {
         if (data) {
             var conf = JSON.parse(data);
             zone = new Zone(conf);
-            zone.loadConfig(conf.config);
         }
         callback(zone);
     });
@@ -97,14 +94,14 @@ Zone.createNewZone = function(account, callback) {
         fs.readFile("zones/dungeon_01.js", function(err, data) {
             var conf = JSON.parse(data);
             var zone = new Zone({
-              id: newZoneId, 
-              name:  "New Zone",
-              music: "dungeon_music",
-              account_id: account.getId(), 
-              width: conf.dimensions[0] || 64, 
-              height: conf.dimensions[1] || 64
+              id:           newZoneId, 
+              name:         "New Zone",
+              music:        "dungeon_music",
+              account_id:   account.getId(), 
+              width:        conf.dimensions[0] || 64, 
+              height:       conf.dimensions[1] || 64,
+              config:       conf
             });
-            zone.loadConfig(conf);
             zone.save(function(){
                 account.setEditorZoneId(newZoneId);
                 account.save(function() {callback(zone)});
@@ -119,15 +116,15 @@ Zone.createNewIsland = function(account, callback) {
         fs.readFile("zones/default_island.js", function(err, data) {
             var conf = JSON.parse(data);
             var zone = new Zone({
-              id: newZoneId, 
-              name:  "My Island", 
-              music: "seiomaccorgo",
-              background: "island1.png",
-              account_id: account.getId(), 
-              width: conf.dimensions[0] || 64,
-              height: conf.dimensions[1] || 64
+              id:           newZoneId, 
+              name:         "My Island", 
+              music:        "seiomaccorgo",
+              background:   "island1.png",
+              account_id:   account.getId(), 
+              width:        conf.dimensions[0] || 64,
+              height:       conf.dimensions[1] || 64,
+              config:       conf
             });
-            zone.loadConfig(conf);
             zone.save(function(){
                 account.setIslandZoneId(newZoneId);
                 account.setEditorZoneId(newZoneId);
@@ -165,10 +162,15 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
       return this._config;
     },
     
-    loadConfig: function(conf) {
-      this.setConfig(conf);
+    reloadConfig: function() {
+      delete this._board;
+      this._board = new Board();
+      this.loadConfig();
+    },
+    
+    loadConfig: function() {
       for (var mli = 0, mllen = Zone.MAP_LAYER_KEYS.length; mli < mllen; mli++) {
-          var confMapLayer    = conf[Zone.MAP_LAYER_KEYS[mli]],
+          var confMapLayer    = this._config[Zone.MAP_LAYER_KEYS[mli]],
               board           = this.getBoard(),
               layer           = board.getLayer(mli);
           
@@ -191,7 +193,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
       }
     },
     
-    updateConfig: function(zoneData, liveZone) {
+    resetConfig: function(zoneData, liveZone) {
       var updatedConfig = {};
       updatedConfig.background = this.getBackground();
       updatedConfig.music = this.getMusic();
@@ -212,8 +214,9 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
             updatedConfig[layerLabel][j] = null;
           }
         }
-        this.setConfig(updatedConfig);
       }
+      this.setConfig(updatedConfig);
+      this.reloadConfig();
     },
     
     _old_serializeConfig: function(callback) {
@@ -434,7 +437,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
               layerIndex  = tilesAndLayer[1];
 
           _(tiles).each(function(_tileData) {
-              var tile = zone.getTile(_tileData[0]);
+              var tile = zone.getTile(_tileData);
               if (tile && (layerIndex === Defs.OBJECT_LAYER) && tile.portalTile) {
                   returnVal = tile;
                   tileData  = _tileData;
