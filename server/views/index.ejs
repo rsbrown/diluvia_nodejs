@@ -34,6 +34,25 @@
         <%}%>  
       </div>
       <div style="margin-top: 30px; font-size: 12px;" class="info">All original game art courtesy of <a href="http://gabemartin.tumblr.com">Gabe Martin</a></div>
-      <div style="font-size: 12px;" class="info">With thanks to <a href="http://www.jsayles.com/familypages/earlymusic.htm">Jon Sayles</a> and <a href="http://fourgrant.com">Robby Grant</a> for providing the music.</div>
+      <div style="font-size: 12px;" class="info">Thanks to <a href="http://www.jsayles.com/familypages/earlymusic.htm">Jon Sayles</a> and <a href="http://fourgrant.com">Robby Grant</a> for providing the music.</div>
     </div>
 </div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+      var $genericDialog = $('<div id="dialog"></div>');
+      $("#header-links a#account").click(function(ev){
+        ev.preventDefault();
+        $genericDialog.load('/editor/account', function(){
+          $('#account-form').ajaxForm(function(res) {
+            window.location.href = "/";
+          });
+        }).dialog({
+            modal: true,
+            closeOnEscape: true,
+            width: 400,
+            height: 250
+        });
+      });
+    });
+</script>

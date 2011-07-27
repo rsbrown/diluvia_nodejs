@@ -164,9 +164,8 @@ _.extend(Account.prototype, events.EventEmitter.prototype, {
         return this._editorViewTileIndex ? this._editorViewTileIndex : this.getPlayer().getTileIndex();
     },
 
-    getUsername: function() {
-        return this._username;
-    },
+    setUsername: function(uName) { this._username = uName; },
+    getUsername: function() { return this._username; },
     
     setSoundOn: function(bool) {
         this._musicOn = bool;

@@ -28,6 +28,7 @@ var Web = module.exports = function(app, gameServer) {
     this._musicFiles = [];
     this._backgroundImages = [];
     this._loadMusicFiles();
+    this._loadBackgroundImages();
 };
 
 Web.prototype = {
@@ -43,22 +44,34 @@ Web.prototype = {
       return this._musicFiles;
     },
     
-    _loadMusicFiles: function() {
+    getBackgroundImages: function() {
+      return this._backgroundImages;
+    },
+    
+    _loadFiles: function(dirName, collection) {
       var self = this;
-      fs.readdir("public/media/music", function(err, files) {
+      fs.readdir(dirName, function(err, files) {
           if (err) {
               console.log("Could not find music media directory!");
           }
           else {
               _(files).each(function(filename) {
                 if (filename.substr(-4) === ".mp3") {
-                  self._musicFiles.push(filename.substr(0, filename.length-4));
+                  collection.push(filename.substr(0, filename.length-4));
                 }
               });
           }
       });
     },
     
+    _loadMusicFiles: function() {
+      this._loadFiles("public/media/music", this._musicFiles);
+    },
+
+    _loadBackgroundImages: function() {
+      this._loadFiles("public/images/backgrounds", this._backgroundImages);
+    },
+
     loadUserSession: function(req, res, next) {
         if (req.user) {
           req.session.accountId  = req.user.getId();
@@ -114,11 +127,6 @@ Web.prototype = {
       var zoneId = account.getEditorZoneId();
       var portalOriginZone = server.getWorld().getZone(zoneId);
       if (portalOriginZone && (portalOriginZone.getAccountId() == account.getId())) {
-        var newCoords = null;
-        if (req.body.portal.dest_coords && req.body.portal.dest_coords !== "") {
-          var editCoords = req.body.portal.dest_coords.split(",");
-          newCoords = [Number(editCoords[0]), Number(editCoords[1])];
-        }
         portalOriginZone.portalAtIndex(portalTileIdx, function(portalTile, tileData, layerIndex){
           var tileId = tileData;
           if (portalTile == null) {
@@ -128,6 +136,13 @@ Web.prototype = {
           }
           Zone.findById(req.body.portal.zone, function(portalDestZone) {
             if (portalDestZone) {
+              var newCoords = null;
+              if (req.body.portal.dest_coords && req.body.portal.dest_coords !== "") {
+                var editCoords = req.body.portal.dest_coords.split(",");
+                newCoords = [Number(editCoords[0]), Number(editCoords[1])];
+              } else {
+                newCoords = [parseInt(portalDestZone.getWidth()/2),parseInt(portalDestZone.getHeight()/2)];
+              }
               portalTile.setDestinationZone(portalDestZone.getId());
               if ( (newCoords[0] <= portalDestZone.getDimensions()[0]) && (newCoords[1] <= portalDestZone.getDimensions()[1])) {
                 portalTile.setDestinationCoords(newCoords);
@@ -156,6 +171,12 @@ Web.prototype = {
           zone.setDimensions(zoneParams.width, zoneParams.height);
           zone.save();
         }
+    },
+    
+    updateAccount: function(req) {
+      var account = req.user;
+      account.setUsername(req.body.account.username);
+      account.save();
     }
     
 };

@@ -22,12 +22,6 @@
     <script src="/js/diluvia.js" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript">
       var SOCKET_URI = "<%=SOCKET_URI%>";
-      $(document).ready(function() {
-        $("#header-links a#account").click(function(ev){
-          ev.preventDefault();
-          console.log("Account management dashboard goes here.");
-        });
-      });
     </script>
   </head>
   <body>
@@ -36,6 +30,7 @@
         <%= flash.error %>
     </div>
     <% } %>
+    <div id="dialog"></div>
     <%- body %>
   </body>
 </html>

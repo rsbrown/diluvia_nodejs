@@ -56,6 +56,9 @@ var DiluviaController = function(options) {
       2:              [0,  "Dude",  "dude.png:0,0"],
       zoneData: {}
     };
+
+    $(document.body).css({ overflow: "hidden" });
+    this.bindAccountEditDialog();
     
     this["appendElementsFor_" + this._mode]();
 };
@@ -82,7 +85,6 @@ DiluviaController.prototype = {
     },
     
     appendElementsFor_game: function() {
-      $(document.body).css({ overflow: "hidden" });
     },
     
     appendElementsFor_editor: function() {
@@ -92,12 +94,31 @@ DiluviaController.prototype = {
       this.preloadImage("tile_target.png");
       $("#object_edit_link img").addClass("selected");
       this.selectEditLayer(Diluvia.LAYERS.OBJECT);
-
       // async bindings
       var self = this;
       $("#save-button").click(function(ev){
         ev.preventDefault();
         self.saveZoneEdits();
+      });
+    },
+    
+    bindAccountEditDialog: function() {
+      var self = this;
+      $("#header-links a#account").click(function(ev){
+        ev.preventDefault();
+        $("#dialog").load('/editor/account', function(){
+          $('#account-form').ajaxForm(function(res) {
+            $("#header-links a#account").html(res.username);
+            $("#dialog").dialog("close");
+          });
+        }).dialog({
+            open: function() {self._keyboard.paused = true;},
+            close: function() {self._keyboard.paused = false;},
+            modal: true,
+            closeOnEscape: true,
+            width: 400,
+            height: 250
+        });
       });
     },
     
@@ -297,16 +318,18 @@ DiluviaController.prototype = {
     
     showTileChooser: function(callback) {
       var self = this;
-      $("#chooser").dialog({
+      $("#dialog").dialog({
+          open: function() {self._keyboard.paused = true;},
+          close: function() {self._keyboard.paused = false;},
           modal: true,
           closeOnEscape: true,
           width: 610,
           height: 600
       });
-      this.loadTileChooser($("#chooser"), function(newTileId, newTileName, newTileInfo) {
+      this.loadTileChooser($("#dialog"), function(newTileId, newTileName, newTileInfo) {
         self._editState[self._editState.selectedLayer] = [newTileId, newTileName, newTileInfo];
         self.displayPreviewTile();
-        $("#chooser").dialog("close");
+        $("#dialog").dialog("close");
       });
     },
     
@@ -328,7 +351,10 @@ DiluviaController.prototype = {
     },
     
     showZoneEditor: function() {
-      $("#chooser").load('/editor/zone').dialog({
+      var self = this;
+      $("#dialog").load('/editor/zone').dialog({
+          open: function() {self._keyboard.paused = true;},
+          close: function() {self._keyboard.paused = false;},
           modal: true,
           closeOnEscape: true,
           width: 300,
@@ -365,15 +391,17 @@ DiluviaController.prototype = {
         layer[tileIdx] = [res.portalId];
         self.enableSaveButton();
         self.saveZoneEdits();
-        $("#chooser").dialog("close");
+        $("#dialog").dialog("close");
       });
     },
 
     showPortalEditor: function(tileIdx) {
       var self = this;
-      $("#chooser").load('/editor/portal/' + tileIdx, function(){
+      $("#dialog").load('/editor/portal/' + tileIdx, function(){
         self.bindPortalEditActions(tileIdx);
       }).dialog({
+          open: function() {self._keyboard.paused = true;},
+          close: function() {self._keyboard.paused = false;},
           modal: true,
           closeOnEscape: true,
           width: 610,

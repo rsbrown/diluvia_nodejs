@@ -278,6 +278,14 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         return this._dimensions;
     },
     
+    getWidth: function() {
+        return this._dimensions[0];
+    },
+    
+    getHeight: function() {
+        return this._dimensions[1];
+    },
+
     setDimensions: function(width, height) {
       this._dimensions = [width, height, Defs.LAYER_COUNT];
     },

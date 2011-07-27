@@ -1,3 +1,10 @@
+var KEYCODE_MOVE_COMMANDS_EDITOR = {
+    38:  "n",
+    40:  "s",
+    39:  "e",
+    37:  "w"
+};
+
 var KEYCODE_MOVE_COMMANDS = {
     38:  "n",
     40:  "s",
@@ -10,36 +17,47 @@ var KEYCODE_MOVE_COMMANDS = {
 };
 
 var Keyboard = function(controller) {
-  this.keysDown    = {},
-  this.chatting    = false,
+  this.keysDown    = {};
+  this.paused      = false;
+  this.chatting    = false;
   this.sbDown      = false;
   this._controller = controller;
   this[controller.getMode() + "KeyBindings"]();
 };
 
 Keyboard.prototype = {
+    isDialogOpen: function() {
+      $("#dialog").data("dialog").isOpen
+    },
+  
     editorKeyBindings: function() {
       var self = this;
       
       $(document).bind('keydown', 'ctrl+s meta+s', function(ev){
-        ev.preventDefault();
-        self._controller.saveZoneEdits();
+        if (!self.paused) {
+          ev.preventDefault();
+          self._controller.saveZoneEdits();
+        }
       });
 
       $(document).bind('keydown', '1', function(ev){
-        ev.preventDefault();
-        self._controller.selectTileEditor();
+       if (!self.paused) {
+          ev.preventDefault();
+          self._controller.selectTileEditor();
+        }
       });
 
       $(document).bind('keydown', '2', function(ev){
-        ev.preventDefault();
-        self._controller.selectObjectEditor();
+        if (!self.paused) {
+          ev.preventDefault();
+          self._controller.selectObjectEditor();
+        }
       });
 
       $(window).keydown(function(ev) {
           var kc  = ev.keyCode,
-              cmd = KEYCODE_MOVE_COMMANDS[kc];
-          if (cmd && kc < 65) {
+              cmd = KEYCODE_MOVE_COMMANDS_EDITOR[kc];
+          if (cmd && !self.paused) {
               self.keysDown[kc] = true;
               self._controller.moveEditorView(cmd);
               ev.preventDefault();
@@ -48,9 +66,9 @@ Keyboard.prototype = {
       
       $(window).keyup(function(ev) {
           var kc  = ev.keyCode,
-              cmd = KEYCODE_MOVE_COMMANDS[kc];
+              cmd = KEYCODE_MOVE_COMMANDS_EDITOR[kc];
 
-          if (cmd && kc < 65) {
+          if (cmd && !self.paused) {
               self._controller.settleEditorView(cmd);
           }
       });
@@ -61,7 +79,7 @@ Keyboard.prototype = {
       $(window).keydown(function(ev) {
           var kc  = ev.keyCode,
               cmd = KEYCODE_MOVE_COMMANDS[kc];
-          if (cmd && !self.chatting) {
+          if (cmd && !self.paused) {
               self.keysDown[kc] = true;
 
               if (cmd == "scoreboard") {
@@ -82,7 +100,7 @@ Keyboard.prototype = {
           var kc  = ev.keyCode,
               cmd = KEYCODE_MOVE_COMMANDS[kc];
 
-          if (cmd && !self.chatting) {
+          if (cmd && !self.paused) {
               if (cmd == "scoreboard") {
                   self._controller.hideScoreboard();
                   self.sbDown = false;
@@ -93,7 +111,7 @@ Keyboard.prototype = {
       $(window).keypress(function(ev) {
           var kc = ev.keyCode;
 
-          if (!KEYCODE_MOVE_COMMANDS[kc]) {
+          if (!self.paused && !KEYCODE_MOVE_COMMANDS[kc]) {
               if (kc == 13) { // enter
                   if (!self.chatting) {
                       self._controller.showChatBox();

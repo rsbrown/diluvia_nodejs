@@ -104,6 +104,37 @@ var Routes = module.exports = {
       }
     },
     
+    '/editor/account': {
+      get: {
+        middleware: ["loadUserSession"],
+        exec: function(req, res) {
+            if (req.user) {
+              res.render('editor/account', {
+                layout: false,
+                locals: {
+                  account: req.user
+                }
+              });
+            } else {
+                req.flash("error", "You must login to change account settings.");
+                res.redirect("/login");
+            }
+        }
+      },
+      post: {
+        middleware: ["loadUserSession"],
+        exec: function(req, res) {
+          if (req.user) {
+            this.updateAccount(req);
+            res.send({username: req.user.getUsername()});
+          } else {
+            req.flash("error", "You must login to build your island.");
+            res.redirect("/login");
+          }
+        }
+      }
+    },
+
     '/editor/tiles': {
       get: {
           middleware: ["loadUserSession"],
