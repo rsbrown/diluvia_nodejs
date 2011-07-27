@@ -1,0 +1,16 @@
+<div>
+  <fieldset>
+    <legend>
+    Edit Your User Account
+    </legend>
+    <form id="account-form" action="/editor/account" method="post">
+        <div>
+          <label for="account[username]">Username:</label>
+          <input type="text" name="account[username]" value="<%=account.getUsername()%>" size="15"/>
+        </div>
+        <div style="clear:both;">
+            <input type="submit" value="save"/>
+        </div>
+    </form>
+  </fieldset>
+</div>
