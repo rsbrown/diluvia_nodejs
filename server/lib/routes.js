@@ -150,7 +150,7 @@ var Routes = module.exports = {
                   locals: {
                     editingZone: this._gameServer.getWorld().getZone(editingZoneId),
                     backgrounds: ["island1.png", "island2.png"],
-                    musics: ["seiomaccorgo", "leyenda", "dungeon_music"]
+                    musics: this.getMusicFiles()
                   }
                 });
               } else {

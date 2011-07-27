@@ -1,4 +1,5 @@
 var _           = require("underscore"),
+    fs          = require("fs"),
     Account     = require("account"),
     Defs        = require("defs"),
     Zone        = require("zone"),
@@ -9,7 +10,7 @@ var _           = require("underscore"),
 var Web = module.exports = function(app, gameServer) {
     var self         = this;
     this._gameServer = gameServer;
-    methods = ["get", "post"]
+    methods = ["get", "post"];
     // Bind all the routes
     _(Routes).each(function(val, key) {
         for (i in methods) {
@@ -23,6 +24,10 @@ var Web = module.exports = function(app, gameServer) {
             }
         }
     });
+    
+    this._musicFiles = [];
+    this._backgroundImages = [];
+    this._loadMusicFiles();
 };
 
 Web.prototype = {
@@ -32,6 +37,26 @@ Web.prototype = {
           } else {
             res.redirect("/");
           }
+    },
+    
+    getMusicFiles: function() {
+      return this._musicFiles;
+    },
+    
+    _loadMusicFiles: function() {
+      var self = this;
+      fs.readdir("public/media/music", function(err, files) {
+          if (err) {
+              console.log("Could not find music media directory!");
+          }
+          else {
+              _(files).each(function(filename) {
+                if (filename.substr(-4) === ".mp3") {
+                  self._musicFiles.push(filename.substr(0, filename.length-4));
+                }
+              });
+          }
+      });
     },
     
     loadUserSession: function(req, res, next) {
