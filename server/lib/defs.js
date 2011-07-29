@@ -380,7 +380,49 @@ Defs.Tiles =     {
    { class: 'GoalTile',
      image: 'sprites.png:3,5',
      goalType: 'sword',
-     name: 'Sword' } 
+     name: 'Sword' } ,
+     
+  84: 
+  { class: 'WallTile',
+    image: 'sprites.png:12,0',
+    name: 'DUNGEON_SINGLE_1' },
+  85: 
+  { class: 'WallTile',
+    image: 'sprites.png:13,0',
+    name: 'DUNGEON_SINGLE_2' },
+  86: 
+  { class: 'WallTile',
+    image: 'sprites.png:14,0',
+    name: 'DUNGEON_SINGLE_3' },
+  87: 
+  { class: 'WallTile',
+    image: 'sprites.png:12,1',
+    name: 'DUNGEON_SINGLE_4' },
+  88: 
+  { class: 'WallTile',
+    image: 'sprites.png:13,1',
+    name: 'DUNGEON_SINGLE_5' },
+  89: 
+  { class: 'WallTile',
+    image: 'sprites.png:14,1',
+    name: 'DUNGEON_SINGLE_6' },
+  90: 
+  { class: 'WallTile',
+    image: 'sprites.png:15,0',
+    name: 'DUNGEON_SINGLE_7' },
+  91: 
+  { class: 'WallTile',
+    image: 'sprites.png:15,1',
+    name: 'DUNGEON_SINGLE_8' },
+  92: 
+  { class: 'WallTile',
+    image: 'sprites.png:16,0',
+    name: 'DUNGEON_SINGLE_9' },
+  93: 
+  { class: 'WallTile',
+    image: 'sprites.png:16,1',
+    name: 'DUNGEON_SINGLE_10' }
+
 };
 
 Defs.SPELLS = {
