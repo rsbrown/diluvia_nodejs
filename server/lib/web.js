@@ -1,5 +1,6 @@
 var _           = require("underscore"),
     fs          = require("fs"),
+    janrain     = require('janrain-api'),
     Account     = require("account"),
     Defs        = require("defs"),
     Zone        = require("zone"),
@@ -40,6 +41,30 @@ Web.prototype = {
           }
     },
     
+    handleJanrainLogin: function(token, req, res) {
+      var web = this;
+      var engageAPI = janrain(JANRAIN_KEY);
+      engageAPI.authInfo(token, true, function(err, data) {
+        if(err) {
+          res.send(err.message + ( data ? ('  --  ' + JSON.stringify(data)) : ''));
+          return;
+        }
+        
+        var existingUserId = data.profile.identifier;
+        Account.findByJanrainId(existingUserId, function(foundAccount){
+          if (foundAccount) {
+            req.session.accountId = foundAccount.getId();
+            web.redirectBackOrRoot(req, res);
+          } else {
+            Account.createViaJanrain(data.profile, function(newAccount){
+              req.session.accountId = newAccount.getId();
+              web.redirectBackOrRoot(req, res);
+            });
+          }
+        });
+      });
+    },
+    
     getMusicFiles: function() {
       return this._musicFiles;
     },
@@ -73,11 +98,15 @@ Web.prototype = {
     },
 
     loadUserSession: function(req, res, next) {
-        if (req.user) {
-          req.session.accountId  = req.user.getId();
-          req.session.myIslandId = req.user.getIslandZoneId();
-          req.session.isMusicOn  = req.user.isMusicOn();
-          next();
+        if (req.session.accountId) {
+          Account.findById(req.session.accountId, function(foundAccount){
+            if (foundAccount) {
+              req.user               = foundAccount;
+              req.session.myIslandId = req.user.getIslandZoneId();
+              req.session.isMusicOn  = req.user.isMusicOn();
+            }
+            next();
+          });
         } else {
           req.session.isMusicOn = true;
           next();

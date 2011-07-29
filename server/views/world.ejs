@@ -6,8 +6,8 @@
 <header class="world">
   <a href="/"><img src="/images/logo.png" alt="Diluvia" id="logo"></a>
   <div class="header-item" id="user-login">
-    <% if (everyauth.loggedIn) { %>
-      <span id="header-links"><a id="account" href="#"><%= everyauth.user._username %></a> (<a class="logout" href="/logout">logout</a>) </span> 
+    <% if (user) { %>
+      <span id="header-links"><a id="account" href="#"><%= user.getUsername() %></a> (<a class="logout" href="/logout">logout</a>) </span> 
     <% } else { %>
       <% if (false) { %>
       <div style="float: left; margin-right: 10px; line-height: 15px;">

@@ -59,7 +59,7 @@
     <% } %>
   </div>
   <div class="header-item" id="user-login">
-     <span id="header-links"><a id="account" href="#"><%= everyauth.user._username %></a> (<a class="logout" href="/logout">logout</a>) </span>
+     <span id="header-links"><a id="account" href="#"><%= user.getUsername() %></a> (<a class="logout" href="/logout">logout</a>) </span>
      <div><a href='/play'>Play Mode</a></div>
   </div>
 </header>

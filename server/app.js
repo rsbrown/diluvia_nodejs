@@ -6,7 +6,6 @@ var express             = require("express"),
     Client              = require("client"),
     World               = require("world"),
     Account             = require("account"),
-    everyauth           = require('everyauth'),
     connect             = require("connect"),        
     GameServer          = require("game_server"),
     Account             = require("account"),
@@ -34,31 +33,6 @@ git.stdout.on("data", function(data) {
 
 var STATIC_ROOT =  __dirname + "/public";
 
-everyauth.debug = true;
-
-everyauth.facebook
-    .myHostname(SITE_HOSTNAME)
-    .appId(FACEBOOK_ID)
-    .appSecret(FACEBOOK_SECRET)
-    .scope('email')
-    .findOrCreateUser( function (session, accessToken, accessTokenExtra, fbUserMetadata) {
-      var promise = this.Promise();
-      Account.findByFacebookId(fbUserMetadata.id, function(foundAccount){
-        if (foundAccount) {
-          promise.fulfill(foundAccount);
-        } else {
-          Account.createViaFacebook({
-              "facebookUserId": fbUserMetadata.id,
-              "username": fbUserMetadata.name
-          }, function(newAccount){
-            promise.fulfill(newAccount);
-          });
-        }
-      });
-      return promise;
-    })
-    .redirectPath('/');
-
 var app = express.createServer(
     express.bodyParser(),
     express.logger(),
@@ -67,16 +41,8 @@ var app = express.createServer(
         secret:     "zZICGH40MKxHDTTqOCLbA4YN3CcvKoMOOZIkEkOc6C2LHuNMWHAEYzoeBjnqSzy3dpoDhZZhthe7y4ZpMpGpcQcdLVKHGhAlhAvkMxzlFC7eDleIEkXj3XMVWVVAd3Hbpp3epw9iBuBqvOZY4lZ7bdAgtN5VEVvRT5VM5UXzq7y1NX5uXkULPieYsuLFjyAlJRjczCCL",
         store:      new RedisStore
     }),
-    everyauth.middleware(),
-    everyauth.everymodule.findUserById( function (userId, callback) {
-      Account.findById(userId, function(foundAccount){
-        callback(null, foundAccount);
-      });
-    }),
     express.static(STATIC_ROOT)
 );
-
-everyauth.helpExpress(app);
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');

@@ -9,7 +9,7 @@ var Routes = module.exports = {
             this.getIslands(req, res, function(userList) {
                 res.render('index', {
                     locals: {
-                        username:     req.session.username,
+                        user:         req.user,
                         play_music:   req.session.isMusicOn,
                         account:      req.user,
                         users:        userList,
@@ -25,6 +25,20 @@ var Routes = module.exports = {
       get: {
         exec:function(req, res) {
             res.send('pong');
+        }
+      }
+    },
+
+    // Handler for janrain auth callback
+    '/rpx': {
+      post: {
+        exec: function(req, res) {
+          var token = req.body.token;
+          if(!token || token.length != 40 ) {
+            res.send('INVALID TOKEN');
+          } else {
+            this.handleJanrainLogin(token, req, res);
+          }
         }
       }
     },
@@ -45,11 +59,12 @@ var Routes = module.exports = {
         req.session["store_location"] = '/play';
         res.render('world', {
             locals: { 
+                user:          req.user,
                 sessionId:     req.session.id,
                 play_music:    req.session.isMusicOn,
                 flash:         req.flash(),
                 account:       req.user,
-                username:      req.session.username
+                username:      req.username
             }
         });
       }}
@@ -64,7 +79,7 @@ var Routes = module.exports = {
 
     '/login': {
       get: {exec:function(req, res) {
-        res.render('login', {locals: {flash: req.flash(), username: req.session.username}});
+        res.render('login', {locals: {flash: req.flash(), username: req.username}});
       }}
     },
 
@@ -272,10 +287,11 @@ var Routes = module.exports = {
                 self.getEditableZones(req.user, function(zoneList) {
                     res.render('editor', {
                         locals: {
+                            user:           req.user,
                             sessionId:      req.session.id,
                             editingZoneId:  req.user.getEditorZoneId(),
                             zones:          zoneList,
-                            username:       req.session.username,
+                            username:       req.username,
                             flash:          req.flash()
                         }
                     });

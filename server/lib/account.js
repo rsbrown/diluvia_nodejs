@@ -13,6 +13,8 @@ var Account = module.exports = function(attributes) {
     this._islandZoneId          = attributes["islandZoneId"];
     this._editorZoneId          = attributes["editorZoneId"] ? attributes["editorZoneId"] : this._islandZoneId;
     this._musicOn               = attributes["musicOn"];
+    this._name                  = attributes["name"];
+    this._email                 = attributes["email"];
     this._score                 = attributes["score"] || 0;
     this._client                = null;
     this._player                = new Player(attributes);
@@ -38,26 +40,30 @@ Account.initFromSession = function(sessionId, callback) {
     });
 };
 
-Account.createViaFacebook = function(attributes, callback) {
+Account.createViaJanrain = function(janrainProfile, callback) {
     var redis = Persistence.getRedis();
+    var janrainId = janrainProfile.identifier;
+    console.log(janrainProfile);
     redis.incr( 'pkid' , function( err, newUserId ) {
-        var account = new Account({
-            "id"       : newUserId,
-            "musicOn"  : true,
-            "username" : attributes["username"]
-        });
-        account.save(function(){
-            redis.set( 'facebookUser:'+attributes["facebookUserId"], account.getId(), function() {
-                console.log("SAVED NEW USER AND MAPPED FB ID " + attributes["facebookUserId"] + "TO USER ID " + account.getId());
-                callback(account);
-            });
-        });
+      var newAccount = new Account({
+          "id"       : newUserId,
+          "name"     : janrainProfile.name.givenName,
+          "username" : janrainProfile.preferredUsername,
+          "email"    : janrainProfile.email,
+          "musicOn"  : true
+      });
+      newAccount.save(function(){
+          redis.set( 'janrainUser:'+janrainId, newAccount.getId(), function() {
+              console.log("SAVED NEW USER AND MAPPED JANRAIN ID " + janrainId + "TO USER ID " + newAccount.getId());
+              callback(newAccount);
+          });
+      });
     });
 };
 
-Account.findByFacebookId = function(facebookUserId, callback){
+Account.findByJanrainId = function(janrainUserId, callback){
     var redis = Persistence.getRedis();
-    redis.get("facebookUser:" + facebookUserId, function(err, data) {
+    redis.get("janrainUser:" + janrainUserId, function(err, data) {
        if (data) {
           Account.findById(data, function(account){
               callback(account);
@@ -66,6 +72,22 @@ Account.findByFacebookId = function(facebookUserId, callback){
            callback(null);
        }
     });
+};
+
+
+Account.findById = function(id, callback) {
+    if (id) {
+      var redis = Persistence.getRedis();
+      redis.get("account:" + id, function(err, data) {
+          var account = null;
+          if (data) {
+              account = new Account(JSON.parse(data));
+          }
+          callback(account);
+      });
+    } else {
+      callback(null);
+    }
 };
 
 Account.findAll = function(callback) {
@@ -84,17 +106,6 @@ Account.findAll = function(callback) {
     });
 };
 
-Account.findById = function(id, callback) {
-    var redis = Persistence.getRedis();
-    redis.get("account:" + id, function(err, data) {
-        var account = null;
-        if (data) {
-            account = new Account(JSON.parse(data));
-        }
-        callback(account);
-    });
-};
-
 _.extend(Account.prototype, events.EventEmitter.prototype, {
     save: function(callback){
         if (callback === undefined ) { callback = function(){}; }
@@ -105,6 +116,8 @@ _.extend(Account.prototype, events.EventEmitter.prototype, {
         var player = this.getPlayer();
         return JSON.stringify({
             "id"                  : this._id,
+            "email"               : this._email,
+            "name"                : this._name,
             "musicOn"             : this._musicOn,
             "username"            : this._username,
             "islandZoneId"        : this._islandZoneId,
