@@ -249,6 +249,7 @@ DiluviaController.prototype = {
     
     saveZoneEdits: function() {
       var zoneId = this._protocol.getZoneData().id;
+      console.log(zoneId);
       if (this._editState.zoneData[zoneId].unsaved) {
         var unsavedData = this._editState.zoneData[zoneId].data;
         delete this._editState.zoneData[zoneId];
@@ -447,7 +448,7 @@ DiluviaController.prototype = {
       else if (this._editState.selectedMode === "erase") {
         var zoneState = this._editState.zoneData[this._protocol.getZoneData().id].data;
         var layer = zoneState.layers[this._editState.selectedLayer];
-        layer[tileIdx] = 7; // Empty Tile
+        layer[tileIdx] = null; // Empty Tile
         this._currentZoneState = zoneState;
         this.enableSaveButton();
         this.repaintCanvas();
