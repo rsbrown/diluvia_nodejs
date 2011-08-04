@@ -6,7 +6,7 @@ var express             = require("express"),
     Client              = require("client"),
     World               = require("world"),
     Account             = require("account"),
-    connect             = require("connect"),        
+    connect             = require("connect"),
     GameServer          = require("game_server"),
     Account             = require("account"),
     Defs                = require("defs"),
@@ -26,7 +26,7 @@ var express             = require("express"),
 var git = spawn("git", [ "rev-parse", "--short", "HEAD" ]);
 
 git.stdout.on("data", function(data) {
-    gitRevision         = data.toString().substring(0, data.length - 1);    
+    gitRevision         = data.toString().substring(0, data.length - 1);
     Defs.GIT_REVISION   = gitRevision;
     util.log("Diluvia Server version: " + gitRevision);
 });

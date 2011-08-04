@@ -210,8 +210,9 @@ var Routes = module.exports = {
         exec: function(req, res) {
           if (req.user) {
             var editingZoneId = req.user.getEditorZoneId();
-            this.updateZone(req.user, editingZoneId, req.body.zone);
-            res.redirect("/edit");
+            this.updateZone(req.user, editingZoneId, req.body.zone, function(){
+              res.redirect("/edit");
+            });
           } else {
             req.flash("error", "You must login to build your island.");
             res.redirect("/login");

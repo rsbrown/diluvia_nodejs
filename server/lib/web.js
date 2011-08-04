@@ -190,7 +190,7 @@ Web.prototype = {
         });
     },
 
-    updateZone: function(account, zoneId, zoneParams) {
+    updateZone: function(account, zoneId, zoneParams, callback) {
         var server = this._gameServer;
         var zone = this._gameServer.getWorld().getZone(zoneId);
         if (zone && (zone.getAccountId() == account.getId())) {
@@ -198,7 +198,7 @@ Web.prototype = {
           zone.setBackground(zoneParams.background);
           zone.setMusic(zoneParams.music);
           zone.setDimensions(zoneParams.width, zoneParams.height);
-          zone.save();
+          zone.save(callback);
         }
     },
     

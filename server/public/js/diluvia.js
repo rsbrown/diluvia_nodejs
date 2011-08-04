@@ -337,8 +337,8 @@ DiluviaController.prototype = {
       var self = this;
       element.load('/editor/tiles', function(){
         $(".tile_image").hover(
-          function(){ $("#ui-dialog-title-chooser").html($(this).attr("data-tileName")); },
-          function(){ $("#ui-dialog-title-chooser").html("&nbsp;"); }
+          function(){ $("span.ui-dialog-title").html($(this).attr("data-tileName")); },
+          function(){ $("span.ui-dialog-title").html("&nbsp;"); }
         );
         $(".tile_image").click(function(ev){
           ev.preventDefault();
@@ -352,7 +352,10 @@ DiluviaController.prototype = {
     
     showZoneEditor: function() {
       var self = this;
-      $("#dialog").load('/editor/zone').dialog({
+      $("#dialog").load('/editor/zone', function(){
+        self.enableSaveButton();
+        self.saveZoneEdits();
+      }).dialog({
           open: function() {self._keyboard.paused = true;},
           close: function() {self._keyboard.paused = false;},
           modal: true,
@@ -444,7 +447,7 @@ DiluviaController.prototype = {
       else if (this._editState.selectedMode === "erase") {
         var zoneState = this._editState.zoneData[this._protocol.getZoneData().id].data;
         var layer = zoneState.layers[this._editState.selectedLayer];
-        layer[tileIdx] = null;
+        layer[tileIdx] = 7; // Empty Tile
         this._currentZoneState = zoneState;
         this.enableSaveButton();
         this.repaintCanvas();

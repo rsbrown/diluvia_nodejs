@@ -3,10 +3,9 @@ const SOCKET_OPTIONS = {
   'transports': [ 
                     'websocket'
                    ,'flashsocket'
-                   // ,'htmlfile'
-                   // ,'xhr-multipart' 
+                   ,'htmlfile'
                    ,'xhr-polling'
-                   // ,'jsonp-polling'
+                   ,'jsonp-polling'
                   ],
   'try multiple transports': true
 };

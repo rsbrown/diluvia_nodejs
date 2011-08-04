@@ -18,18 +18,19 @@ GameServer.prototype = {
     _onWorldLoaded: function() {
         this._socket = io.listen(this._app, {timeout: 1000});
         this._socket.enable('browser client minification');
-        this._socket.set('log level', 3);
+        this._socket.enable('browser client etag');
+        this._socket.set('log level', IO_LOG_LEVEL);
         this._socket.set('transports', [
             'websocket'
-          // , 'flashsocket'
-          // , 'htmlfile'
+          , 'flashsocket'
+          , 'htmlfile'
           , 'xhr-polling'
-          // , 'jsonp-polling'
+          , 'jsonp-polling'
         ]);
         
         this._socket.sockets.on("connection", _(this._onConnect).bind(this));
     },
-    
+
     _onConnect: function(conn) {
         var server  = this,
             client  = new Client(conn);

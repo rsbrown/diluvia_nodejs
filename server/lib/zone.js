@@ -169,14 +169,15 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
     },
     
     loadConfig: function() {
+      var config = this._config;
       for (var mli = 0, mllen = Zone.MAP_LAYER_KEYS.length; mli < mllen; mli++) {
-          var confMapLayer    = this._config[Zone.MAP_LAYER_KEYS[mli]],
+          var confMapLayer    = config[Zone.MAP_LAYER_KEYS[mli]],
               board           = this.getBoard(),
               layer           = board.getLayer(mli);
           
           var zoneSize = this._dimensions[0]*this._dimensions[1];
           for (var idx = 0; idx < zoneSize; idx++) {
-            var tileId = 0;
+            var tileId = 7; // Empty Tile
             var tileInfo = confMapLayer[idx];
             if (tileInfo) {
                 if (isNaN(tileInfo)) {
@@ -219,33 +220,6 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
       this.reloadConfig();
     },
     
-    _old_serializeConfig: function(callback) {
-      var zone    = this,
-          config  = { "background":   this._background,
-                      "music":        this._music };
-          
-      for (var layerIdx=0; layerIdx < Zone.MAP_LAYER_KEYS.length; layerIdx++) {
-        var layer = this._board.getLayer(layerIdx);
-        var layerKey = "LAYER_" + layerIdx;
-        var zoneSize = (this._dimensions[0]*this._dimensions[1]);
-        config[layerKey] = new Array(zoneSize);
-        for (idx in layer.getRenderAttributes()) {
-          var tileList = layer.getRenderAttributes()[idx];
-          for (tile in tileList) {
-            var tileId = tileList[tile][0];
-            if (typeof tileId === "number") {
-              config[layerKey][idx] = tileId;
-            } else {
-              var tileDef = this._tiles[tileId];
-              config[layerKey][idx] = tileDef.serializable();
-            }
-          }
-        }
-      }
-      
-      return config;
-    },
-
     getNextTileId: function() {
       return this._tileUid++;
     },
@@ -287,7 +261,25 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
     },
 
     setDimensions: function(width, height) {
+      if (width != this._dimensions[0] || height != this._dimensions[1]) {
+        for (var mli = 0, mllen = Zone.MAP_LAYER_KEYS.length; mli < mllen; mli++) {
+            var newConfLayer = [];
+            var oldConfLayer = this._config[Zone.MAP_LAYER_KEYS[mli]];
+            for (var i = 0; i < oldConfLayer.length; i++) {
+              var xy = this.indexToXy(i),
+                   x = xy[0],
+                   y = xy[1];
+              if (x < width && y < height) {
+                  var newIdx = (y * width) + x;
+                  newConfLayer[newIdx] = oldConfLayer[i];
+                  console.log("mapping "+x+","+y+" ("+oldConfLayer[i]+") " + i + " to " + newIdx);
+              }
+            }
+            this._config[Zone.MAP_LAYER_KEYS[mli]] = newConfLayer;
+        }
+      }
       this._dimensions = [width, height, Defs.LAYER_COUNT];
+      this.reloadConfig();
     },
     
     getCenterTileIndex: function() {
