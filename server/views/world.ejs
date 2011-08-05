@@ -9,21 +9,7 @@
     <% if (user) { %>
       <span id="header-links"><a id="account" href="#"><%= user.getUsername() %></a> (<a class="logout" href="/logout">logout</a>) </span> 
     <% } else { %>
-      <% if (false) { %>
-      <div style="float: left; margin-right: 10px; line-height: 15px;">
-        <a href='/auth/google' style='padding: 5px; border: solid 1px #DDDDDD; background: #444444; font-size: 12px;'>
-          Login via Google 
-          <img style='border: 0px' src='https://www.google.com/favicon.ico'/>
-        </a>
-      </div>
-      <% } %>
-      <div class="fb_button" id="fb-login" style="float:left; background-position: left -188px">
-        <a href="/auth/facebook" class="fb_button_medium">
-          <span id="fb_login_text" class="fb_button_text">
-            Connect with Facebook
-          </span>
-        </a>
-      </div>
+      <div><a class="rpxnow" onclick="return false;" href="<%=JANRAIN_URL%>"> Hello, who are you? </a></div>
     <% } %>
     <% if (account && account.getIslandZoneId() !== undefined) { %>
       <div><a href='/edit'>Edit Mode</a></div>

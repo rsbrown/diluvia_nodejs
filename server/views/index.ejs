@@ -4,9 +4,7 @@
     <% if (user) { %>
       <span id="header-links"><a id="account" href="#"><%= user.getUsername() %></a> (<a class="logout" href="/logout">logout</a>) </span> 
     <% } else { %>
-      <div> 
-        <a class="rpxnow" onclick="return false;" href="<%=JANRAIN_URL%>"> Hello, who are you? </a>
-      </div>
+      <div><a class="rpxnow" onclick="return false;" href="<%=JANRAIN_URL%>"> Hello, who are you? </a></div>
     <% } %>
   </div>
 </header>
