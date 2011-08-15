@@ -272,7 +272,6 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
               if (x < width && y < height) {
                   var newIdx = (y * width) + x;
                   newConfLayer[newIdx] = oldConfLayer[i];
-                  console.log("mapping "+x+","+y+" ("+oldConfLayer[i]+") " + i + " to " + newIdx);
               }
             }
             this._config[Zone.MAP_LAYER_KEYS[mli]] = newConfLayer;

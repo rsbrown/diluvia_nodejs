@@ -230,7 +230,8 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         
         player.on("changeGoalInventory", function(goalInventory) {
             if (goalInventory != null) {
-                var goalTileId  = goalInventory[0],
+                var goalInventory
+                    goalTileId  = goalInventory,
                     currentZone = world.getZone(player.getZoneId()),
                     goalTile    = currentZone.getTile(goalTileId);
                 
@@ -355,7 +356,8 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         var player  = account.getPlayer(),
             zone    = this.getZone(player.getZoneId());
         
-        zone.playSound("scream");
+        var screamNumber = Math.floor(Math.random() * Defs.NUM_SCREAM_SOUNDS);
+        zone.playSound("scream"+screamNumber);
         
         player.die();
         player.setRole(Defs.ROLE_SEEKER);
@@ -381,27 +383,19 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
     
     // TODO: this method is _WAY_ too big now
     otherCommand: function(account, zone, command) {
-        var client      = account.getClient(),
-            player      = account.getPlayer(),
-            tileIndex   = player.getTileIndex(),
-            orientation = player.getOrientation(),
-            otherIndex  = zone.indexForDirectionalMove(tileIndex, orientation),
-            actors      = zone.getActors(),
-            goalInv     = player.getGoalInventory();
+        var client          = account.getClient(),
+            player          = account.getPlayer(),
+            playerTileIndex = player.getTileIndex(),
+            orientation     = player.getOrientation(),
+            otherIndex      = zone.indexForDirectionalMove(playerTileIndex, orientation),
+            goalInv         = player.getGoalInventory();
 
         if (command == "attack") {
-            var otherActors = [];
+            this.broadcastAttack(playerTileIndex);
             
             // first, look for players that we would be attacking
-            for (var i = 0, len = actors.length; i < len; i++) {
-                var actor           = actors[i],
-                    actorTileIndex  = actor.getTileIndex();
-            
-                if (actor != player && (actorTileIndex == otherIndex || actorTileIndex == tileIndex)) {
-                    otherActors.push(actor);
-                }
-            }
-            
+            var otherActors = this.actorsAtIndex(account, zone, playerTileIndex, otherIndex);
+
             if (otherActors.length > 0) {
                 if (player.getRole() == Defs.ROLE_ASSASSIN) {
                     _(otherActors).each(function(otherActor) {
@@ -452,6 +446,21 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
             
             client.sendScoreData(scoreData);
         }
+    },
+    
+    actorsAtIndex: function(account, zone, tileIndex, otherIndex) {
+      var actors      = zone.getActors(),
+          player      = account.getPlayer(),
+          otherActors = [];
+      for (var i = 0, len = actors.length; i < len; i++) {
+          var actor           = actors[i],
+              actorTileIndex  = actor.getTileIndex();
+      
+          if (actor != player && (actorTileIndex == otherIndex || actorTileIndex == tileIndex)) {
+              otherActors.push(actor);
+          }
+      }
+      return otherActors;
     },
 
     randomSpawnGoal: function(tileId) {
@@ -511,7 +520,6 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         var layer       = zone.getBoard().getLayer(layerIndex),
             tileId      = zone.getTileId(tile),
             oldGoal     = actor.getGoalInventory();
-        
         if (!oldGoal) {            
             if (tile.goalType == "skull") {
                 // TODO: make this more generic (work with multiple goals)        
@@ -534,7 +542,6 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
             else {
                 return; // shouldn't be able to pick up things that aren't spec'd right
             }
-        
             layer.popTile(tileIndex, tileData);
             actor.setGoalInventory(tileData);
         }
@@ -586,6 +593,12 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
     setZoneFromConfig: function(zoneConfig) {
         var zone = new Zone(zoneConfig);
         this.setZone(zone.getId(), zone);
+    },
+    
+    broadcastAttack: function(attackingActorIdx) {
+      _(this._online).each(function(account) {
+          account.getClient().sendAnimCommand(attackingActorIdx, "attack");
+      });
     },
     
     broadcastMessage: function(color, text) {

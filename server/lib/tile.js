@@ -5,6 +5,7 @@ var Tile = module.exports = function(options) {
     options             = options || {};
     
     this._image         = options.image         || "";
+    this._animations    = options.animations;
     this._label         = options.name          || "";
     this._type          = options.type          || "Tile";
     this._description   = options.description   || "Tile";
@@ -47,6 +48,7 @@ Tile.prototype = {
     },
     
     getImage:       function() { return this._image },
+    getAnimations:  function() { return this._animations },
     getLabel:       function() { return this._label },
     getType:        function() { return this._type },
     getDescription: function() { return this._description },
@@ -55,9 +57,10 @@ Tile.prototype = {
     
     getRenderAttributes: function() {
         return {
-            "image"    :    this.getImage(),
-            "label"    :    this.getLabel(),
-            "passable" :    !this.isImpassable()
+            "image"      :    this.getImage(),
+            "animations" :    this.getAnimations(),
+            "label"      :    this.getLabel(),
+            "passable"   :    !this.isImpassable()
         }
     }
 };
@@ -65,6 +68,7 @@ Tile.prototype = {
 // need these for instancing tiles
 
 var ActorTile   = require("actor_tile"),
+    MobTile     = require("mob_tile"),
     SpawnTile   = require("spawn_tile"),
     PortalTile  = require("portal_tile"),
     WallTile    = require("wall_tile"),

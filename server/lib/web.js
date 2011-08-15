@@ -98,17 +98,16 @@ Web.prototype = {
     },
 
     loadUserSession: function(req, res, next) {
+        req.session.isMusicOn = !req.cookies.music_off;
         if (req.session.accountId) {
           Account.findById(req.session.accountId, function(foundAccount){
             if (foundAccount) {
               req.user               = foundAccount;
               req.session.myIslandId = req.user.getIslandZoneId();
-              req.session.isMusicOn  = req.user.isMusicOn();
             }
             next();
           });
         } else {
-          req.session.isMusicOn = true;
           next();
         }
     },

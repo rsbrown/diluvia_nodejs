@@ -40,27 +40,31 @@ Keyboard.prototype = {
         }
       });
 
-      $(document).bind('keydown', '1', function(ev){
-       if (!self.paused) {
-          ev.preventDefault();
-          self._controller.selectTileEditor();
-        }
-      });
-
-      $(document).bind('keydown', '2', function(ev){
-        if (!self.paused) {
-          ev.preventDefault();
-          self._controller.selectObjectEditor();
-        }
-      });
-
       $(window).keydown(function(ev) {
           var kc  = ev.keyCode,
               cmd = KEYCODE_MOVE_COMMANDS_EDITOR[kc];
-          if (cmd && !self.paused) {
-              self.keysDown[kc] = true;
-              self._controller.moveEditorView(cmd);
-              ev.preventDefault();
+
+          if (!self.paused) {
+            switch(kc) {
+              case 49: // "1"
+                ev.preventDefault();
+                self._controller.selectTileEditor();
+                break;
+              case 50: // "2"
+                ev.preventDefault();
+                self._controller.selectObjectEditor();
+                break;
+              // case 51: // "3"
+              //   ev.preventDefault();
+              //   self._controller.selectActorEditor();
+              //   break;
+              default:
+                if (cmd) {
+                    ev.preventDefault();
+                    self.keysDown[kc] = true;
+                    self._controller.moveEditorView(cmd);
+                }
+            }
           }
       });
       

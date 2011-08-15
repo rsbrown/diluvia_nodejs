@@ -24,6 +24,8 @@ var Defs = module.exports = {
     BASE_LAYER:             0,
     OBJECT_LAYER:           1,
     ACTOR_LAYER:            2,
+
+    NUM_SCREAM_SOUNDS:      5,
     
     CHAT_PLAYER:            "white",
     CHAT_SYSTEM:            "#BBBBBB",
@@ -37,6 +39,7 @@ var Defs = module.exports = {
 var Tile            = require("tile"),
     WallTile        = require("wall_tile"),
     ActorTile       = require("actor_tile"),
+    MobTile         = require("mob_tile"),
     SpawnTile       = require("spawn_tile"),
     PortalTile      = require("portal_tile"),
     PainTile        = require("pain_tile"),
@@ -44,20 +47,36 @@ var Tile            = require("tile"),
 
 Defs.Tiles =     { 
   1: 
-   { class: 'ActorTile',
-     image: 'dude.png:0,0',
-     name: 'PLAYER_N' },
+   { class:        'ActorTile',
+     image:        'dude.png:0,0',
+     animations: {
+       attack: { imagePath: 'dude.png',
+                 frames:    [[0,1], [0,2], [0,1]] }
+     },
+     name:         'PLAYER_N' },
   2: 
    { class: 'ActorTile',
      image: 'dude.png:2,0',
+     animations: {
+       attack: { imagePath: 'dude.png',
+                 frames:    [[2,1], [2,2], [2,1]] }
+     },
      name: 'PLAYER_S' },
   3: 
    { class: 'ActorTile',
      image: 'dude.png:1,0',
+     animations: {
+       attack: { imagePath: 'dude.png',
+                 frames:    [[1,1], [1,2], [1,1]] }
+     },
      name: 'PLAYER_E' },
   4: 
    { class: 'ActorTile',
      image: 'dude.png:3,0',
+     animations: {
+       attack: { imagePath: 'dude.png',
+                 frames:    [[3,1], [3,2], [3,1]] }
+     },
      name: 'PLAYER_W' },
   5: 
    { class: 'SpawnTile',
@@ -381,7 +400,6 @@ Defs.Tiles =     {
      image: 'sprites.png:3,5',
      goalType: 'sword',
      name: 'Sword' } ,
-     
   84: 
   { class: 'WallTile',
     image: 'sprites.png:12,0',
@@ -421,7 +439,12 @@ Defs.Tiles =     {
   93: 
   { class: 'WallTile',
     image: 'sprites.png:16,1',
-    name: 'DUNGEON_SINGLE_10' }
+    name: 'DUNGEON_SINGLE_10' },
+  94: 
+  { class: 'MobTile',
+    image: 'sprites.png:10,6',
+    damage: 100,
+    name: 'Ghoul' }
 
 };
 

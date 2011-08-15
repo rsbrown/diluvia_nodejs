@@ -12,7 +12,6 @@ var Account = module.exports = function(attributes) {
     this._username              = attributes["username"];
     this._islandZoneId          = attributes["islandZoneId"];
     this._editorZoneId          = attributes["editorZoneId"] ? attributes["editorZoneId"] : this._islandZoneId;
-    this._musicOn               = attributes["musicOn"];
     this._name                  = attributes["name"];
     this._email                 = attributes["email"];
     this._score                 = attributes["score"] || 0;
@@ -43,14 +42,12 @@ Account.initFromSession = function(sessionId, callback) {
 Account.createViaJanrain = function(janrainProfile, callback) {
     var redis = Persistence.getRedis();
     var janrainId = janrainProfile.identifier;
-    console.log(janrainProfile);
     redis.incr( 'pkid' , function( err, newUserId ) {
       var newAccount = new Account({
           "id"       : newUserId,
           "name"     : janrainProfile.name.givenName,
           "username" : janrainProfile.preferredUsername,
-          "email"    : janrainProfile.email,
-          "musicOn"  : true
+          "email"    : janrainProfile.email
       });
       newAccount.save(function(){
           redis.set( 'janrainUser:'+janrainId, newAccount.getId(), function() {
@@ -118,7 +115,6 @@ _.extend(Account.prototype, events.EventEmitter.prototype, {
             "id"                  : this._id,
             "email"               : this._email,
             "name"                : this._name,
-            "musicOn"             : this._musicOn,
             "username"            : this._username,
             "islandZoneId"        : this._islandZoneId,
             "editorZoneId"        : this._editorZoneId,
@@ -176,17 +172,9 @@ _.extend(Account.prototype, events.EventEmitter.prototype, {
     getCenterViewTileIndex: function(idx) {
         return this._editorViewTileIndex ? this._editorViewTileIndex : this.getPlayer().getTileIndex();
     },
-
+    
     setUsername: function(uName) { this._username = uName; },
     getUsername: function() { return this._username; },
-    
-    setSoundOn: function(bool) {
-        this._musicOn = bool;
-    },
-    
-    isMusicOn: function() {
-        return this._musicOn;
-    },
     
     getScore: function() {
         return this._score;

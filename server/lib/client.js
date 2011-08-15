@@ -111,6 +111,13 @@ _.extend(Client.prototype, events.EventEmitter.prototype, {
         this.sendMessage("Flash", color);
     },
     
+    sendAnimCommand: function(actorIdx, animType) {
+        this.sendMessage("PlayAnim", {
+          "actorIdx": actorIdx,
+          "animType": animType
+        });
+    },
+    
     sendChat: function(color, message) {
         this.sendMessage("Chat", { color: color, text: message });
     },

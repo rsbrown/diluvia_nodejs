@@ -34,10 +34,10 @@ Canvas.prototype = {
       this._context.fillRect(0, 0, this._canvasWidth, this._canvasHeight);
     },
     
-    paint: function(zoneData, zoneState) {
-        var zoneDims        = zoneData.dimensions,
-            viewCenterIdx   = zoneState.viewCenterIdx,
-            layerCount      = zoneDims[2];
+    paint: function() {
+        var zoneData        = this._controller.getZoneData(),
+            zoneState       = this._controller.getZoneState(),
+            zoneDims        = zoneData.dimensions;
         
         // Set the new Canvas width/height (zoom level may have changed)
         this._canvasWidth  = zoneDims[0] * this._tileWidth;
@@ -62,8 +62,15 @@ Canvas.prototype = {
         if (this._controller.isEditMode()) {
           this.clearCanvas();
         }
-
-        var layerIndexes = [];
+        
+        this.paintZoneUpdate(zoneData, zoneState, zoneDims[2]);
+    },
+    
+    paintZoneUpdate: function(zoneData, zoneState, layerCount) {
+        var zoneDims        = zoneData.dimensions,
+            viewCenterIdx   = zoneState.viewCenterIdx,
+            layerIndexes = [];
+          
         for (var layerIdx = 0; layerIdx < layerCount; layerIdx++) {
             var layer = zoneState.layers[layerIdx];
         
@@ -101,7 +108,7 @@ Canvas.prototype = {
                       } else {
                         tile = zoneData.tiles[tileId];
                       }
-
+                      
                       if (tile) {
                         this._context.drawImage(
                             this._controller.getImage(tile.imagePath),
@@ -120,6 +127,49 @@ Canvas.prototype = {
             }
         }
         this.recenter(zoneData, zoneState);
+    },
+    
+    playAnimation: function(animOptions) {
+      var ACTOR_LAYER = 2; // TODO: introspect to find the actor layer index
+      var ANIM_OBJ_INDEX = 0; // TODO: Handle multiple animation objects on same tile
+
+      var zoneData        = this._controller.getZoneData(),
+          zoneState       = this._controller.getZoneState(),
+          zoneDims        = zoneData.dimensions,
+          tileIndex       = animOptions.actorIdx,
+          tileId          = zoneState.layers[ACTOR_LAYER][tileIndex][ANIM_OBJ_INDEX][0],
+          tile            = zoneData.tiles[tileId],
+          animDef         = tile.animations[animOptions.animType],
+          frames          = tile.animations[animOptions.animType].frames,
+          frameCount      = 0,
+          row             = Math.floor(tileIndex / zoneDims[0]),
+          col             = tileIndex % zoneDims[0],
+          destPixelCoords = this.rowColToPixels(row, col),
+          self            = this;
+      
+      // 1: Clip the current frame and save it
+      // 2: Build an array of image data for the animation frames to be drawn
+      // 3: Start a timer to draw the animation frames, with the original clipped frame as the final animation frame      
+      
+      self._controller.startAnimating();
+      
+      var animInterval = setInterval(function() {
+        if (frameCount == frames.length) {
+          clearInterval(animInterval);
+          self._controller.finishAnimating();
+          self.paint(); // Repaint the last known zone state
+        } else {
+          self.paintZoneUpdate(zoneData, zoneState, Diluvia.LAYERS.OBJECT); // Do not draw the actor layer
+          self._context.drawImage(
+              self._controller.getImage(animDef.imagePath),
+              frames[frameCount][0],frames[frameCount][1],
+              Diluvia.TILE_DIMS[0],Diluvia.TILE_DIMS[1],
+              destPixelCoords.x,destPixelCoords.y,
+              self._tileWidth,self._tileHeight
+          );
+          frameCount++;
+        }
+      }, Diluvia.ANIM_DELAY);
     },
     
     forgetHoverTile: function() {

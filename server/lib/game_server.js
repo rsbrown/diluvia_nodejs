@@ -116,10 +116,6 @@ GameServer.prototype = {
                 else if (command == "suicide") {
                     world.accountDeath(account);
                 }
-                else if (command == "StopMusic" || command == "StartMusic") {
-                    account.setSoundOn((command == "StartMusic"));
-                    account.save();
-                }
                 else {
                     world.otherCommand(account, zone, command);
                 }

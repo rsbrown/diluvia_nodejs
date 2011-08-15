@@ -75,8 +75,8 @@ _(Actor.prototype).extend(
     },
     
     takeDamage: function(amount) {
+        if (!amount) return;
         this._hitpoints = Math.max(0, this._hitpoints - amount);
-        
         this.emit("tookDamage", amount, this._hitpoints);
         this.emit("changeHitpoints", this._hitpoints);
         this.emit("change");

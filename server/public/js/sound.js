@@ -12,7 +12,9 @@ var Sound = function() {
     
     soundManager.onready(function() {
         self.addAudio("bump",   "/media/sounds/bump.mp3");
-        self.addAudio("scream", "/media/sounds/scream.mp3");
+        for (var i=0; i<5; i++) {
+          self.addAudio("scream"+i, "/media/sounds/scream"+i+".mp3");
+        }
         self.addAudio("portal", "/media/sounds/button-43.mp3");
         self.addAudio("chat",   "/media/sounds/button-22.mp3");
         self.addAudio("ouch",   "/media/sounds/grunt.mp3");

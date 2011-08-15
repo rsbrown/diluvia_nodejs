@@ -6,9 +6,10 @@ var Diluvia = {
     TILE_DIMS:              [64, 64],
     CANVAS_ID:              "viewport",
     INTERVAL_DELAY:         10,
+    ANIM_DELAY:             50,
     FLASH_DURATION:         250,
     
-    LAYERS:                 { BASE: 0, OBJECT: 1, ACTOR: 2 },
+    LAYERS:                 { BASE: 1, OBJECT: 2, ACTOR: 3 },
     
     REL_DECODE: function(arr)
     {
@@ -37,8 +38,9 @@ var DiluviaController = function(options) {
     this._sound                    = new Sound();
     this._preload                  = [];
     this._imageCache               = {};
-    this._hasRecvarr              = false;
+    this._hasRecvarr               = false;
     this._hasRecvState             = false;
+    this._animating                = false;
     this._currentZoneState         = null;
     this._interval                 = setInterval(function() { self._onInterval(); }, Diluvia.INTERVAL_DELAY);
     this._stateQueue               = [];
@@ -53,7 +55,7 @@ var DiluviaController = function(options) {
       selectedLayer:  Diluvia.LAYERS.OBJECT,
       0:              [9,  "Grass", "sprites.png:2,7"],
       1:              [6,  "Rock", "sprites.png:3,4"],
-      2:              [0,  "Dude",  "dude.png:0,0"],
+      2:              [1,  "Dude",  "dude.png:0,0"],
       zoneData: {}
     };
 
@@ -138,6 +140,14 @@ DiluviaController.prototype = {
         return this._sound;
     },
     
+    getZoneData: function() {
+      return this._protocol.getZoneData();
+    },
+    
+    getZoneState: function() {
+      return this._currentZoneState;
+    },
+    
     initZoneData: function(msg) {
       this.initZoneTiles(msg.ZoneTiles);
       this.initZoneState(msg.ZoneLayout);
@@ -160,7 +170,17 @@ DiluviaController.prototype = {
             item.imagePath  = imgParts[0];
             item.coords     = [parseInt(rowcol[0])*Diluvia.TILE_DIMS[0], 
                                parseInt(rowcol[1])*Diluvia.TILE_DIMS[1]];
-          
+            
+            for (var animKey in item.animations) {
+              var animDef = item.animations[animKey];
+              this.preloadImage(animDef.imagePath);
+              for(var frameIdx in animDef.frames) {
+                var frameDef = animDef.frames[frameIdx];
+                frameDef[0] = frameDef[0]*Diluvia.TILE_DIMS[0];
+                frameDef[1] = frameDef[1]*Diluvia.TILE_DIMS[1];
+              }
+            }
+            
             this.preloadImage(item.imagePath);
         }
         this._hasRecvData = true;
@@ -214,8 +234,12 @@ DiluviaController.prototype = {
     repaintCanvas: function() {
       if (this.isEditMode()) {this._canvas.forgetHoverTile()};
       if (this._currentZoneState){
-        this._canvas.paint(this._protocol.getZoneData(), this._currentZoneState);
+        this._canvas.paint();
       }
+    },
+    
+    playAnimation: function(animOptions) {
+      this._canvas.playAnimation(animOptions);
     },
 
     initWorldView: function() {
@@ -235,7 +259,21 @@ DiluviaController.prototype = {
     },
     
     command: function(cmd) {
+      if (!this._animating) {
         this._protocol.send({ "type": "Command", "command": cmd });
+      }
+    },
+    
+    startAnimating: function() {
+        this._animating = true;
+    },
+    
+    finishAnimating: function() {
+        this._animating = false;
+    },
+    
+    isAnimating: function() {
+        return this._animating;
     },
     
     /***********************
@@ -249,7 +287,6 @@ DiluviaController.prototype = {
     
     saveZoneEdits: function() {
       var zoneId = this._protocol.getZoneData().id;
-      console.log(zoneId);
       if (this._editState.zoneData[zoneId].unsaved) {
         var unsavedData = this._editState.zoneData[zoneId].data;
         delete this._editState.zoneData[zoneId];
@@ -270,6 +307,11 @@ DiluviaController.prototype = {
     selectObjectEditor: function() {
       this.selectEditor("object");
       this.selectEditLayer(Diluvia.LAYERS.OBJECT);
+    },
+    
+    selectActorEditor: function() {
+      this.selectEditor("actor");
+      this.selectEditLayer(Diluvia.LAYERS.ACTOR);
     },
     
     disableSaveButton: function() {
@@ -518,12 +560,12 @@ DiluviaController.prototype = {
     
     startMusic: function() {
         this._sound.startMusic(this._protocol.getZoneData().music);
-        this._protocol.send({ "type": "Command", "command": "StartMusic" });
+        $.cookie('music_off', null);
     },
     
     stopMusic: function() {
         this._sound.stopMusic();
-        this._protocol.send({ "type": "Command", "command": "StopMusic" });
+        $.cookie('music_off', true);
     },
     
     changeMusic: function(music) {
