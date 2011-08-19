@@ -6,10 +6,10 @@ var SpellCaster = module.exports = function() {
 };
 
 _.extend(SpellCaster.prototype, events.EventEmitter.prototype, {
-    spellCasted: function(spellAffect) {
+    spellCasted: function(spellEffect) {
         var spellCaster = this;
         
-        this.emit("spellEvent", "casted", spellAffect);
-        this.forwardSpellEvents(spellAffect);
+        this.emit("spellEvent", "casted", spellEffect);
+        this.forwardSpellEvents(spellEffect);
     }
 });

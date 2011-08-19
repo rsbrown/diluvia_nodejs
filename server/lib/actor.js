@@ -109,7 +109,6 @@ _(Actor.prototype).extend(
         this._hitpoints     = this.getStartingHitpoints();
         this._goalCounter   = Defs.MAX_GOAL_COUNTER;
         this._lastGoalTime  = 0;
-        
         this.emit("spawned");
     },
     

@@ -158,7 +158,7 @@ var Routes = module.exports = {
                 res.render('editor/tiles', {
                   layout: false,
                   locals: {
-                    tiles:      Defs.Tiles
+                    tiles:      Defs.LAYER_TILES
                   }
                 });
               } else {
@@ -232,7 +232,7 @@ var Routes = module.exports = {
                     locals: {
                       portal:      portalInfo,
                       tileIdx:     portalTileIdx,
-                      tiles:       Defs.Tiles,
+                      tiles:       Defs.LAYER_TILES,
                       zones:       zoneList,
                       myAccountId: req.user.getId(),
                       accounts:    accountList

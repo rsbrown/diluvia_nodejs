@@ -1,12 +1,12 @@
 var _           = require("underscore"),
     events      = require("events"),
-    SpellAffect = require("spell_affect"),
+    SpellEffect = require("spell_effect"),
     SpellEvents = require("spell_events");
 
 var SpellTarget = module.exports = function() {
     events.EventEmitter.call(this);
     
-    this._spellAffects = [];
+    this._spellEffects = [];
     this._targetableAt = (new Date()).getDate();
 };
 
@@ -19,36 +19,36 @@ _.extend(SpellTarget.prototype, events.EventEmitter.prototype, {
         return ((new Date()).getTime() >= this._targetableAt);
     },
     
-    getSpellAffectForSpell: function(spell) {
-        return _(this._spellAffects).find(function(sa) { return sa.getSpell() == spell; });
+    getSpellEffectForSpell: function(spell) {
+        return _(this._spellEffects).find(function(sa) { return sa.getSpell() == spell; });
     },
 
-    spellTargeted: function(spellAffect) {
+    spellTargeted: function(spellEffect) {
         var spellTarget = this;
         
-        this._spellAffects.push(spellAffect);
-        this.emit("spellEvent", "targeted", spellAffect);
+        this._spellEffects.push(spellEffect);
+        this.emit("spellEvent", "targeted", spellEffect);
 
-        spellAffect.on("damaged", function(amount) {
+        spellEffect.on("damaged", function(amount) {
             spellTarget.takeDamage(amount);
             
             if (spellTarget.getHitpoints() <= 0) {
-                spellTarget.emit("spellEvent", "died", spellAffect);
+                spellTarget.emit("spellEvent", "died", spellEffect);
             }
         });
                 
-        spellAffect.on("removed", function() {
-            var idx = spellTarget._spellAffects.indexOf(spellAffect);
+        spellEffect.on("removed", function() {
+            var idx = spellTarget._spellEffects.indexOf(spellEffect);
             
             if (idx != -1) {
-                spellTarget._spellAffects.splice(idx, 1);
+                spellTarget._spellEffects.splice(idx, 1);
             }            
         });
         
-        this.forwardSpellEvents(spellAffect);
+        this.forwardSpellEvents(spellEffect);
     },
     
-    spellAffected: function(spellAffect) {
-        this.emit("spellEvent", "affected", spellAffect);
+    spellEffected: function(spellEffect) {
+        this.emit("spellEvent", "affected", spellEffect);
     }
 });

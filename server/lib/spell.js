@@ -1,16 +1,16 @@
-var SpellAffect = require("spell_affect");
+var SpellEffect = require("spell_effect");
 
 var Spell = module.exports = function(options) {
     this._name      = options.name;
     this._display   = options.display;
 
     this._duration  = options.duration;
-    this._affects   = options.affects;
+    this._effects   = options.effects;
 };
 
 Spell.prototype = {
     cast: function(caster, target) {
-        var sa = target.getSpellAffectForSpell(this);
+        var sa = target.getSpellEffectForSpell(this);
         
         if (target.isValidSpellTargetFor(caster)) {
             if (sa) {
@@ -19,7 +19,7 @@ Spell.prototype = {
                 }
             }
             else {
-                new SpellAffect(this, caster, target);
+                new SpellEffect(this, caster, target);
                 return true;
             }
         }
@@ -36,7 +36,7 @@ Spell.prototype = {
     getDuration: function() {
         return this._duration;
     },
-    getAffects: function() {
-        return this._affects;
+    getEffects: function() {
+        return this._effects;
     }
 };

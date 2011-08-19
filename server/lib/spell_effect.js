@@ -1,7 +1,7 @@
 var _       = require("underscore"),
     events  = require("events");
 
-var SpellAffect = module.exports = function(spell, caster, target) {
+var SpellEffect = module.exports = function(spell, caster, target) {
     events.EventEmitter.call(this);
 
     this._spell     = spell;
@@ -11,7 +11,7 @@ var SpellAffect = module.exports = function(spell, caster, target) {
     this._initialize();
 };
 
-_.extend(SpellAffect.prototype, events.EventEmitter.prototype, {    
+_.extend(SpellEffect.prototype, events.EventEmitter.prototype, {    
     getSpell:  function() { return this._spell; },
     getCaster: function() { return this._caster; },
     getTarget: function() { return this._target; },
@@ -57,7 +57,7 @@ _.extend(SpellAffect.prototype, events.EventEmitter.prototype, {
 
     _initialize: function() {
         var duration    = this._spell.getDuration(),
-            spellAffect = this;
+            spellEffect = this;
 
         this._prepDisplay();
 
@@ -65,7 +65,7 @@ _.extend(SpellAffect.prototype, events.EventEmitter.prototype, {
         this._target.spellTargeted(this);
 
         this._target.on("unspawn", function() {
-            spellAffect.complete();
+            spellEffect.complete();
         });
         
         if (duration) {
@@ -152,25 +152,25 @@ _.extend(SpellAffect.prototype, events.EventEmitter.prototype, {
     },
     
     _destroy: function() {
-        var spellAffect = this;
+        var spellEffect = this;
         
         _(["completed", "removed", "faded", "periodic", "damaged"]).each(function(eventName) {
-            spellAffect.removeAllListeners(eventName);
+            spellEffect.removeAllListeners(eventName);
         });
     },
 
     _triggerSpell: function() {
         this.emit("periodic");
 
-        var affects     = this._spell.getAffects(),
-            spellAffect = this;
+        var effects     = this._spell.getEffects(),
+            spellEffect = this;
 
-        _.each(affects, function(val, key, list) {
+        _.each(effects, function(val, key, list) {
 
             if (key == "hitpoints") {
                 if (val < 0) {
                     //damage
-                    spellAffect.emit("damaged", Math.abs(val));
+                    spellEffect.emit("damaged", Math.abs(val));
                 } else {
                     //heal (TODO)
 

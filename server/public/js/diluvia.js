@@ -9,7 +9,7 @@ var Diluvia = {
     ANIM_DELAY:             50,
     FLASH_DURATION:         250,
     
-    LAYERS:                 { BASE: 1, OBJECT: 2, ACTOR: 3 },
+    LAYERS:                 { BASE: 1, OBJECT: 2 },
     
     REL_DECODE: function(arr)
     {
@@ -53,9 +53,8 @@ var DiluviaController = function(options) {
       hoverTileIdx:   0,
       selectedMode:   "paint",
       selectedLayer:  Diluvia.LAYERS.OBJECT,
-      0:              [9,  "Grass", "sprites.png:2,7"],
-      1:              [6,  "Rock", "sprites.png:3,4"],
-      2:              [1,  "Dude",  "dude.png:0,0"],
+      1:              [9,  "Grass", "sprites.png:2,7"],
+      2:              [6,  "Rock", "sprites.png:3,4"],
       zoneData: {}
     };
 
@@ -334,7 +333,7 @@ DiluviaController.prototype = {
     },
     
     displayPreviewTile: function() {
-      var tileInfo = this._editState[this._editState.selectedLayer][2];
+      var tileInfo = this._editState[this._editState.selectedLayer][Diluvia.LAYERS.OBJECT];
       var imgInfo = tileInfo.split(":");
       var imgCoords = imgInfo[1].split(",");
       var bgX = imgCoords[0]*64;
@@ -433,7 +432,7 @@ DiluviaController.prototype = {
       });
       $('#portal-form').ajaxForm(function(res) {
         var zoneState = self._editState.zoneData[self._protocol.getZoneData().id].data;
-        var layer = zoneState.layers[self._editState.selectedLayer];
+        var layer = zoneState.layers[self._editState.selectedLayer-1];
         layer[tileIdx] = [res.portalId];
         self.enableSaveButton();
         self.saveZoneEdits();
@@ -481,7 +480,7 @@ DiluviaController.prototype = {
       var tileIdx = this.pixelsToIndex(x, y);
       if (this._editState.selectedMode === "paint") {
         var zoneState = this._editState.zoneData[this._protocol.getZoneData().id].data;
-        var layer = zoneState.layers[this._editState.selectedLayer];
+        var layer = zoneState.layers[this._editState.selectedLayer-1];
         layer[tileIdx] = [this.getSelectedEditTile()];
         this._currentZoneState = zoneState;
         this.enableSaveButton();
@@ -489,7 +488,7 @@ DiluviaController.prototype = {
       }
       else if (this._editState.selectedMode === "erase") {
         var zoneState = this._editState.zoneData[this._protocol.getZoneData().id].data;
-        var layer = zoneState.layers[this._editState.selectedLayer];
+        var layer = zoneState.layers[this._editState.selectedLayer-1];
         layer[tileIdx] = null; // Empty Tile
         this._currentZoneState = zoneState;
         this.enableSaveButton();

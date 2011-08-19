@@ -39,13 +39,13 @@ var Defs = module.exports = {
 var Tile            = require("tile"),
     WallTile        = require("wall_tile"),
     ActorTile       = require("actor_tile"),
-    MobTile         = require("mob_tile"),
-    SpawnTile       = require("spawn_tile"),
+    MobSpawnTile    = require("mob_spawn_tile"),
+    PlayerSpawnTile = require("player_spawn_tile"),
     PortalTile      = require("portal_tile"),
     PainTile        = require("pain_tile"),
     Spell           = require("spell");
 
-Defs.Tiles =     { 
+Defs.ACTOR_TILES = {
   1: 
    { class:        'ActorTile',
      image:        'dude.png:0,0',
@@ -77,11 +77,14 @@ Defs.Tiles =     {
        attack: { imagePath: 'dude.png',
                  frames:    [[3,1], [3,2], [3,1]] }
      },
-     name: 'PLAYER_W' },
+     name: 'PLAYER_W' }
+}
+
+Defs.LAYER_TILES =     { 
   5: 
-   { class: 'SpawnTile',
+   { class: 'PlayerSpawnTile',
      image: 'sprites.png:2,8',
-     name: 'SPAWN' },
+     name: 'Player Spawn' },
   6: 
    { class: 'WallTile',
      image: 'sprites.png:3,4',
@@ -103,13 +106,13 @@ Defs.Tiles =     {
      image: 'sprites.png:4,7',
      name: 'BASE_STONE' },
   11: 
-   { class: 'SpawnTile',
+   { class: 'PlayerSpawnTile',
      image: 'sprites.png:4,7',
-     name: 'SPAWN_STONE' },
+     name: 'Player Spawn (stone)' },
   12: 
-   { class: 'SpawnTile',
+   { class: 'PlayerSpawnTile',
      image: 'sprites.png:2,7',
-     name: 'SPAWN_GRASS' },
+     name: 'Player Spawn (grass)' },
   13: 
    { class: 'WallTile',
      image: 'sprites.png:0,6',
@@ -441,10 +444,13 @@ Defs.Tiles =     {
     image: 'sprites.png:16,1',
     name: 'DUNGEON_SINGLE_10' },
   94: 
-  { class: 'MobTile',
-    image: 'sprites.png:10,6',
-    damage: 100,
-    name: 'Ghoul' }
+  { class: 'MobSpawnTile',
+    image:        'sprites.png:10,6',
+    damage:       100,
+    spawn_type:   'ghoul',
+    rate:         1,
+    period:       5000,
+    name: 'Ghoul Spawn' }
 
 };
 
@@ -459,7 +465,7 @@ Defs.SPELLS = {
             triggerOnFade:  false,
             refreshable:    false
         },
-        affects: {
+        effects: {
             hitpoints: -34
         },
         display: {

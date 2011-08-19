@@ -1,17 +1,17 @@
-var _            = require("underscore"),
-    fs           = require("fs"),
-    events       = require("events"),
-    Persistence  = require("persistence"),
-    Defs         = require("defs"),
-    World        = require("world"),
-    Tile         = require("tile"),
-    SpawnTile    = require("spawn_tile"),
-    PortalTile   = require("portal_tile"),
-    WallTile     = require("wall_tile"),
-    PainTile     = require("pain_tile"),
-    GoalTile     = require("goal_tile"),
-    Board        = require("board"),
-    BoardLayer   = require("board_layer");
+var _                 = require("underscore"),
+    fs                = require("fs"),
+    events            = require("events"),
+    Persistence       = require("persistence"),
+    Defs              = require("defs"),
+    World             = require("world"),
+    Tile              = require("tile"),
+    PlayerSpawnTile   = require("player_spawn_tile"),
+    PortalTile        = require("portal_tile"),
+    WallTile          = require("wall_tile"),
+    PainTile          = require("pain_tile"),
+    GoalTile          = require("goal_tile"),
+    Board             = require("board"),
+    BoardLayer        = require("board_layer");
 
 var Zone = module.exports = function(options) {
     events.EventEmitter.call(this);
@@ -31,11 +31,6 @@ var Zone = module.exports = function(options) {
     this._music             = options["music"];
     this._tileUid           = (new Date()).getTime();
     this._config            = options["config"];
-    
-    for (key in Defs.Tiles) {
-      var tile = this._tiles[key] = Tile.instanceFromDefinition(Defs.Tiles[key]);
-      tile.setZone(this);
-    }
     
     this.loadConfig();
 };
@@ -154,6 +149,25 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         });
     },
     
+    addTile: function(tileId, tile) {
+        this._tiles[tileId] = tile;
+        tile.setZone(this);
+    },
+    
+    initTileFromObj: function(tile) {
+      var tileId = tile.getClass() + "_" + this.getNextTileId();
+      this.addTile(tileId, tile);
+      return tileId;
+    },
+    
+    initTileFromDefs: function(tileId) {
+      if (!this._tiles[tileId]) {
+        var tileDef = Defs.LAYER_TILES[tileId];
+        var tile = Tile.instanceFromDefinition(tileDef.class, tileDef);
+        this.addTile(tileId, tile);
+      }
+    },
+    
     setConfig: function(conf) {
         this._config = conf;
     },
@@ -177,16 +191,16 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
           
           var zoneSize = this._dimensions[0]*this._dimensions[1];
           for (var idx = 0; idx < zoneSize; idx++) {
-            var tileId = 7; // Empty Tile
+            var tileId = 7; // If no tileInfo specified, just fill in with the Empty Tile Definition
             var tileInfo = confMapLayer[idx];
             if (tileInfo) {
                 if (isNaN(tileInfo)) {
-                  var klass   = eval(tileInfo.class),
-                      tile    = new klass(tileInfo.options);
-                  tileId = this.addTile(tile, tileInfo.class);
+                  var tile = Tile.instanceFromDefinition(tileInfo.class, tileInfo.options);
+                  tileId = this.initTileFromObj(tile);
                 }
                 else {
                   tileId  = tileInfo;
+                  this.initTileFromDefs(tileId);
                 }
             }
             layer.pushTile(idx, tileId);
@@ -291,7 +305,7 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         var spawnTiles  = [],
             resIndex    = -1;
         
-        for (var key in this._tiles) {
+        for (var key in this.getTiles()) {
             var tile = this._tiles[key];
             if (tile.spawnTile) {
                 spawnTiles.push(Number(key));
@@ -466,22 +480,16 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         return this._tiles;
     },
     
-    addTile: function(tile, class) {
-        var idx = class + "_" + this.getNextTileId();
-        this._tiles[idx] = tile;
-        tile.setZone(this);
-        return idx;
-    },
-    
     getTile: function(idx) {
         if (typeof idx === "object") {
           idx = idx[0];
         }
+        
         return this._tiles[idx];
     },
     
     getTileId: function(tile) {
-        for (var key in this._tiles) {
+        for (var key in this.getTiles()) {
             if (this._tiles[key] == tile) {
                 return key;
             }
@@ -553,27 +561,23 @@ _.extend(Zone.prototype, events.EventEmitter.prototype, {
         this.emit("sound", sound);
     },
     
-    setPlayerTileForOrientation: function(player, orientation) {
+    updateActorTile: function(actor) {
         var layer       = this._board.getLayer(Defs.ACTOR_LAYER),
-            tileIndex   = player.getTileIndex(),
+            tileIndex   = actor.getTileIndex(),
             tiles       = layer.getTiles(tileIndex),
-            tileData    = player.getTileDataFrom(tiles),
-            orienMap    = {
-              "N": 1,
-              "S": 2,
-              "E": 3,
-              "W": 4
-            };
+            oldTileData = actor.getTileDataFrom(tiles),
+            orienMap    = actor.getOrientationTileMap();
         
-        if (tileData) {
-            layer.popTile(tileIndex, tileData);
-            layer.pushTile(tileIndex, [ orienMap[orientation.toUpperCase()], tileData[1] ]);
+        if (oldTileData) {
+            var x = oldTileData[1];
+            layer.popTile(tileIndex, oldTileData);
+            layer.pushTile(tileIndex, [ actor.getRenderTileId(),  x]);
         }
     },
     
     getRenderAttributes: function() {
-        var tiles       = this._tiles,
-            tileData    = {};
+        var tileData    = {},
+            tiles       = _.extend(this.getTiles(), Tile.getActorTiles());
         
         for (var key in tiles) {
             tileData[key] = tiles[key].getRenderAttributes();

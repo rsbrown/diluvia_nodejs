@@ -75,7 +75,7 @@ Canvas.prototype = {
             var layer = zoneState.layers[layerIdx];
         
             // Only draw the selected layer and below in edit mode.
-            if (this._controller.isEditMode() && layerIdx > this._controller.getSelectedEditLayer()) {break};
+            if (this._controller.isEditMode() && layerIdx >= this._controller.getSelectedEditLayer()) {break};
 
             for (var tileIdx in layer) {
               var row             = Math.floor(tileIdx / zoneDims[0]),

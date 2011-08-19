@@ -4,6 +4,7 @@ var _           = require("underscore"),
     Account     = require("account"),
     Defs        = require("defs"),
     Zone        = require("zone"),
+    Tile        = require("tile"),
     PortalTile  = require("portal_tile"),
     Routes      = require("routes"),
     Fence       = require("fence");
@@ -158,8 +159,8 @@ Web.prototype = {
         portalOriginZone.portalAtIndex(portalTileIdx, function(portalTile, tileData, layerIndex){
           var tileId = tileData;
           if (portalTile == null) {
-              portalTile = new PortalTile({"image": "sprites.png:1,12"});
-              tileId = portalOriginZone.addTile(portalTile, "PortalTile");
+              portalTile = Tile.instanceFromDefinition("PortalTile", {"image": "sprites.png:1,12"});
+              tileId = portalOriginZone.initTileFromObj(portalTile);
               portalOriginZone.getBoard().getLayer(Defs.OBJECT_LAYER).pushTile(portalTileIdx, tileId);
           }
           Zone.findById(req.body.portal.zone, function(portalDestZone) {

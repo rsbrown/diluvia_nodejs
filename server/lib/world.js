@@ -1,16 +1,16 @@
-var _           = require("underscore"),
-    events      = require("events"),
-    fs          = require("fs"),
-    Defs        = require("defs"),
-    Zone        = require("zone"),
-    Tile        = require("tile"),
-    SpawnTile   = require("spawn_tile"),
-    PortalTile  = require("portal_tile"),
-    WallTile    = require("wall_tile"),
-    PainTile    = require("pain_tile"),
-    GoalTile    = require("goal_tile"),
-    Player      = require("player"),
-    Fence       = require("fence");
+var _                 = require("underscore"),
+    events            = require("events"),
+    fs                = require("fs"),
+    Defs              = require("defs"),
+    Zone              = require("zone"),
+    Tile              = require("tile"),
+    PlayerSpawnTile   = require("player_spawn_tile"),
+    PortalTile        = require("portal_tile"),
+    WallTile          = require("wall_tile"),
+    PainTile          = require("pain_tile"),
+    GoalTile          = require("goal_tile"),
+    Player            = require("player"),
+    Fence             = require("fence");
 
 var World = module.exports = function() {
     events.EventEmitter.call(this);
@@ -207,7 +207,7 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         // switch the player's tile when they change orientations
         player.on("changeOrientation", function(orientation) {
             var currentZone = world.getZone(player.getZoneId());
-            currentZone.setPlayerTileForOrientation(player, orientation);
+            currentZone.updateActorTile(player);
         });
         
         player.on("moveFailed", function() {
@@ -273,7 +273,7 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
             }
         });
 
-        player.on("spellEvent", function(eventName, spellAffect) {
+        player.on("spellEvent", function(eventName, spellEffect) {
             function sendSpellEventChat(msg) {
                 if (msg) {
                     client.sendChat(msg.importance || Defs.CHAT_ALERT, msg.message);
@@ -284,10 +284,10 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
                 }
             }
             
-            if (spellAffect.getCaster() == player) {
-                sendSpellEventChat(spellAffect.getCasterEventMessage(eventName));
+            if (spellEffect.getCaster() == player) {
+                sendSpellEventChat(spellEffect.getCasterEventMessage(eventName));
 
-                if (eventName == "completed" && spellAffect.getSpell() == Defs.SPELLS.ASSASSIN_POISON) {
+                if (eventName == "completed" && spellEffect.getSpell() == Defs.SPELLS.ASSASSIN_POISON) {
                     var account = world._getAccountFromPlayer(player);
 
                     if (account) {
@@ -296,8 +296,8 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
                 }
             }
             
-            if (spellAffect.getTarget() == player) {
-                sendSpellEventChat(spellAffect.getTargetEventMessage(eventName));
+            if (spellEffect.getTarget() == player) {
+                sendSpellEventChat(spellEffect.getTargetEventMessage(eventName));
             }
         });
         
@@ -332,7 +332,7 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
         }
         
         this.placeAccountInZone(account, zone, tileIdx);
-        zone.setPlayerTileForOrientation(player, player.getOrientation());
+        zone.updateActorTile(player);
         player.spawn();
     },
     
@@ -402,15 +402,15 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
                         Defs.SPELLS.ASSASSIN_POISON.cast(player, otherActor);
                     });
                 }
-                else if (goalInv) {                    
+                else if (goalInv) {
                     var tile = zone.getTile(goalInv);
-                    
+
                     if (tile && tile.goalType == "sword") {
                         // TODO: this account search is going to be costly to do on each swing
                         var assassinAccount = _(this._online).detect(function (account) {
                             return account.getPlayer().getRole() == Defs.ROLE_ASSASSIN;
                         });
-                        
+
                         if (assassinAccount) {
                             var assassinPlayer = assassinAccount.getPlayer();
 
@@ -509,7 +509,7 @@ _.extend(World.prototype, events.EventEmitter.prototype, {
             var tileIndex = (coords ? newZone.xyToIndex(coords[0], coords[1]) : newZone.getDefaultSpawnPointIndex());
             oldZone.removeActor(actor);
             newZone.addActor(actor, "PLAYER", tileIndex);
-            newZone.setPlayerTileForOrientation(actor, actor.getOrientation());
+            newZone.updateActorTile(actor);
         }
         else {
             console.log("Tried to teleport to " + zoneId + ", which doesn't exist!");
