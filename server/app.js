@@ -38,7 +38,7 @@ var app = express.createServer(
     express.logger(),
     express.cookieParser(),
     express.session({
-        secret:     "zZICGH40MKxHDTTqOCLbA4YN3CcvKoMOOZIkEkOc6C2LHuNMWHAEYzoeBjnqSzy3dpoDhZZhthe7y4ZpMpGpcQcdLVKHGhAlhAvkMxzlFC7eDleIEkXj3XMVWVVAd3Hbpp3epw9iBuBqvOZY4lZ7bdAgtN5VEVvRT5VM5UXzq7y1NX5uXkULPieYsuLFjyAlJRjczCCL",
+        secret:     Env.app_secret,
         store:      new RedisStore
     }),
     express.static(STATIC_ROOT)
